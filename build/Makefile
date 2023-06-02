@@ -1,9 +1,6 @@
 PLATFORM = 
 BUILD    = debug
-TARGET   = libPLC.a
-SRCS		 = PLC.c 
-OBJS     = $(SRCS:.c=.o)
-
+TARGET	 = ESGE_plc.o
 
 PLATFORM_FIELDS = $(subst _, ,$(PLATFORM))
 PLATFORM_NAME   = $(firstword $(PLATFORM_FIELDS))
@@ -46,14 +43,34 @@ else ifeq ($(BUILD), debug)
 	CFLAGS += -Wall -Wextra -pedantic -ggdb3
 endif
 
+vpath %.h ../include
+vpath %.c ../src:../src/util:../src/test
+vpath %.cpp ../src:../src/util:../src/test
 
-CFLAGS += -I ../SGLIB
+CFLAGS += -I../include
 
+#LDLIBS  += -Wl,-Bstatic
+
+#CFLAGS  += -I../../PLC
+#CFLAGS  += -I../../SGLIB
+#LDFLAGS += -L../lib
+#LDLIBS  += -lPLC
+
+
+LDLIBS  += -Wl,-Bdynamic
+
+CFLAGS  += $(shell PKG_CONFIG_SYSROOT_DIR=$(SYSROOT) \
+	pkg-config --cflags          sdl2)
+LDFLAGS += $(shell PKG_CONFIG_SYSROOT_DIR=$(SYSROOT) \
+	pkg-config --libs-only-L     sdl2)
+LDFLAGS += $(shell PKG_CONFIG_SYSROOT_DIR=$(SYSROOT) \
+	pkg-config --libs-only-other sdl2)
+LDLIBS  += $(shell PKG_CONFIG_SYSROOT_DIR=$(SYSROOT) \
+	pkg-config --libs-only-l     sdl2)
+
+CPPFLAGS += $(CFLAGS)
 
 all: $(TARGET)
 
-test: $(TARGET)
-
-%.a: $(OBJS)
-	$(AR) r $@ $(OBJS)
-	$(RM) $(OBJS)
+test:
+	$(CXX) $(CFLAGS) ESGE_plc.o ESGE_event.o ESGE_objEvent.o ESGE_test_objEvent.o $(LDFLAGS) $(LDLIBS)
