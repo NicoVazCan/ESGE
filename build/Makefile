@@ -1,6 +1,6 @@
 PLATFORM = 
 BUILD    = debug
-TARGET	 = ESGE_plc.o
+TARGET	 = ESGE_objPoint.o
 
 PLATFORM_FIELDS = $(subst _, ,$(PLATFORM))
 PLATFORM_NAME   = $(firstword $(PLATFORM_FIELDS))
@@ -44,8 +44,8 @@ else ifeq ($(BUILD), debug)
 endif
 
 vpath %.h ../include
-vpath %.c ../src:../src/util:../src/test
-vpath %.cpp ../src:../src/util:../src/test
+vpath %.c ../src:../src/util:../src/test:../src/impl
+vpath %.cpp ../src:../src/util:../src/test:../src/impl
 
 CFLAGS += -I../include
 
@@ -73,4 +73,4 @@ CPPFLAGS += $(CFLAGS)
 all: $(TARGET)
 
 test:
-	$(CXX) $(CFLAGS) ESGE_plc.o ESGE_event.o ESGE_objEvent.o ESGE_test_objEvent.o $(LDFLAGS) $(LDLIBS)
+	$(CXX) $(CFLAGS) ESGE_plc.o ESGE_event.o ESGE_objEvent.o ESGE_objDisplay.o ESGE_test_objDisplay.o $(LDFLAGS) $(LDLIBS)
