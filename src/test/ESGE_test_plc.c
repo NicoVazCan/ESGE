@@ -48,7 +48,7 @@ void PLC3(void *pvN)
 	}
 }
 
-int main(int argc, char const *argv[])
+int main(SDL_UNUSED int argc, SDL_UNUSED char const *argv[])
 {
 	ESGE_AddPLC(PLC0_PRI, PLC0, commonData);
 	ESGE_AddPLC(PLC1_PRI, PLC1, commonData+1);

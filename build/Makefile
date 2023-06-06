@@ -1,6 +1,6 @@
 PLATFORM = 
 BUILD    = debug
-TARGET	 = ESGE_objPoint.o
+TARGET	 = ESGE_test_objDraw
 
 PLATFORM_FIELDS = $(subst _, ,$(PLATFORM))
 PLATFORM_NAME   = $(firstword $(PLATFORM_FIELDS))
@@ -47,6 +47,16 @@ vpath %.h ../include
 vpath %.c ../src:../src/util:../src/test:../src/impl
 vpath %.cpp ../src:../src/util:../src/test:../src/impl
 
+HDRS		 = $(wildcard ../include/*.h)
+
+SRCS_C   = $(notdir $(wildcard ../src/util/*.c))
+
+SRCS_CXX = $(notdir $(wildcard ../src/*.cpp) \
+					 $(wildcard ../src/impl/*.cpp))
+
+OBJS     = $(patsubst %.c,%.o, $(SRCS_C)) \
+					 $(patsubst %.cpp,%.o, $(SRCS_CXX))
+
 CFLAGS += -I../include
 
 #LDLIBS  += -Wl,-Bstatic
@@ -68,9 +78,12 @@ LDFLAGS += $(shell PKG_CONFIG_SYSROOT_DIR=$(SYSROOT) \
 LDLIBS  += $(shell PKG_CONFIG_SYSROOT_DIR=$(SYSROOT) \
 	pkg-config --libs-only-l     sdl2)
 
+LDLIBS += -lstdc++
+
 CPPFLAGS += $(CFLAGS)
 
-all: $(TARGET)
-
-test:
-	$(CXX) $(CFLAGS) ESGE_plc.o ESGE_event.o ESGE_objEvent.o ESGE_objDisplay.o ESGE_test_objDisplay.o $(LDFLAGS) $(LDLIBS)
+all: $(TARGET).o $(OBJS)
+	$(CC) $(LDFLAGS) $(TARGET).o $(OBJS) $(LDLIBS) -o $(TARGET)
+	
+clean:
+	$(RM) *.o

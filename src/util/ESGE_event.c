@@ -1,10 +1,9 @@
 #include "ESGE_event.h"
-#include "sglib.h"
+#include "../sglib.h"
 
 
 typedef struct ESGE_EWDataL
 {
-  int del;
   void *userdata;
   struct ESGE_EWDataL *n;
 
@@ -144,7 +143,6 @@ ESGE_AddEventWatch(
       }
 
       pData->userdata = userdata;
-      pData->del = 0;
       pFunc->watch = watch;
       pFunc->l = NULL;
       pType->type = type;
@@ -152,13 +150,8 @@ ESGE_AddEventWatch(
 
       SGLIB_LIST_ADD(ESGE_EWDataL, pFunc->l, pData, n);
       SGLIB_LIST_ADD(ESGE_EWFuncL, pType->l, pFunc, n);
-      SGLIB_SORTED_LIST_ADD(
-        ESGE_EWTypeL,
-        ESGE_eventLoopTypes,
-        pType,
-        ESGE_CmpEWTypeL,
-        n
-      );
+      pType->n = *ppTypePos;
+      *ppTypePos = pType;
     }
     else
     {
@@ -186,7 +179,6 @@ ESGE_AddEventWatch(
         }
 
         pData->userdata = userdata;
-        pData->del = 0;
         pFunc->watch = watch;
         pFunc->l = NULL;
 
@@ -214,15 +206,10 @@ ESGE_AddEventWatch(
           }
 
           pData->userdata = userdata;
-          pData->del = 0;
 
           SGLIB_LIST_ADD(ESGE_EWDataL, pFunc->l, pData, n);
         }
-        else
-        {
-          if (pData->del) pData->del = 0;
-          else return 1;
-        }
+        else return 1;
       }
     }
   }

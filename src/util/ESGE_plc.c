@@ -128,13 +128,8 @@ ESGE_AddPLC(unsigned pri, ESGE_PLC func, void *userdata)
 
     SGLIB_LIST_ADD(ESGE_PLCDataL, pFunc->l, pData, n);
     SGLIB_LIST_ADD(ESGE_PLCFuncL, pPri->l, pFunc, n);
-    SGLIB_SORTED_LIST_ADD(
-      ESGE_PLCPriL,
-      ESGE_priGrps,
-      pPri,
-      ESGE_CmpPLCPriL,
-      n
-    );
+    pPri->n = *ppPriPos;
+    *ppPriPos = pPri;
   }
   else
   {

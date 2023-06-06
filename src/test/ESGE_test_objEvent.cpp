@@ -43,7 +43,7 @@ public:
 	}
 };
 
-int main(int argc, char const *argv[])
+int main(SDL_UNUSED int argc, SDL_UNUSED char const *argv[])
 {
 	SDL_Window *pWind;
 

@@ -3,7 +3,7 @@
 #include "ESGE_plc.h"
 
 void
-OnQuit(void *n, SDL_Event *pE)
+OnQuit(void *n, SDL_UNUSED SDL_Event *pE)
 {
 	SDL_Log("%s\n", __func__);
 	ESGE_DelEventWatch(SDL_QUIT, OnQuit, n);
@@ -34,7 +34,7 @@ OnKeyDown0(void *n, SDL_Event *pE)
 }
 
 int
-main(int argc, char const *argv[])
+main(SDL_UNUSED int argc, SDL_UNUSED char const *argv[])
 {
 	SDL_Window *pWind;
 	int n0, n1 = 0, n2 = 1;
