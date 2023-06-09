@@ -9,13 +9,18 @@ class TestPlayer: ESGE_ObjDraw, ESGE_ObjKeyEvent, ESGE_ObjQuitEvent
   SDL_Rect pos = {0,0,16,16};
 public:
   TestPlayer(SDL_Renderer *rend):
-    ESGE_ObjDraw(1, rend),
-    ESGE_ObjKeyEvent(),
-    ESGE_ObjQuitEvent()
+    ESGE_ObjDraw(1, rend)
   {
     SDL_Log("%s", SDL_FUNCTION);
+    OnEnable();
   }
-  ~TestPlayer(void) override {SDL_Log("%s", SDL_FUNCTION);};
+
+  ~TestPlayer(void) override 
+  {
+    SDL_Log("%s", SDL_FUNCTION);
+    OnDisable();
+  }
+
 protected:
   virtual void OnKeyDown(
     SDL_Keycode key,
@@ -40,41 +45,74 @@ protected:
       break;
     }
   }
-  virtual void OnKeyUp(
-    SDL_UNUSED SDL_Keycode key,
-    SDL_UNUSED SDL_Keymod mod
-  ) override {}
+
   virtual void OnQuit(void) override
   {
     delete this;
   }
+
   virtual void OnDraw(SDL_Renderer *rend) override
   {
     SDL_SetRenderDrawColor(rend, 0xFF, 0x00, 0x00, 0xFF);
     SDL_RenderFillRect(rend, &pos);
+  }
+
+  virtual void OnEnable(void) override
+  {
+    ESGE_ObjDraw::OnEnable();
+    ESGE_ObjKeyEvent::OnEnable();
+    ESGE_ObjQuitEvent::OnEnable();
+  }
+
+  virtual void OnDisable(void) override
+  {
+    ESGE_ObjDraw::OnDisable();
+    ESGE_ObjKeyEvent::OnDisable();
+    ESGE_ObjQuitEvent::OnDisable();
   }
 };
 
 class TestFloor: ESGE_ObjDraw, ESGE_ObjQuitEvent
 {
   SDL_Rect pos = {16,16,160-16*2,160-16*2};
+
 public:
   TestFloor(SDL_Renderer *rend):
     ESGE_ObjDraw(0, rend),
     ESGE_ObjQuitEvent()
   {
     SDL_Log("%s", SDL_FUNCTION);
+    OnEnable();
   }
-  ~TestFloor(void) override {SDL_Log("%s", SDL_FUNCTION);};
+
+  ~TestFloor(void) override
+  {
+    SDL_Log("%s", SDL_FUNCTION);
+    OnDisable();
+  }
+
 protected:
   virtual void OnQuit(void) override
   {
     delete this;
   }
+
   virtual void OnDraw(SDL_Renderer *rend) override
   {
     SDL_SetRenderDrawColor(rend, 0x00, 0xFF, 0x00, 0xFF);
     SDL_RenderFillRect(rend, &pos);
+  }
+
+  virtual void OnEnable(void) override
+  {
+    ESGE_ObjDraw::OnEnable();
+    ESGE_ObjQuitEvent::OnEnable();
+  }
+
+  virtual void OnDisable(void) override
+  {
+    ESGE_ObjDraw::OnDisable();
+    ESGE_ObjQuitEvent::OnDisable();
   }
 };
 

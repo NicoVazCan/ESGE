@@ -6,12 +6,10 @@
 class ESGE_ObjPoint
 {
 public:
-  static ESGE_ObjPoint *list;
-  ESGE_ObjPoint *next;
   SDL_Point pos;
 
   ESGE_ObjPoint(SDL_Point pos);
-  virtual ~ESGE_ObjPoint(void);
+  virtual ~ESGE_ObjPoint(void) = 0;
 };
 
 #endif

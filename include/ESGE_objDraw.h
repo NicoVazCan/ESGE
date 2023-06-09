@@ -2,19 +2,19 @@
 # define ESGE_OBJ_DRAW_H_
 
 # include <SDL2/SDL.h>
+# include "ESGE_objActive.h"
 
-class ESGE_ObjDraw
+class ESGE_ObjDraw: public virtual ESGE_ObjActive
 {
   friend void ESGE_OnDraw(void *userdata, SDL_Renderer *rend);
   const unsigned layer;
-  SDL_Renderer * const rend;
-  SDL_bool drawing;
+  SDL_Renderer *rend;
 public:
-  ESGE_ObjDraw(unsigned layer, SDL_Renderer *rend);
+  ESGE_ObjDraw(unsigned layer);
   ~ESGE_ObjDraw(void);
-  void PlayDraw(void);
-  void StopDraw(void);
-  SDL_bool IsDrawing(void) const;
+  virtual void OnEnable(void) override;
+  virtual void OnDisable(void) override;
+  void SetRenderer(SDL_Renderer *rend);
 protected:
   virtual void OnDraw(SDL_Renderer *rend) = 0;
 };

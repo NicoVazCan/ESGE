@@ -3,40 +3,75 @@
 #include "ESGE_objEvent.h"
 #include "ESGE_objDisplay.h"
 
-class TestQuit: ESGE_ObjQuitEvent
+class TestQuit: public ESGE_ObjQuitEvent
 {
 public:
-	TestQuit(): ESGE_ObjQuitEvent() {SDL_Log("%s", SDL_FUNCTION);}
-	~TestQuit() override {SDL_Log("%s", SDL_FUNCTION);};
+	ESGE_ObjDisplay *display;
+
+	TestQuit()
+	{
+		const Uint8 data[4] = {0x00, 0x02, 0x00, 0xFF};
+		SDL_RWops *io;
+
+		SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
+
+
+		SDL_Log("%X %X  %X %X", data[0], data[1], data[2], data[3]);
+
+		SDL_assert((io = SDL_RWFromConstMem((void*)data, 4)) != NULL);
+		display = (ESGE_ObjDisplay*)ESGE_Loader::Load(2, io);
+		SDL_RWclose(io);
+
+
+		OnEnable();
+	}
+	~TestQuit() override
+	{
+		Uint8 data[4];
+		SDL_RWops *io;
+
+		OnDisable();
+
+
+		SDL_assert((io = SDL_RWFromMem((void*)data, 4)) != NULL);
+		display->OnSave(io);
+		delete display;
+		SDL_RWclose(io);
+
+		SDL_Log("%X %X  %X %X", data[0], data[1], data[2], data[3]);
+
+
+		SDL_Quit();
+	}
+	void OnEnable(void)
+	{
+		display->OnEnable();
+		ESGE_ObjQuitEvent::OnEnable();
+	}
+	void OnDisable(void)
+	{
+		display->OnDisable();
+		ESGE_ObjQuitEvent::OnDisable();
+	}
 protected:
 	void OnQuit(void) override
 	{
-		SDL_Log("%s", SDL_FUNCTION);
-
 		delete this;
 	}
 };
 
 int main(SDL_UNUSED int argc, SDL_UNUSED char const *argv[])
 {
-	SDL_Init(SDL_INIT_VIDEO);
+	TestQuit *test = new TestQuit();
 
-	ESGE_ObjDisplay display;
-
-	SDL_SetRenderDrawColor(display.rend, 255, 0, 0, 255);
-	
-
-	new TestQuit();
-
+	SDL_SetRenderDrawColor(test->display->rend, 255, 0, 0, 255);
 	while (ESGE_AnyPLC())
 	{
 		ESGE_UpdatePLC();
-		SDL_RenderClear(display.rend);
-		SDL_RenderPresent(display.rend);
+		SDL_RenderClear(test->display->rend);
+		SDL_RenderPresent(test->display->rend);
 		SDL_Delay(33);
 	}
-
-	SDL_Quit();
 
 	return 0;
 }

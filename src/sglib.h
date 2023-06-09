@@ -521,7 +521,7 @@
 }
 
 #define SGLIB_SORTED_LIST_MAP_ON_ELEMENTS(type, list, iteratedVariable, next, command) {\
-  SGLIB_LIST_MAP_ON_ELEMENTS(type, list, iteratedVariable, next, command);\
+  SGLIB_LIST_MAP_ON_ELEMENTS(type, list, iteratedVariable, next, command)\
 }
 
 

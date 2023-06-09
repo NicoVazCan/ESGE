@@ -2,24 +2,23 @@
 # define ESGE_OBJ_SERIAL_H_
 
 # include <SDL2/SDL.h>
+# include "ESGE_objActive.h"
 
+# define ESGE_CMP_OBJ_SERIAL(left, right) ((left)->id - (right)->id)
 
-class ESGE_ObjSerial
+class ESGE_ObjSerial: public virtual ESGE_ObjActive
 {
   friend int ESGE_CmpObjSerial(
     const ESGE_ObjSerial *left,
     const ESGE_ObjSerial *right
   );
 public:
-  static ESGE_ObjSerial *list;
-  ESGE_ObjSerial *next;
   const Uint16 id;
-  
+
   ESGE_ObjSerial(Uint16 id);
   virtual ~ESGE_ObjSerial(void);
-  virtual int Save(SDL_RWops *io) const = 0;
+  virtual void OnSave(SDL_RWops *io) const;
   virtual Uint16 GetTypeID(void) const = 0;
-  static ESGE_ObjSerial *GetObj(Uint16 id);
 };
 
 typedef ESGE_ObjSerial *(*ESGE_Load)(SDL_RWops *io);
@@ -30,11 +29,7 @@ class ESGE_Loader
   ESGE_Loader *next;
   const Uint16 typeID;
   const ESGE_Load load;
-
-  friend int ESGE_CmpLoader(
-    const ESGE_Loader *left,
-    const ESGE_Loader *right
-  );
+  
 public:
   ESGE_Loader(Uint16 typeID, ESGE_Load load);
   ~ESGE_Loader(void);
