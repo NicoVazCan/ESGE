@@ -1,6 +1,6 @@
 PLATFORM = 
 BUILD    = debug
-TARGET	 = ESGE_test_objDraw
+TARGET	 = ESGE_test_objScene
 
 PLATFORM_FIELDS = $(subst _, ,$(PLATFORM))
 PLATFORM_NAME   = $(firstword $(PLATFORM_FIELDS))
