@@ -9,26 +9,25 @@
 class ESGE_ObjInScene: public ESGE_ObjSerial
 {
 public:
-  static ESGE_ObjInScene *list;
   ESGE_ObjInScene *next;
 
   ESGE_ObjInScene(Uint16 id);
-  ~ESGE_ObjInScene(void);
-  virtual void OnEnable(void) override;
-  virtual void OnDisable(void) override;
+  virtual ~ESGE_ObjInScene(void) override;
 };
 
-class ESGE_ObjScene: ESGE_ObjSerial
+class ESGE_ObjScene: public ESGE_ObjInScene
 {
-  ESGE_ObjInScene *disList = NULL;
+  ESGE_ObjInScene *objList;
 public:
   friend ESGE_ObjSerial *ESGE_LoadObjScene(SDL_RWops *io);
-  ESGE_ObjScene(Uint16 id, ESGE_ObjInScene *disList);
+  ESGE_ObjScene(Uint16 id, ESGE_ObjInScene *objList);
   virtual ~ESGE_ObjScene(void) override;
   virtual void OnSave(SDL_RWops *io) const override;
   virtual Uint16 GetTypeID(void) const override;
   virtual void OnEnable(void) override;
   virtual void OnDisable(void) override;
+  void AddObj(ESGE_ObjInScene *obj);
+  void DelObj(ESGE_ObjInScene *obj);
 };
 
 #endif

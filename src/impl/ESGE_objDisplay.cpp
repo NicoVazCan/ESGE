@@ -103,7 +103,7 @@ ESGE_ObjDisplay::OnSave(SDL_RWops *io) const
 {
   Uint8 full;
   
-  ESGE_ObjSerial::OnSave(io);
+  ESGE_ObjInScene::OnSave(io);
 
   full = (
     SDL_GetWindowFlags(SDL_RenderGetWindow(rend)) &
@@ -184,7 +184,7 @@ ESGE_LoadObjDisplay(SDL_RWops *io)
   return new ESGE_ObjDisplay(id, full, vsync);
 }
 
-static ESGE_Loader ESGE_ObjSerialLoader(
+static ESGE_Loader ESGE_ObjInSceneLoader(
   ESGE_OBJ_DISPLAY_TYPE_ID,
   ESGE_LoadObjDisplay
 );

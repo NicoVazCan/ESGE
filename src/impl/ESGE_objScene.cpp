@@ -2,43 +2,19 @@
 #define SGLIB_ASSERT SDL_assert
 #include "../sglib.h"
 
-ESGE_ObjInScene *ESGE_ObjInScene::list = NULL;
 
 ESGE_ObjInScene::ESGE_ObjInScene(Uint16 id): ESGE_ObjSerial(id) {}
 
 ESGE_ObjInScene::~ESGE_ObjInScene(void) {}
-
-void
-ESGE_ObjInScene::OnEnable(void)
-{
-  SGLIB_SORTED_LIST_ADD(
-    ESGE_ObjInScene,
-    list,
-    this,
-    ESGE_CMP_OBJ_SERIAL,
-    next
-  );
-}
-
-void
-ESGE_ObjInScene::OnDisable(void)
-{
-  SGLIB_SORTED_LIST_DELETE(
-    ESGE_ObjInScene,
-    list,
-    this,
-    next
-  );
-}
 
 
 ESGE_ObjSerial*
 ESGE_LoadObjScene(SDL_RWops *io)
 {
   Uint16 id, typeID;
-  ESGE_ObjInScene *obj, *disList = NULL;
+  ESGE_ObjInScene *obj, *objList = NULL;
 
-  id = SDL_ReadBE16(io);
+  if(!(id = SDL_ReadBE16(io))) return NULL;
 
   while ((typeID = SDL_ReadBE16(io)))
   {
@@ -53,14 +29,16 @@ ESGE_LoadObjScene(SDL_RWops *io)
 
     SGLIB_SORTED_LIST_ADD(
       ESGE_ObjInScene,
-      disList,
+      objList,
       obj,
       ESGE_CMP_OBJ_SERIAL,
       next
     );
   }
 
-  return new ESGE_ObjScene(id, disList);
+  return (
+    dynamic_cast<ESGE_ObjSerial*>(new ESGE_ObjScene(id, objList))
+  );
 }
 
 static ESGE_Loader ESGE_ObjSceneLoader(
@@ -68,16 +46,16 @@ static ESGE_Loader ESGE_ObjSceneLoader(
   ESGE_LoadObjScene
 );
 
-ESGE_ObjScene::ESGE_ObjScene(Uint16 id, ESGE_ObjInScene *disList):
-  ESGE_ObjSerial(id),
-  disList(disList)
+ESGE_ObjScene::ESGE_ObjScene(Uint16 id, ESGE_ObjInScene *objList):
+  ESGE_ObjInScene(id),
+  objList(objList)
 {}
 
 ESGE_ObjScene::~ESGE_ObjScene(void)
 {
   SGLIB_LIST_MAP_ON_ELEMENTS(
     ESGE_ObjInScene,
-    disList,
+    objList,
     obj,
     next,
     {
@@ -89,14 +67,11 @@ ESGE_ObjScene::~ESGE_ObjScene(void)
 void
 ESGE_ObjScene::OnSave(SDL_RWops *io) const
 {
-  ESGE_ObjInScene *list = disList == NULL?
-    ESGE_ObjInScene::list: disList;
-
   ESGE_ObjSerial::OnSave(io);
 
   SGLIB_LIST_MAP_ON_ELEMENTS(
     ESGE_ObjInScene,
-    list,
+    objList,
     obj,
     next,
     {
@@ -129,16 +104,13 @@ ESGE_ObjScene::OnEnable(void)
 {
   SGLIB_LIST_MAP_ON_ELEMENTS(
     ESGE_ObjInScene,
-    disList,
+    objList,
     obj,
     next,
     {
       obj->OnEnable();
     }
   );
-
-  disList = NULL;
-
   ESGE_ObjSerial::OnEnable();
 }
 
@@ -147,21 +119,35 @@ ESGE_ObjScene::OnDisable(void)
 {
   SGLIB_LIST_MAP_ON_ELEMENTS(
     ESGE_ObjInScene,
-    ESGE_ObjInScene::list,
+    objList,
     obj,
     next,
     {
       obj->OnDisable();
-      
-      SGLIB_SORTED_LIST_ADD(
-        ESGE_ObjInScene,
-        disList,
-        obj,
-        ESGE_CMP_OBJ_SERIAL,
-        next
-      );
     }
   );
-
   ESGE_ObjSerial::OnDisable();
+}
+
+void
+ESGE_ObjScene::AddObj(ESGE_ObjInScene *obj)
+{
+  SGLIB_SORTED_LIST_ADD(
+    ESGE_ObjInScene,
+    objList,
+    obj,
+    ESGE_CMP_OBJ_SERIAL,
+    next
+  );
+}
+
+void
+ESGE_ObjScene::DelObj(ESGE_ObjInScene *obj)
+{
+  SGLIB_SORTED_LIST_DELETE(
+    ESGE_ObjInScene,
+    objList,
+    obj,
+    next
+  );
 }
