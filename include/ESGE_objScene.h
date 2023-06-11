@@ -4,7 +4,7 @@
 # include <SDL2/SDL.h>
 # include "ESGE_objSerial.h"
 
-# define ESGE_OBJ_SCENE_TYPE_ID 1u
+# define ESGE_OBJ_SCENE_FILE_LEN 32
 
 class ESGE_ObjInScene: public ESGE_ObjSerial
 {
@@ -15,17 +15,20 @@ public:
   virtual ~ESGE_ObjInScene(void) override;
 };
 
-class ESGE_ObjScene: public ESGE_ObjInScene
+class ESGE_ObjScene
 {
-  ESGE_ObjInScene *objList;
+  ESGE_ObjInScene *objList = NULL;
+
 public:
-  friend ESGE_ObjSerial *ESGE_LoadObjScene(SDL_RWops *io);
-  ESGE_ObjScene(Uint16 id, ESGE_ObjInScene *objList);
-  virtual ~ESGE_ObjScene(void) override;
-  virtual void OnSave(SDL_RWops *io) const override;
-  virtual Uint16 GetTypeID(void) const override;
-  virtual void OnEnable(void) override;
-  virtual void OnDisable(void) override;
+  char file[ESGE_OBJ_SCENE_FILE_LEN];
+  static ESGE_ObjScene *list;
+  ESGE_ObjScene *next;
+
+  ESGE_ObjScene(const char *file);
+  virtual ~ESGE_ObjScene(void);
+  void Save(void);
+  void Enable(void);
+  void Disable(void);
   void AddObj(ESGE_ObjInScene *obj);
   void DelObj(ESGE_ObjInScene *obj);
 };

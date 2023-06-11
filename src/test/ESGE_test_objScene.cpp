@@ -284,39 +284,9 @@ class TestGame: ESGE_ObjQuitEvent, ESGE_ObjKeyEvent
 public:
   TestGame(void)
   {
-    /*const Uint8 data[] = {
-      0x00,0x01,  //ObjScene id=1
-
-      0x00,0x03,  //TestPlayer typeID=3
-      0x00,0x03,  //TestPlayer id=3
-      0x00,0x00,  //TestPlayer pos.x=0
-      0x00,0x00,  //TestPlayer pos.y=0
-      0x00,0x02,  //TestPlayer displayID=2
-
-      0x00,0x04,  //TestFloor typeID=4
-      0x00,0x04,  //TestFloor id=4
-      0x00,0x02,  //TestFloor displayID=2
-
-      0x00,0x02,  //ObjDisplay typeID=2
-      0x00,0x02,  //ObjDisplay id=2
-      0x00,       //ObjDisplay full=0
-      0x00,       //ObjDisplay vsync=0
-    };*/
-    SDL_RWops *io;
-
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
 
-    /*SDL_assert(
-      (
-        io = SDL_RWFromConstMem((void*)data, sizeof(data))
-      ) != NULL
-    );*/
-    SDL_assert(
-      (io = SDL_RWFromFile("test_scene.bin", "rb")) != NULL ||
-      "Failed to open file" == NULL
-    );
-    scene = (ESGE_ObjScene*)ESGE_Loader::Load(1, io);
-    SDL_RWclose(io);
+    scene = new ESGE_ObjScene("test_scene.bin");
 
     OnEnable();
   }
@@ -325,19 +295,21 @@ public:
   {
     OnDisable();
 
+    delete scene;
+
     SDL_Quit();
   }
 
   virtual void OnEnable(void) override
   {
-    scene->OnEnable();
+    scene->Enable();
     ESGE_ObjQuitEvent::OnEnable();
     ESGE_ObjKeyEvent::OnEnable();
   }
 
   virtual void OnDisable(void) override
   {
-    scene->OnDisable();
+    scene->Disable();
     ESGE_ObjQuitEvent::OnDisable();
     ESGE_ObjKeyEvent::OnDisable();
   }
@@ -366,23 +338,16 @@ protected:
     {
       if ((paused = !paused))
       {
-        scene->OnDisable();
+        scene->Disable();
       }
       else
       {
-        scene->OnEnable();
+        scene->Enable();
       }
     }
     else if (key == SDLK_g)
     {
-      SDL_RWops *io;
-
-      SDL_assert(
-        (io = SDL_RWFromFile("test_scene.bin", "wb")) != NULL ||
-        "Failed to open file" == NULL
-      );
-      scene->OnSave(io);
-      SDL_RWclose(io);
+      scene->Save();
     }
   }
 };

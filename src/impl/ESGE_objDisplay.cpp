@@ -10,6 +10,24 @@
 #define REND_INDEX -1
 #define REND_FLAGS SDL_RENDERER_ACCELERATED
 
+ESGE_ObjSerial*
+ESGE_LoadObjDisplay(SDL_RWops *io)
+{
+  Uint16 id;
+  Uint8 full, vsync;
+
+  if(!(id = SDL_ReadBE16(io))) return NULL;
+  full = SDL_ReadU8(io);
+  vsync = SDL_ReadU8(io);
+
+  return new ESGE_ObjDisplay(id, full, vsync);
+}
+
+static ESGE_Loader ESGE_ObjDisplayLoader(
+  ESGE_OBJ_DISPLAY_TYPE_ID,
+  ESGE_LoadObjDisplay
+);
+
 ESGE_ObjDisplay *ESGE_ObjDisplay::list = NULL;
 
 ESGE_ObjDisplay::ESGE_ObjDisplay(
@@ -170,21 +188,3 @@ ESGE_ObjDisplay::OnDisable(void)
   ESGE_ObjInScene::OnDisable();
   ESGE_ObjKeyEvent::OnDisable();
 }
-
-ESGE_ObjSerial*
-ESGE_LoadObjDisplay(SDL_RWops *io)
-{
-  Uint16 id;
-  Uint8 full, vsync;
-
-  if(!(id = SDL_ReadBE16(io))) return NULL;
-  full = SDL_ReadU8(io);
-  vsync = SDL_ReadU8(io);
-
-  return new ESGE_ObjDisplay(id, full, vsync);
-}
-
-static ESGE_Loader ESGE_ObjInSceneLoader(
-  ESGE_OBJ_DISPLAY_TYPE_ID,
-  ESGE_LoadObjDisplay
-);

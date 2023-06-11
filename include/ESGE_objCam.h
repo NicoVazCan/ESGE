@@ -2,6 +2,7 @@
 # define ESGE_OBJ_CAM_H_
 
 # include <SDL2/SDL.h>
+# include "ESGE_objSerial.h"
 # include "ESGE_objScene.h"
 
 # define ESGE_OBJ_CAM_TYPE_ID 16u
@@ -10,9 +11,8 @@ class ESGE_ObjCam: public ESGE_ObjInScene
 {
   friend ESGE_ObjSerial *ESGE_LoadObjCam(SDL_RWops *io);
 
-  SDL_Rect view;
-
 public:
+  SDL_Rect view;
   static ESGE_ObjCam *list;
   ESGE_ObjCam *next;
 

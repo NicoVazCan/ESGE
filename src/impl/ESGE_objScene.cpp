@@ -2,54 +2,49 @@
 #define SGLIB_ASSERT SDL_assert
 #include "../sglib.h"
 
+#define ESGE_CMP_OBJ_SCENE(left, right) ( \
+  SDL_strcmp((left)->file, (right)->file) \
+)
+
 
 ESGE_ObjInScene::ESGE_ObjInScene(Uint16 id): ESGE_ObjSerial(id) {}
 
 ESGE_ObjInScene::~ESGE_ObjInScene(void) {}
 
 
-ESGE_ObjSerial*
-ESGE_LoadObjScene(SDL_RWops *io)
+ESGE_ObjScene *ESGE_ObjScene::list = NULL;
+
+ESGE_ObjScene::ESGE_ObjScene(const char *file)
 {
-  Uint16 id, typeID;
-  ESGE_ObjInScene *obj, *objList = NULL;
+  SDL_strlcpy(this->file, file, ESGE_OBJ_SCENE_FILE_LEN);
 
-  if(!(id = SDL_ReadBE16(io))) return NULL;
+  SDL_RWops *io;
+  Uint16 typeID;
+  ESGE_ObjInScene *obj;
 
-  while ((typeID = SDL_ReadBE16(io)))
+  if ((io = SDL_RWFromFile(file, "rb")) != NULL)
   {
-    SDL_assert(
-      (
-        obj = dynamic_cast<ESGE_ObjInScene*>(
-          ESGE_Loader::Load(typeID, io)
-        )
-      ) != NULL ||
-      "Failed to load ObjInScene" == NULL
-    );
-
-    SGLIB_SORTED_LIST_ADD(
-      ESGE_ObjInScene,
-      objList,
-      obj,
-      ESGE_CMP_OBJ_SERIAL,
-      next
-    );
+    while ((typeID = SDL_ReadBE16(io)))
+    {
+      SDL_assert(
+        (
+          obj = dynamic_cast<ESGE_ObjInScene*>(
+            ESGE_Loader::Load(typeID, io)
+          )
+        ) != NULL || "Failed to load ObjInScene" == NULL
+      );
+      AddObj(obj);
+    }
   }
 
-  return (
-    dynamic_cast<ESGE_ObjSerial*>(new ESGE_ObjScene(id, objList))
+  SGLIB_SORTED_LIST_ADD(
+    ESGE_ObjScene,
+    list,
+    this,
+    ESGE_CMP_OBJ_SCENE,
+    next
   );
 }
-
-static ESGE_Loader ESGE_ObjSceneLoader(
-  ESGE_OBJ_SCENE_TYPE_ID,
-  ESGE_LoadObjScene
-);
-
-ESGE_ObjScene::ESGE_ObjScene(Uint16 id, ESGE_ObjInScene *objList):
-  ESGE_ObjInScene(id),
-  objList(objList)
-{}
 
 ESGE_ObjScene::~ESGE_ObjScene(void)
 {
@@ -62,12 +57,24 @@ ESGE_ObjScene::~ESGE_ObjScene(void)
       delete obj;
     }
   );
+
+  SGLIB_SORTED_LIST_DELETE(
+    ESGE_ObjScene,
+    list,
+    this,
+    next
+  );
 }
 
 void
-ESGE_ObjScene::OnSave(SDL_RWops *io) const
+ESGE_ObjScene::Save(void)
 {
-  ESGE_ObjSerial::OnSave(io);
+  SDL_RWops *io;
+
+  SDL_assert(
+    (io = SDL_RWFromFile(file, "wb")) != NULL ||
+    "Failed to open or create file" == NULL
+  );
 
   SGLIB_LIST_MAP_ON_ELEMENTS(
     ESGE_ObjInScene,
@@ -86,21 +93,17 @@ ESGE_ObjScene::OnSave(SDL_RWops *io) const
           SDL_GetError()
         );
         SDL_ClearError();
-        SDL_assert("Failed to write scene obj typeID" == NULL);
+        SDL_assert("Failed to write scene ObjInScene typeID" == NULL);
       }
       obj->OnSave(io);
     }
   );
-}
 
-Uint16
-ESGE_ObjScene::GetTypeID(void) const
-{
-  return ESGE_OBJ_SCENE_TYPE_ID;
+  SDL_RWclose(io);
 }
 
 void
-ESGE_ObjScene::OnEnable(void)
+ESGE_ObjScene::Enable(void)
 {
   SGLIB_LIST_MAP_ON_ELEMENTS(
     ESGE_ObjInScene,
@@ -111,11 +114,10 @@ ESGE_ObjScene::OnEnable(void)
       obj->OnEnable();
     }
   );
-  ESGE_ObjSerial::OnEnable();
 }
 
 void
-ESGE_ObjScene::OnDisable(void)
+ESGE_ObjScene::Disable(void)
 {
   SGLIB_LIST_MAP_ON_ELEMENTS(
     ESGE_ObjInScene,
@@ -126,7 +128,6 @@ ESGE_ObjScene::OnDisable(void)
       obj->OnDisable();
     }
   );
-  ESGE_ObjSerial::OnDisable();
 }
 
 void

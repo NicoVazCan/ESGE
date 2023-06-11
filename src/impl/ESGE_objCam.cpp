@@ -1,8 +1,10 @@
 #include "ESGE_objCam.h"
 #include "../sglib.h"
 
-#define ESGE_OBJ_CAM_W 256
-#define ESGE_OBJ_CAM_H 144
+#define ESGE_OBJ_CAM_W 32
+//256
+#define ESGE_OBJ_CAM_H 32
+//144
 
 ESGE_ObjCam *ESGE_ObjCam::list = NULL;
 
@@ -23,6 +25,11 @@ ESGE_LoadObjCam(SDL_RWops *io)
     new ESGE_ObjCam(id, view)
   );
 }
+
+static ESGE_Loader ESGE_ObjDisplayLoader(
+  ESGE_OBJ_CAM_TYPE_ID,
+  ESGE_LoadObjCam
+);
 
 ESGE_ObjCam::ESGE_ObjCam(Uint16 id, SDL_Rect view):
   ESGE_ObjInScene(id),
