@@ -2,8 +2,11 @@
 #define SGLIB_ASSERT SDL_assert
 #include "../sglib.h"
 
-# define ESGE_OBJ_TILE_W 160
-# define ESGE_OBJ_TILE_H 160
+
+# define ESGE_OBJ_TILE_COL_BOX_OFFSET_X 0
+# define ESGE_OBJ_TILE_COL_BOX_OFFSET_Y 0
+# define ESGE_OBJ_TILE_COL_BOX_W 160
+# define ESGE_OBJ_TILE_COL_BOX_H 160
 
 ESGE_ObjTile *ESGE_ObjTile::list = NULL;
 
@@ -82,8 +85,17 @@ ESGE_ObjTile::ESGE_ObjTile(
   Uint16 displayID,
   Uint16 camID
 ):
-  ESGE_ObjInScene(id),
   ESGE_ObjPoint(pos),
+  ESGE_ObjInScene(id),
+  ESGE_ObjStatic(
+    pos,
+    {
+      ESGE_OBJ_TILE_COL_BOX_OFFSET_X,
+      ESGE_OBJ_TILE_COL_BOX_OFFSET_Y,
+      ESGE_OBJ_TILE_COL_BOX_W,
+      ESGE_OBJ_TILE_COL_BOX_H
+    }
+  ),
   ESGE_ObjDraw(ESGE_OBJ_TILE_LAYER),
   displayID(displayID),
   camID(camID)
@@ -176,6 +188,12 @@ ESGE_ObjTile::GetTypeID(void) const
 }
 
 void
+ESGE_ObjTile::OnCollide(ESGE_ObjCollider *other)
+{
+  //SDL_Log("Tile->%s", SDL_FUNCTION);
+}
+
+void
 ESGE_ObjTile::OnDraw(SDL_Renderer *rend)
 {
   SDL_Point inDisplayPos;
@@ -184,8 +202,8 @@ ESGE_ObjTile::OnDraw(SDL_Renderer *rend)
   inDisplayPos = cam->WorldToDisplayPoint(pos);
   tile.x = inDisplayPos.x;
   tile.y = inDisplayPos.y;
-  tile.w = ESGE_ObjCam::WorldToPixel(ESGE_OBJ_TILE_W);
-  tile.h = ESGE_ObjCam::WorldToPixel(ESGE_OBJ_TILE_H);
+  tile.w = ESGE_ObjCam::WorldToPixel(ESGE_OBJ_TILE_COL_BOX_W);
+  tile.h = ESGE_ObjCam::WorldToPixel(ESGE_OBJ_TILE_COL_BOX_H);
 
   SDL_SetRenderDrawColor(rend, 0xFF, 0x00, 0x00, 0xFF);
   SDL_RenderFillRect(rend, &tile);

@@ -122,8 +122,8 @@ ESGE_ObjCam::GetTypeID(void) const
 void
 ESGE_ObjCam::SetCenter(SDL_Point pos)
 {
-  this->pos.x = ESGE_OBJ_CAM_CENTER_H_OFFSET + pos.x;
-  this->pos.y = ESGE_OBJ_CAM_CENTER_V_OFFSET + pos.y;
+  this->pos.x = pos.x - ESGE_OBJ_CAM_CENTER_H_OFFSET;
+  this->pos.y = pos.y - ESGE_OBJ_CAM_CENTER_V_OFFSET;
 }
 
 SDL_Point

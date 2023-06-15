@@ -7,11 +7,14 @@
 # include "ESGE_objSceneEditor.h"
 # include "ESGE_objPoint.h"
 # include "ESGE_objEvent.h"
-# include "ESGE_objMove.h"
+# include "ESGE_objCollider.h"
+# include "ESGE_objDynamic.h"
 # include "ESGE_objDraw.h"
+# include "ESGE_objUpdate.h"
 
 # include "ESGE_objCam.h"
 # include "ESGE_objDisplay.h"
+# include "ESGE_objTile.h"
 
 # define ESGE_OBJ_PLAYER_TYPE_ID 4
 # define ESGE_OBJ_PLAYER_LAYER 2
@@ -19,7 +22,8 @@
 class ESGE_ObjPlayer:
   public ESGE_ObjInScene,
   public ESGE_ObjKeyEvent,
-  public ESGE_ObjMove,
+  public ESGE_ObjUpdate,
+  public ESGE_ObjDynamic,
   public ESGE_ObjDraw
 {
   const Uint16 displayID, camID;
@@ -44,10 +48,10 @@ public:
   virtual Uint16 GetTypeID(void) const override;
 
 protected:
-  virtual void OnKeyDown(SDL_Keycode key, SDL_Keymod mod) override;
-  virtual void OnKeyUp(SDL_Keycode key, SDL_Keymod mod) override;
+  virtual void OnUpdate(void) override;
 
-  virtual void OnMove(void);
+  virtual void OnMove(void) override;
+  virtual void OnCollide(ESGE_ObjCollider *other) override;
 
   virtual void OnDraw(SDL_Renderer *rend) override;
 };

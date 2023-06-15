@@ -6,6 +6,8 @@
 # include "ESGE_objScene.h"
 # include "ESGE_objSceneEditor.h"
 # include "ESGE_objPoint.h"
+# include "ESGE_objCollider.h"
+# include "ESGE_objStatic.h"
 # include "ESGE_objDraw.h"
 
 # include "ESGE_objCam.h"
@@ -16,7 +18,7 @@
 
 class ESGE_ObjTile:
   public ESGE_ObjInScene,
-  public ESGE_ObjPoint,
+  public ESGE_ObjStatic,
   public ESGE_ObjDraw
 {
   const Uint16 displayID, camID;
@@ -36,6 +38,8 @@ public:
 
   virtual void OnEnable(void) override;
   virtual void OnDisable(void) override;
+
+  virtual void OnCollide(ESGE_ObjCollider *other) override;
 
   virtual void OnSave(SDL_RWops *io) const override;
   virtual Uint16 GetTypeID(void) const override;

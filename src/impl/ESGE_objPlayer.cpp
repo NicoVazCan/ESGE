@@ -2,10 +2,13 @@
 #define SGLIB_ASSERT SDL_assert
 #include "../sglib.h"
 
-# define ESGE_OBJ_PLAYER_W 160
-# define ESGE_OBJ_PLAYER_H 320
+# define ESGE_OBJ_PLAYER_COL_BOX_OFFSET_X 0
+# define ESGE_OBJ_PLAYER_COL_BOX_OFFSET_Y 0
+# define ESGE_OBJ_PLAYER_COL_BOX_W 160
+# define ESGE_OBJ_PLAYER_COL_BOX_H 320
 # define ESGE_OBJ_PLAYER_ACC 2
 # define ESGE_OBJ_PLAYER_MAX_VEL 20
+
 
 ESGE_ObjPlayer *ESGE_ObjPlayer::list = NULL;
 
@@ -87,7 +90,18 @@ ESGE_ObjPlayer::ESGE_ObjPlayer(
   ESGE_ObjPoint(pos),
   ESGE_ObjInScene(id),
   ESGE_ObjKeyEvent(),
-  ESGE_ObjMove(pos, {0,0}, {0,0}),
+  ESGE_ObjUpdate(),
+  ESGE_ObjDynamic(
+    pos,
+    {0,0},
+    {0,0},
+    {
+      ESGE_OBJ_PLAYER_COL_BOX_OFFSET_X,
+      ESGE_OBJ_PLAYER_COL_BOX_OFFSET_Y,
+      ESGE_OBJ_PLAYER_COL_BOX_W,
+      ESGE_OBJ_PLAYER_COL_BOX_H
+    }
+  ),
   ESGE_ObjDraw(ESGE_OBJ_PLAYER_LAYER),
   displayID(displayID),
   camID(camID)
@@ -114,6 +128,7 @@ ESGE_ObjPlayer::~ESGE_ObjPlayer(void)
 void
 ESGE_ObjPlayer::OnEnable(void)
 {
+  SDL_Point center;
   ESGE_ObjDisplay *display;
   SDL_Window *wind;
 
@@ -140,8 +155,14 @@ ESGE_ObjPlayer::OnEnable(void)
     "ObjCam not found" == NULL
   );
 
+  center.x = pos.x + ESGE_OBJ_PLAYER_COL_BOX_W/2;
+  center.y = pos.y + ESGE_OBJ_PLAYER_COL_BOX_H/2;
+
+  cam->SetCenter(center);
+
   ESGE_ObjInScene::OnEnable();
   ESGE_ObjKeyEvent::OnEnable();
+  ESGE_ObjUpdate::OnEnable();
   ESGE_ObjMove::OnEnable();
   ESGE_ObjDraw::OnEnable();
 }
@@ -151,6 +172,7 @@ ESGE_ObjPlayer::OnDisable(void)
 {
   ESGE_ObjInScene::OnDisable();
   ESGE_ObjKeyEvent::OnDisable();
+  ESGE_ObjUpdate::OnDisable();
   ESGE_ObjMove::OnDisable();
   ESGE_ObjDraw::OnDisable();
 }
@@ -187,34 +209,35 @@ ESGE_ObjPlayer::GetTypeID(void) const
 }
 
 void
-ESGE_ObjPlayer::OnKeyDown(SDL_Keycode key, SDL_UNUSED SDL_Keymod mod)
+ESGE_ObjPlayer::OnUpdate(void)
 {
-  if (key == SDLK_LEFT)   vel.x = -ESGE_OBJ_PLAYER_MAX_VEL;
-  if (key == SDLK_RIGHT)  vel.x = ESGE_OBJ_PLAYER_MAX_VEL;
-  if (key == SDLK_UP)     vel.y = -ESGE_OBJ_PLAYER_MAX_VEL;
-  if (key == SDLK_DOWN)   vel.y = ESGE_OBJ_PLAYER_MAX_VEL;
-}
+  const Uint8 *keys = SDL_GetKeyboardState(NULL);
 
-void
-ESGE_ObjPlayer::OnKeyUp(SDL_Keycode key, SDL_UNUSED SDL_Keymod mod)
-{
-  if (key == SDLK_LEFT)   vel.x = 0;
-  if (key == SDLK_RIGHT)  vel.x = 0;
-  if (key == SDLK_UP)     vel.y = 0;
-  if (key == SDLK_DOWN)   vel.y = 0;
+  vel.x = keys[SDL_SCANCODE_LEFT]? -ESGE_OBJ_PLAYER_MAX_VEL: (
+    keys[SDL_SCANCODE_RIGHT]?       ESGE_OBJ_PLAYER_MAX_VEL: 0
+  );
+  vel.y = keys[SDL_SCANCODE_UP]?   -ESGE_OBJ_PLAYER_MAX_VEL: (
+    keys[SDL_SCANCODE_DOWN]?        ESGE_OBJ_PLAYER_MAX_VEL: 0
+  );
 }
 
 void
 ESGE_ObjPlayer::OnMove(void)
 {
-  //SDL_Point center;
+  SDL_Point center;
 
-  ESGE_ObjMove::OnMove();
-/*
-  center.x = pos.x + ESGE_OBJ_PLAYER_W/2;
-  center.y = pos.y + ESGE_OBJ_PLAYER_H/2;
+  ESGE_ObjDynamic::OnMove();
 
-  cam->SetCenter(center);*/
+  center.x = pos.x + ESGE_OBJ_PLAYER_COL_BOX_W/2;
+  center.y = pos.y + ESGE_OBJ_PLAYER_COL_BOX_H/2;
+
+  cam->SetCenter(center);
+}
+
+void
+ESGE_ObjPlayer::OnCollide(SDL_UNUSED ESGE_ObjCollider *other)
+{
+  
 }
 
 void
@@ -226,8 +249,8 @@ ESGE_ObjPlayer::OnDraw(SDL_Renderer *rend)
   inDisplayPos = cam->WorldToDisplayPoint(pos);
   body.x = inDisplayPos.x;
   body.y = inDisplayPos.y;
-  body.w = ESGE_ObjCam::WorldToPixel(ESGE_OBJ_PLAYER_W);
-  body.h = ESGE_ObjCam::WorldToPixel(ESGE_OBJ_PLAYER_H);
+  body.w = ESGE_ObjCam::WorldToPixel(ESGE_OBJ_PLAYER_COL_BOX_W);
+  body.h = ESGE_ObjCam::WorldToPixel(ESGE_OBJ_PLAYER_COL_BOX_H);
 
   SDL_SetRenderDrawColor(rend, 0x00, 0xFF, 0x00, 0xFF);
   SDL_RenderFillRect(rend, &body);

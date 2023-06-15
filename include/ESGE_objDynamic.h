@@ -4,6 +4,7 @@
 # include <SDL2/SDL.h>
 # include "ESGE_objMove.h"
 # include "ESGE_objCollider.h"
+# include "ESGE_objStatic.h"
 
 class ESGE_ObjDynamic:
   public ESGE_ObjMove,
@@ -17,9 +18,12 @@ public:
     SDL_Point pos,
     SDL_Point vel,
     SDL_Point acc,
-    SDL_Rect colBox
+    SDL_Rect offsetSize
   );
   virtual ~ESGE_ObjDynamic(void) = 0;
+
+protected:
+  virtual void OnMove(void) override;
 };
 
 #endif
