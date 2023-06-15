@@ -2,6 +2,7 @@
 # define ESGE_OBJ_EVENT_H_
 
 # include <SDL2/SDL.h>
+# include "ESGE_event.h"
 # include "ESGE_objActive.h"
 
 class ESGE_ObjQuitEvent: public virtual ESGE_ObjActive

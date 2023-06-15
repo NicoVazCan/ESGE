@@ -20,20 +20,16 @@ ESGE_ObjScene::ESGE_ObjScene(const char *file)
 
   SDL_RWops *io;
   Uint16 typeID;
-  ESGE_ObjInScene *obj;
+  ESGE_ObjSerial *obj;
 
   if ((io = SDL_RWFromFile(file, "rb")) != NULL)
   {
     while ((typeID = SDL_ReadBE16(io)))
     {
-      SDL_assert(
-        (
-          obj = dynamic_cast<ESGE_ObjInScene*>(
-            ESGE_Loader::Load(typeID, io)
-          )
-        ) != NULL || "Failed to load ObjInScene" == NULL
-      );
-      AddObj(obj);
+      if ((obj = ESGE_Loader::Load(typeID, io)) != NULL)
+      {
+        AddObj(dynamic_cast<ESGE_ObjInScene*>(obj));
+      }
     }
   }
 

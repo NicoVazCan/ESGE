@@ -1,5 +1,4 @@
 #include <SDL2/SDL.h>
-#include "ESGE_objCam.h"
 #include "ESGE_objRoom.h"
 #include "ESGE_plc.h"
 #include "ESGE_objDraw.h"
@@ -8,7 +7,7 @@
 #include "ESGE_objDisplay.h"
 
 
-#define ESGE_TEST_FLOOR_TYPE_ID 3
+#define ESGE_TEST_FLOOR_TYPE_ID 128
 
 
 class TestFloor: ESGE_ObjInScene, ESGE_ObjDraw
@@ -146,8 +145,9 @@ class TestGame: ESGE_ObjQuitEvent, ESGE_ObjKeyEvent, ESGE_ObjDraw
 	friend void TestGameUpdate(void *userdata);
 	ESGE_ObjDisplay *display;
   ESGE_ObjRoomMngr *roomMngr;
-  ESGE_ObjCam *cam;
   bool paused = false;
+  SDL_Rect pos = {0,0,32,32};
+
 public:
   TestGame(void): ESGE_ObjDraw(10)
   {
@@ -156,12 +156,7 @@ public:
   		0x00,						//ObjDisplay::full
   		0x00,						//ObjDisplay::vsync
 
-  		0x00,0x01, //ObjCam::id
-  		0x00,0x00, //ObjCam::x
-  		0x00,0x00, //ObjCam::y
-
   		0x00,0x02, //ObjRoomMngr::id
-  		0x00,0x01, //ObjRoomMngr::camID
   		0x00,0x03, //ObjRoomMngr::nRoom
 
   		0x00,0x00, //ObjRoomMngr::room[0].area.x
@@ -184,16 +179,12 @@ public:
   	};
   	SDL_RWops *io;
 
-
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
 
     SDL_assert((io = SDL_RWFromConstMem(data, sizeof(data))));
 
     display 	= dynamic_cast<ESGE_ObjDisplay*>(
     	ESGE_Loader::Load(ESGE_OBJ_DISPLAY_TYPE_ID, io)
-    );
-    cam 			= dynamic_cast<ESGE_ObjCam*>(
-    	ESGE_Loader::Load(ESGE_OBJ_CAM_TYPE_ID, io)
     );
     roomMngr 	= dynamic_cast<ESGE_ObjRoomMngr*>(
     	ESGE_Loader::Load(ESGE_OBJ_ROOM_MNGR_TYPE_ID, io)
@@ -210,6 +201,7 @@ public:
   {
     OnDisable();
 
+    delete display;
     delete roomMngr;
 
     SDL_Quit();
@@ -217,34 +209,31 @@ public:
 
   virtual void OnEnable(void) override
   {
+  	SDL_Point center = {
+			pos.x + pos.w/2,
+			pos.y + pos.h/2
+		};
+		
   	display->OnEnable();
-  	cam->OnEnable();
     roomMngr->OnEnable();
     ESGE_ObjQuitEvent::OnEnable();
     ESGE_ObjKeyEvent::OnEnable();
     ESGE_ObjDraw::OnEnable();
 
-    ESGE_AddPLC(
-    	ESGE_OBJ_ROOM_MNGR_UPDATE_PRI+1,
-    	TestGameUpdate,
-    	this
-    );
+    roomMngr->SetCenter(center);
+
+    ESGE_AddPLC(1, TestGameUpdate, this);
   }
 
   virtual void OnDisable(void) override
   {
   	display->OnDisable();
-  	cam->OnDisable();
     roomMngr->OnDisable();
     ESGE_ObjQuitEvent::OnDisable();
     ESGE_ObjKeyEvent::OnDisable();
     ESGE_ObjDraw::OnDisable();
 
-    ESGE_DelPLC(
-    	ESGE_OBJ_ROOM_MNGR_UPDATE_PRI+1,
-    	TestGameUpdate,
-    	this
-    );
+    ESGE_DelPLC(1, TestGameUpdate, this);
   }
 
   void MainLoop(void)
@@ -284,6 +273,9 @@ protected:
         roomMngr->OnEnable();
       }
     	break;
+    case SDLK_q:
+      delete this;
+      break;
     default:
       break;
     }
@@ -292,7 +284,7 @@ protected:
   virtual void OnDraw(SDL_Renderer *rend) override
   {
   	SDL_SetRenderDrawColor(rend, 0xFF, 0xFF, 0xFF, 0xFF);
-  	SDL_RenderDrawRect(rend, &cam->view);
+  	SDL_RenderDrawRect(rend, &pos);
   }
 };
 
@@ -303,10 +295,24 @@ void TestGameUpdate(void *userdata)
 
 	keys = SDL_GetKeyboardState(NULL);
 
-	if (keys[SDL_SCANCODE_LEFT]) pThis->cam->view.x--;
-	if (keys[SDL_SCANCODE_RIGHT]) pThis->cam->view.x++;
-	if (keys[SDL_SCANCODE_UP]) pThis->cam->view.y--;
-	if (keys[SDL_SCANCODE_DOWN]) pThis->cam->view.y++;
+	if (keys[SDL_SCANCODE_LEFT]) pThis->pos.x--;
+	if (keys[SDL_SCANCODE_RIGHT]) pThis->pos.x++;
+	if (keys[SDL_SCANCODE_UP]) pThis->pos.y--;
+	if (keys[SDL_SCANCODE_DOWN]) pThis->pos.y++;
+
+	if (
+		keys[SDL_SCANCODE_LEFT] ||
+		keys[SDL_SCANCODE_RIGHT] ||
+		keys[SDL_SCANCODE_UP] ||
+		keys[SDL_SCANCODE_DOWN]
+	)
+	{
+		SDL_Point center = {
+			pThis->pos.x + pThis->pos.w/2,
+			pThis->pos.y + pThis->pos.h/2
+		};
+		pThis->roomMngr->SetCenter(center);
+	}
 }
 
 int main(SDL_UNUSED int argc, SDL_UNUSED char const *argv[])

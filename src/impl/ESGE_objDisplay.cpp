@@ -1,31 +1,76 @@
 #include "ESGE_objDisplay.h"
+#define SGLIB_ASSERT SDL_assert
 #include "../sglib.h"
 
 #define TITLE "test"
 #define X SDL_WINDOWPOS_UNDEFINED
 #define Y SDL_WINDOWPOS_UNDEFINED
-#define W 160
-#define H 160
+#define W 256
+#define H 144
 #define WIND_FLAGS SDL_WINDOW_RESIZABLE
 #define REND_INDEX -1
 #define REND_FLAGS SDL_RENDERER_ACCELERATED
 
-ESGE_ObjSerial*
+static ESGE_ObjSerial*
 ESGE_LoadObjDisplay(SDL_RWops *io)
 {
   Uint16 id;
   Uint8 full, vsync;
+  ESGE_ObjDisplay *obj;
 
   if(!(id = SDL_ReadBE16(io))) return NULL;
   full = SDL_ReadU8(io);
   vsync = SDL_ReadU8(io);
 
-  return new ESGE_ObjDisplay(id, full, vsync);
+  for (
+    obj = ESGE_ObjDisplay::list;
+    obj != NULL && obj->id < id;
+    obj = obj->next
+  );
+  if (obj == NULL || obj->id != id)
+  {
+    return new ESGE_ObjDisplay(id, full, vsync);
+  }
+  else return NULL;
 }
 
 static ESGE_Loader ESGE_ObjDisplayLoader(
   ESGE_OBJ_DISPLAY_TYPE_ID,
   ESGE_LoadObjDisplay
+);
+
+static ESGE_ObjSerial*
+ESGE_TextLoadObjDisplay(void)
+{
+  char buff[8];
+  Uint16 id;
+  Uint8 full, vsync;
+  ESGE_ObjDisplay *obj;
+
+  while (
+    !(fputs("id: ", stdout), fgets(buff, 7, stdin)) ||
+    !(id = (unsigned)SDL_atoi(buff))
+  );
+  while(!(fputs("full: ", stdout), fgets(buff, 7, stdin)));
+  full = (unsigned)SDL_atoi(buff);
+  while(!(fputs("vsync: ", stdout), fgets(buff, 7, stdin)));
+  vsync = (unsigned)SDL_atoi(buff);
+
+  for (
+    obj = ESGE_ObjDisplay::list;
+    obj != NULL && obj->id < id;
+    obj = obj->next
+  );
+  if (obj == NULL || obj->id != id)
+  {
+    return new ESGE_ObjDisplay(id, full, vsync);
+  }
+  else return NULL;
+}
+
+static ESGE_TextLoader ESGE_ObjDisplayTextLoader(
+  ESGE_OBJ_DISPLAY_TYPE_ID,
+  ESGE_TextLoadObjDisplay
 );
 
 ESGE_ObjDisplay *ESGE_ObjDisplay::list = NULL;
@@ -79,12 +124,30 @@ ESGE_ObjDisplay::ESGE_ObjDisplay(
     SDL_LogError(SDL_LOG_CATEGORY_RENDER, "%s", SDL_GetError());
     SDL_ClearError();
   }
+
+  SGLIB_SORTED_LIST_ADD(
+    ESGE_ObjDisplay,
+    list,
+    this,
+    ESGE_CMP_OBJ_SERIAL,
+    next
+  );
 }
 
 ESGE_ObjDisplay::~ESGE_ObjDisplay(void)
 {
-  SDL_DestroyWindow(SDL_RenderGetWindow(rend));
+  SDL_Window *wind;
+
+  wind = SDL_RenderGetWindow(rend);
   SDL_DestroyRenderer(rend);
+  SDL_DestroyWindow(wind);
+
+  SGLIB_SORTED_LIST_DELETE(
+    ESGE_ObjDisplay,
+    list,
+    this,
+    next
+  );
 }
 
 void
@@ -165,13 +228,6 @@ ESGE_ObjDisplay::GetTypeID(void) const
 void
 ESGE_ObjDisplay::OnEnable(void)
 {
-  SGLIB_SORTED_LIST_ADD(
-    ESGE_ObjDisplay,
-    list,
-    this,
-    ESGE_CMP_OBJ_SERIAL,
-    next
-  );
   ESGE_ObjInScene::OnEnable();
   ESGE_ObjKeyEvent::OnEnable();
 }
@@ -179,12 +235,6 @@ ESGE_ObjDisplay::OnEnable(void)
 void
 ESGE_ObjDisplay::OnDisable(void)
 {
-  SGLIB_SORTED_LIST_DELETE(
-    ESGE_ObjDisplay,
-    list,
-    this,
-    next
-  );
   ESGE_ObjInScene::OnDisable();
   ESGE_ObjKeyEvent::OnDisable();
 }

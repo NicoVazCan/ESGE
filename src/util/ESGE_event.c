@@ -1,4 +1,5 @@
 #include "ESGE_event.h"
+#define SGLIB_ASSERT SDL_assert
 #include "../sglib.h"
 
 

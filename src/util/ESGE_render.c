@@ -1,4 +1,5 @@
 #include "ESGE_render.h"
+#define SGLIB_ASSERT SDL_assert
 #include "../sglib.h"
 
 #define CLEAR_R 0x00

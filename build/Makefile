@@ -1,6 +1,8 @@
 PLATFORM = 
+#rpi_1
 BUILD    = debug
-TARGET	 = ESGE_test_objRoom
+#release
+TARGET	 = ESGE_sceneEditor
 
 PLATFORM_FIELDS = $(subst _, ,$(PLATFORM))
 PLATFORM_NAME   = $(firstword $(PLATFORM_FIELDS))
@@ -24,7 +26,7 @@ ifeq ($(PLATFORM_NAME),rpi)
 
 	SYSROOT = /media/nico/rootfs
 
-	CFLAGS += --sysroot=$(SYSROOT) \
+	CFLAGS += \
 		-I$(SYSROOT)/opt/vc/include \
 		-I$(SYSROOT)/usr/include \
 		-I$(SYSROOT)/opt/vc/include/interface/vcos/pthreads \
@@ -34,7 +36,10 @@ ifeq ($(PLATFORM_NAME),rpi)
 
 	CC = /opt/rpi-tools/arm-bcm2708$\
 		/gcc-linaro-arm-linux-gnueabihf-raspbian$\
-		/bin/arm-linux-gnueabihf-gcc
+		/bin/arm-linux-gnueabihf-gcc --sysroot=$(SYSROOT)
+	CXX = /opt/rpi-tools/arm-bcm2708$\
+		/gcc-linaro-arm-linux-gnueabihf-raspbian$\
+		/bin/arm-linux-gnueabihf-g++ --sysroot=$(SYSROOT)
 endif
 
 ifeq ($(BUILD), release)
@@ -59,16 +64,6 @@ OBJS     = $(patsubst %.c,%.o, $(SRCS_C)) \
 
 CFLAGS += -I../include
 
-#LDLIBS  += -Wl,-Bstatic
-
-#CFLAGS  += -I../../PLC
-#CFLAGS  += -I../../SGLIB
-#LDFLAGS += -L../lib
-#LDLIBS  += -lPLC
-
-
-LDLIBS  += -Wl,-Bdynamic
-
 CFLAGS  += $(shell PKG_CONFIG_SYSROOT_DIR=$(SYSROOT) \
 	pkg-config --cflags          sdl2)
 LDFLAGS += $(shell PKG_CONFIG_SYSROOT_DIR=$(SYSROOT) \
@@ -80,7 +75,8 @@ LDLIBS  += $(shell PKG_CONFIG_SYSROOT_DIR=$(SYSROOT) \
 
 LDLIBS += -lstdc++
 
-CPPFLAGS += $(CFLAGS)
+CPPFLAGS += -std=c++11 $(CFLAGS)
+
 
 all: $(TARGET).o $(OBJS)
 	$(CC) $(LDFLAGS) $(TARGET).o $(OBJS) $(LDLIBS) -o $(TARGET)

@@ -4,7 +4,11 @@
 # include <SDL2/SDL.h>
 # include "ESGE_objActive.h"
 
-# define ESGE_CMP_OBJ_SERIAL(left, right) ((left)->id - (right)->id)
+# define ESGE_CMP_OBJ_SERIAL(left, right) (       \
+  (left)->GetTypeID() < (right)->GetTypeID()? -1: \
+    (left)->GetTypeID() == (right)->GetTypeID()?  \
+      (left)->id - (right)->id: 1                 \
+)
 
 class ESGE_ObjSerial: public virtual ESGE_ObjActive
 {

@@ -1,5 +1,4 @@
 #include "ESGE_objEvent.h"
-#include "ESGE_event.h"
 
 void
 ESGE_OnQuit(void *userdata, SDL_UNUSED SDL_Event *pEvent)

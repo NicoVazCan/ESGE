@@ -1,9 +1,14 @@
 #include "ESGE_objRoom.h"
-#include "../sglib.h"
 #include "ESGE_plc.h"
+#define SGLIB_ASSERT SDL_assert
+#include "../sglib.h"
 
-#define ESGE_OBJ_ROOM_MNGR_LOAD_RANGE 32
-#define ESGE_OBJ_ROOM_MNGR_ENABLE_RANGE 16
+#define ESGE_OBJ_ROOM_MNGR_LOAD_RANGE_H   32
+#define ESGE_OBJ_ROOM_MNGR_LOAD_RANGE_V   32
+#define ESGE_OBJ_ROOM_MNGR_ENABLE_RANGE_H 16
+#define ESGE_OBJ_ROOM_MNGR_ENABLE_RANGE_V 16
+
+ESGE_ObjRoomMngr *ESGE_ObjRoomMngr::list = NULL;
 
 #define READ_STR(io, str) {                                         \
   for (char *_c=(str); (*_c = (char)SDL_ReadU8(io)) != '\0'; ++_c); \
@@ -13,14 +18,14 @@
   for (char *_c=(str); SDL_WriteU8(io, *_c) && *_c!='\0'; ++_c); \
 }
 
-ESGE_ObjSerial*
+static ESGE_ObjSerial*
 ESGE_LoadObjRoomMngr(SDL_RWops *io)
 {
-  Uint16 id, camID, nRooms;
+  Uint16 id, nRooms;
   ESGE_Room *rooms;
+  ESGE_ObjRoomMngr *obj;
 
   if(!(id = SDL_ReadBE16(io))) return NULL;
-  camID   = SDL_ReadBE16(io);
   nRooms  = SDL_ReadBE16(io);
 
   rooms = new ESGE_Room[nRooms];
@@ -38,7 +43,16 @@ ESGE_LoadObjRoomMngr(SDL_RWops *io)
     rooms[i].scene  = NULL;
   }
 
-  return new ESGE_ObjRoomMngr(id, camID, nRooms, rooms);
+  for (
+    obj = ESGE_ObjRoomMngr::list;
+    obj != NULL && obj->id < id;
+    obj = obj->next
+  );
+  if (obj == NULL || obj->id != id)
+  {
+    return new ESGE_ObjRoomMngr(id, nRooms, rooms);
+  }
+  else return NULL;
 }
 
 static ESGE_Loader ESGE_ObjRoomMngrLoader(
@@ -46,80 +60,76 @@ static ESGE_Loader ESGE_ObjRoomMngrLoader(
   ESGE_LoadObjRoomMngr
 );
 
-void
-ESGE_ObjRoomMngrUpdate(void *userdata)
+static ESGE_ObjSerial*
+ESGE_TextLoadObjRoomMngr(void)
 {
-  ESGE_ObjRoomMngr *pThis = (ESGE_ObjRoomMngr*)userdata;
+  char buff[8];
+  Uint16 id, nRooms;
+  ESGE_Room *rooms;
+  ESGE_ObjRoomMngr *obj;
 
-  SDL_Rect loadArea = {
-    pThis->cam->view.x - ESGE_OBJ_ROOM_MNGR_LOAD_RANGE,
-    pThis->cam->view.y - ESGE_OBJ_ROOM_MNGR_LOAD_RANGE,
-    pThis->cam->view.w + ESGE_OBJ_ROOM_MNGR_LOAD_RANGE*2,
-    pThis->cam->view.h + ESGE_OBJ_ROOM_MNGR_LOAD_RANGE*2
-  };
+  while (
+    !(fputs("id: ", stdout), fgets(buff, 8, stdin)) ||
+    !(id = SDL_atoi(buff))
+  );
+  while(!(fputs("nRooms: ", stdout), fgets(buff, 8, stdin)));
+  nRooms = (unsigned)SDL_atoi(buff);
 
-  SDL_Rect enableArea = {
-    pThis->cam->view.x - ESGE_OBJ_ROOM_MNGR_ENABLE_RANGE,
-    pThis->cam->view.y - ESGE_OBJ_ROOM_MNGR_ENABLE_RANGE,
-    pThis->cam->view.w + ESGE_OBJ_ROOM_MNGR_ENABLE_RANGE*2,
-    pThis->cam->view.h + ESGE_OBJ_ROOM_MNGR_ENABLE_RANGE*2
-  };
+  rooms = new ESGE_Room[nRooms];
 
-
-
-  for (Uint16 i = 0; i < pThis->nRooms; ++i)
+  for (Uint16 i = 0; i < nRooms; ++i)
   {
-    if (SDL_HasIntersection(&pThis->rooms[i].area, &loadArea))
-    {
-      if (pThis->rooms[i].scene == NULL)
-      {
-        pThis->rooms[i].scene = new ESGE_ObjScene(
-          pThis->rooms[i].file
-        );
-      }
-      if (SDL_HasIntersection(&pThis->rooms[i].area, &enableArea))
-      {
-        if (!pThis->rooms[i].enable)
-        {
-          pThis->rooms[i].enable = true;
-          pThis->rooms[i].scene->Enable();
-        }
-      }
-      else
-      {
-        if (pThis->rooms[i].enable)
-        {
-          pThis->rooms[i].enable = false;
-          pThis->rooms[i].scene->Disable();
-        }
-      }
-    }
-    else
-    {
-      if (pThis->rooms[i].scene != NULL)
-      {
-        pThis->rooms[i].scene->Save();
-        if (pThis->rooms[i].enable)
-        {
-          pThis->rooms[i].enable = false;
-          pThis->rooms[i].scene->Disable();
-        }
-        delete pThis->rooms[i].scene;
-        pThis->rooms[i].scene = NULL;
-      }
-    }
+    while(!(printf("room[%hu].area.x: ", i), fgets(buff, 7, stdin)));
+    rooms[i].area.x = SDL_atoi(buff);
+    while(!(printf("room[%hu].area.y: ", i), fgets(buff, 7, stdin)));
+    rooms[i].area.y = SDL_atoi(buff);
+    while(!(printf("room[%hu].area.w: ", i), fgets(buff, 7, stdin)));
+    rooms[i].area.w = SDL_atoi(buff);
+    while(!(printf("room[%hu].area.h: ", i), fgets(buff, 7, stdin)));
+    rooms[i].area.h = SDL_atoi(buff);
+
+    while(
+      !(printf("room[%hu].file: ", i),
+        fgets(rooms[i].file, ESGE_OBJ_SCENE_FILE_LEN-1, stdin)
+      )
+    );
+
+    rooms[i].enable = false;
+    rooms[i].scene  = NULL;
   }
+
+  for (
+    obj = ESGE_ObjRoomMngr::list;
+    obj != NULL && obj->id < id;
+    obj = obj->next
+  );
+  if (obj == NULL || obj->id != id)
+  {
+    return new ESGE_ObjRoomMngr(id, nRooms, rooms);
+  }
+  else return NULL;
 }
 
+static ESGE_TextLoader ESGE_ObjRoomMngrTextLoader(
+  ESGE_OBJ_ROOM_MNGR_TYPE_ID,
+  ESGE_TextLoadObjRoomMngr
+);
 
 ESGE_ObjRoomMngr::ESGE_ObjRoomMngr(
   Uint16 id,
-  Uint16 camID,
   Uint16 nRooms,
   ESGE_Room *rooms
 ):
-  ESGE_ObjInScene(id), camID(camID), nRooms(nRooms), rooms(rooms)
-{}
+  ESGE_ObjInScene(id), nRooms(nRooms), rooms(rooms)
+{
+  SGLIB_SORTED_LIST_ADD(
+    ESGE_ObjRoomMngr,
+    list,
+    this,
+    ESGE_CMP_OBJ_SERIAL,
+    next
+  );
+}
 
 ESGE_ObjRoomMngr::~ESGE_ObjRoomMngr(void)
 {
@@ -137,14 +147,19 @@ ESGE_ObjRoomMngr::~ESGE_ObjRoomMngr(void)
     }
   }
   delete[] rooms;
+
+  SGLIB_SORTED_LIST_DELETE(
+    ESGE_ObjRoomMngr,
+    list,
+    this,
+    next
+  );
 }
 
 void
 ESGE_ObjRoomMngr::OnSave(SDL_RWops *io) const
 {
   ESGE_ObjInScene::OnSave(io);
-
-  SDL_WriteBE16(io, camID);
   SDL_WriteBE16(io, nRooms);
 
   for (Uint16 i = 0; i < nRooms; ++i)
@@ -167,25 +182,6 @@ ESGE_ObjRoomMngr::GetTypeID(void) const
 void
 ESGE_ObjRoomMngr::OnEnable(void)
 {
-  for (
-    cam = ESGE_ObjCam::list;
-    cam != NULL && cam->id < camID;
-    cam = cam->next
-  );
-
-  SDL_assert(
-    (cam != NULL && cam->id == camID) ||
-    "ObjCam not found" == NULL
-  );
-
-  SDL_assert(
-    !ESGE_AddPLC(
-      ESGE_OBJ_ROOM_MNGR_UPDATE_PRI,
-      ESGE_ObjRoomMngrUpdate,
-      this
-    )
-  );
-
   for (Uint16 i = 0; i < nRooms; ++i)
   {
     if (rooms[i].scene != NULL && rooms[i].enable)
@@ -198,19 +194,72 @@ ESGE_ObjRoomMngr::OnEnable(void)
 void
 ESGE_ObjRoomMngr::OnDisable(void)
 {
-  cam = NULL;
-
-  ESGE_DelPLC(
-    ESGE_OBJ_ROOM_MNGR_UPDATE_PRI,
-    ESGE_ObjRoomMngrUpdate,
-    this
-  );
-
   for (Uint16 i = 0; i < nRooms; ++i)
   {
     if (rooms[i].scene != NULL && rooms[i].enable)
     {
       rooms[i].scene->Disable();
+    }
+  }
+}
+
+void
+ESGE_ObjRoomMngr::SetCenter(SDL_Point center)
+{
+  const SDL_Rect loadArea = {
+    center.x - ESGE_OBJ_ROOM_MNGR_LOAD_RANGE_H,
+    center.y - ESGE_OBJ_ROOM_MNGR_LOAD_RANGE_V,
+    ESGE_OBJ_ROOM_MNGR_LOAD_RANGE_H*2,
+    ESGE_OBJ_ROOM_MNGR_LOAD_RANGE_V*2
+  };
+
+  const SDL_Rect enableArea = {
+    center.x - ESGE_OBJ_ROOM_MNGR_ENABLE_RANGE_H,
+    center.y - ESGE_OBJ_ROOM_MNGR_ENABLE_RANGE_V,
+    ESGE_OBJ_ROOM_MNGR_ENABLE_RANGE_H*2,
+    ESGE_OBJ_ROOM_MNGR_ENABLE_RANGE_V*2
+  };
+
+  for (Uint16 i = 0; i < nRooms; ++i)
+  {
+    if (SDL_HasIntersection(&rooms[i].area, &loadArea))
+    {
+      if (rooms[i].scene == NULL)
+      {
+        rooms[i].scene = new ESGE_ObjScene(
+          rooms[i].file
+        );
+      }
+      if (SDL_HasIntersection(&rooms[i].area, &enableArea))
+      {
+        if (!rooms[i].enable)
+        {
+          rooms[i].enable = true;
+          rooms[i].scene->Enable();
+        }
+      }
+      else
+      {
+        if (rooms[i].enable)
+        {
+          rooms[i].enable = false;
+          rooms[i].scene->Disable();
+        }
+      }
+    }
+    else
+    {
+      if (rooms[i].scene != NULL)
+      {
+        rooms[i].scene->Save();
+        if (rooms[i].enable)
+        {
+          rooms[i].enable = false;
+          rooms[i].scene->Disable();
+        }
+        delete rooms[i].scene;
+        rooms[i].scene = NULL;
+      }
     }
   }
 }

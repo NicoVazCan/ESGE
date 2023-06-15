@@ -5,13 +5,13 @@
 
 class ESGE_ObjActive
 {
-  SDL_bool enabled;
+  bool enabled = false;
 public:
   ESGE_ObjActive() = default;
   virtual ~ESGE_ObjActive() = 0;
   virtual void OnEnable(void);
   virtual void OnDisable(void);
-  SDL_bool IsEnabled(void) const;
+  bool IsEnabled(void) const;
 };
 
 #endif

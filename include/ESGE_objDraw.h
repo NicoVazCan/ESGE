@@ -11,7 +11,7 @@ class ESGE_ObjDraw: public virtual ESGE_ObjActive
   SDL_Renderer *rend;
 public:
   ESGE_ObjDraw(unsigned layer);
-  ~ESGE_ObjDraw(void);
+  virtual ~ESGE_ObjDraw(void);
   virtual void OnEnable(void) override;
   virtual void OnDisable(void) override;
   void SetRenderer(SDL_Renderer *rend);

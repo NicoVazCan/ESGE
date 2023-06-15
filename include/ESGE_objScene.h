@@ -17,9 +17,9 @@ public:
 
 class ESGE_ObjScene
 {
-  ESGE_ObjInScene *objList = NULL;
-
 public:
+  ESGE_ObjInScene *objList = NULL;
+  
   char file[ESGE_OBJ_SCENE_FILE_LEN];
   static ESGE_ObjScene *list;
   ESGE_ObjScene *next;

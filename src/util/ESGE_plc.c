@@ -1,5 +1,4 @@
 #include "ESGE_plc.h"
-
 #define SGLIB_ASSERT SDL_assert
 #include "../sglib.h"
 

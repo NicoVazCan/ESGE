@@ -2,8 +2,8 @@
 
 ESGE_ObjActive::~ESGE_ObjActive()     {}
 void
-ESGE_ObjActive::OnEnable(void)        { enabled = SDL_TRUE;  }
+ESGE_ObjActive::OnEnable(void)        { enabled = true;  }
 void
-ESGE_ObjActive::OnDisable(void)       { enabled = SDL_FALSE; }
-SDL_bool
-ESGE_ObjActive::IsEnabled(void) const { return enabled;      }
+ESGE_ObjActive::OnDisable(void)       { enabled = false; }
+bool
+ESGE_ObjActive::IsEnabled(void) const { return enabled;  }
