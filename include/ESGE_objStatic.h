@@ -10,7 +10,6 @@
 
 struct ESGE_ObjStaticHNode;
 struct ESGE_ObjStaticVNode;
-struct ESGE_ObjStaticList;
 
 class ESGE_ObjStatic: public ESGE_ObjCollider
 {

@@ -39,8 +39,6 @@ public:
   virtual void OnEnable(void) override;
   virtual void OnDisable(void) override;
 
-  virtual void OnCollide(ESGE_ObjCollider *other) override;
-
   virtual void OnSave(SDL_RWops *io) const override;
   virtual Uint16 GetTypeID(void) const override;
 

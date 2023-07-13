@@ -2,42 +2,102 @@
 # define ESGE_OBJ_SERIAL_H_
 
 # include <SDL2/SDL.h>
-# include "ESGE_objActive.h"
+# include "ESGE_hash.h"
+# include "ESGE_mem.h"
 
-# define ESGE_CMP_OBJ_SERIAL(left, right) (       \
-  (left)->GetTypeID() < (right)->GetTypeID()? -1: \
-    (left)->GetTypeID() == (right)->GetTypeID()?  \
-      (left)->id - (right)->id: 1                 \
-)
+# define ESGE_ADD_TYPE(type) \
+static ESGE_TypeImpl<type> ESGE__type##type(#type);
 
-class ESGE_ObjSerial: public virtual ESGE_ObjActive
+# define OFFSETOF(type, field) ((size_t) &(((type*)0)->field))
+
+struct ESGE_Field
 {
-  friend int ESGE_CmpObjSerial(
-    const ESGE_ObjSerial *left,
-    const ESGE_ObjSerial *right
-  );
-public:
-  const Uint16 id;
-
-  ESGE_ObjSerial(Uint16 id);
-  virtual ~ESGE_ObjSerial(void);
-  virtual void OnSave(SDL_RWops *io) const;
-  virtual Uint16 GetTypeID(void) const = 0;
+  enum
+  {
+    S8,  U8,  S16, U16,  S32, U32,  S64, U64,  FLOAT,  STR
+  } type;
+  const char *name;
+  size_t offset, strLen;
 };
 
-typedef ESGE_ObjSerial *(*ESGE_Load)(SDL_RWops *io);
-
-class ESGE_Loader
+class ESGE_ObjSerial
 {
-  static ESGE_Loader *list;
-  ESGE_Loader *next;
-  const Uint16 typeID;
-  const ESGE_Load load;
+public:
+  Uint64 typeID = 0;
+
+  ESGE_ObjSerial(void);
+  virtual ~ESGE_ObjSerial(void) = 0;
+
+  virtual const ESGE_Field *GetFields(size_t *nFields) const;
+  int GetFieldValue(const ESGE_Field *field, char *value, size_t len);
+  int SetFieldValue(const char *name, const char *value);
+
+  virtual int OnLoad(SDL_RWops *io);
+  virtual int OnSave(SDL_RWops *io) const;
+};
+
+typedef ESGE_ObjSerial *(*ESGE_NewCall)(void);
+
+class ESGE_Type
+{
+  static ESGE_Type *list;
+  const Uint64 typeID;
+  const ESGE_NewCall newObj;
+  ESGE_Type *next;
   
+protected:
+  ESGE_Type(
+    const char *typeName,
+    ESGE_NewCall newObj
+  );
+  ~ESGE_Type(void);
+
 public:
-  ESGE_Loader(Uint16 typeID, ESGE_Load load);
-  ~ESGE_Loader(void);
-  static ESGE_ObjSerial *Load(Uint16 typeID, SDL_RWops *io);
+  static ESGE_ObjSerial* New(Uint64 typeID);
+  static ESGE_ObjSerial* New(const char *typeName);
 };
+
+template<class C>
+class ESGE_TypeImpl: ESGE_Type
+{
+  static ESGE_ObjSerial* New(void)
+  {
+    void *ptr;
+
+    if(!(ptr = SDL_malloc(sizeof(C))))
+    {
+      SDL_OutOfMemory();
+      return NULL;
+    }
+    return new(ptr) C;
+  }
+
+public:
+  ESGE_TypeImpl(const char *typeName):
+    ESGE_Type(typeName, New)
+  {}
+};
+
+int ESGE_Read(SDL_RWops *io, Sint8  *ptr);
+int ESGE_Read(SDL_RWops *io, Uint8  *ptr);
+int ESGE_Read(SDL_RWops *io, Sint16 *ptr);
+int ESGE_Read(SDL_RWops *io, Uint16 *ptr);
+int ESGE_Read(SDL_RWops *io, Sint32 *ptr);
+int ESGE_Read(SDL_RWops *io, Uint32 *ptr);
+int ESGE_Read(SDL_RWops *io, Sint64 *ptr);
+int ESGE_Read(SDL_RWops *io, Uint64 *ptr);
+int ESGE_Read(SDL_RWops *io, float  *ptr);
+int ESGE_Read(SDL_RWops *io, char   *str, size_t n);
+
+int ESGE_Write(SDL_RWops *io, Sint8       value);
+int ESGE_Write(SDL_RWops *io, Uint8       value);
+int ESGE_Write(SDL_RWops *io, Sint16      value);
+int ESGE_Write(SDL_RWops *io, Uint16      value);
+int ESGE_Write(SDL_RWops *io, Sint32      value);
+int ESGE_Write(SDL_RWops *io, Uint32      value);
+int ESGE_Write(SDL_RWops *io, Sint64      value);
+int ESGE_Write(SDL_RWops *io, Uint64      value);
+int ESGE_Write(SDL_RWops *io, float       value);
+int ESGE_Write(SDL_RWops *io, const char *str, size_t n);
 
 #endif

@@ -1,13 +1,6 @@
 #include "ESGE_objCollider.h"
 
-ESGE_ObjCollider::ESGE_ObjCollider(
-  SDL_Point pos,
-  SDL_Rect offsetSize
-):
-  ESGE_ObjPoint(pos),
-  offsetSize(offsetSize)
-{}
-
+ESGE_ObjCollider::ESGE_ObjCollider(void)  {}
 ESGE_ObjCollider::~ESGE_ObjCollider(void) {}
 
 SDL_Rect

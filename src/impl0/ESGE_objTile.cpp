@@ -188,12 +188,6 @@ ESGE_ObjTile::GetTypeID(void) const
 }
 
 void
-ESGE_ObjTile::OnCollide(ESGE_ObjCollider *other)
-{
-  //SDL_Log("Tile->%s", SDL_FUNCTION);
-}
-
-void
 ESGE_ObjTile::OnDraw(SDL_Renderer *rend)
 {
   SDL_Point inDisplayPos;

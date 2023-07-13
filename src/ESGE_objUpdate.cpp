@@ -1,6 +1,6 @@
 #include "ESGE_objUpdate.h"
 
-void ESGE_OnUpdate(void *userdata)
+static void ESGE_OnUpdate(void *userdata)
 {
   ((ESGE_ObjUpdate*)userdata)->OnUpdate();
 }

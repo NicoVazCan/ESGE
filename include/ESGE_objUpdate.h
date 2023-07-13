@@ -9,15 +9,13 @@
 
 class ESGE_ObjUpdate: public virtual ESGE_ObjActive
 {
-  friend void ESGE_OnUpdate(void *userdata);
-
 public:
   ESGE_ObjUpdate(void);
-  virtual ~ESGE_ObjUpdate(void);
+  virtual ~ESGE_ObjUpdate(void) override;
+
   virtual void OnEnable(void) override;
   virtual void OnDisable(void) override;
 
-protected:
   virtual void OnUpdate(void) = 0;
 };
 

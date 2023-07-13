@@ -1,31 +1,34 @@
 #include "ESGE_objDraw.h"
 #include "ESGE_render.h"
 
-ESGE_ObjDraw::ESGE_ObjDraw(unsigned layer): layer(layer) {}
-
+ESGE_ObjDraw::ESGE_ObjDraw(void)  {}
 ESGE_ObjDraw::~ESGE_ObjDraw(void) {}
 
 void
-ESGE_OnDraw(void *userdata, SDL_Renderer *rend)
+ESGE_OnDraw(void *userdata)
 {
-  ESGE_ObjDraw *pThis = (ESGE_ObjDraw*) userdata;
+  ESGE_ObjDraw *this = (ESGE_ObjDraw*)userdata;
 
-  pThis->OnDraw(rend);
+  for (
+    ESGE_ObjCam *cam = ESGE_ObjCam::list;
+    cam != NULL;
+    cam = cam->next
+  )
+    this->OnDraw(drawData->cam);
 }
 
 void
 ESGE_ObjDraw::OnEnable(void)
 {
-  SDL_assert(!ESGE_AddDrawCallback(layer, rend, ESGE_OnDraw, this));
   ESGE_ObjActive::OnEnable();
+
+  SDL_assert(!ESGE_AddDrawCallback(layer, ESGE_OnDraw, this));
 }
 
 void
 ESGE_ObjDraw::OnDisable(void)
 {
-  ESGE_DelDrawCallback(layer, rend, ESGE_OnDraw, this);
   ESGE_ObjActive::OnDisable();
-}
 
-void
-ESGE_ObjDraw::SetRenderer(SDL_Renderer *rend) { this->rend = rend; }
+  ESGE_DelDrawCallback(layer, ESGE_OnDraw, this);
+}

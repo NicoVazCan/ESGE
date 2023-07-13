@@ -6,9 +6,9 @@
 class ESGE_ObjPoint
 {
 public:
-  SDL_Point pos;
+  SDL_Point pos = {0, 0};
 
-  ESGE_ObjPoint(SDL_Point pos);
+  ESGE_ObjPoint(void);
   virtual ~ESGE_ObjPoint(void) = 0;
 };
 

@@ -13,17 +13,15 @@ class ESGE_ObjMove:
   public virtual ESGE_ObjPoint,
   public virtual ESGE_ObjActive
 {
-  friend void ESGE_OnMove(void *userdata);
-
 public:
-  SDL_Point vel, acc;
+  SDL_Point vel = {0, 0}, acc = {0, 0};
 
-  ESGE_ObjMove(SDL_Point pos, SDL_Point vel, SDL_Point acc);
-  virtual ~ESGE_ObjMove(void) = 0;
+  ESGE_ObjMove(void);
+  virtual ~ESGE_ObjMove(void) override = 0;
+
   virtual void OnEnable(void) override;
   virtual void OnDisable(void) override;
-  
-protected:
+
   virtual void OnMove(void);
 };
 

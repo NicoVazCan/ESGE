@@ -1,13 +1,12 @@
 #include "ESGE_objEvent.h"
 
-void
+static void
 ESGE_OnQuit(void *userdata, SDL_UNUSED SDL_Event *pEvent)
 {
   ((ESGE_ObjQuitEvent*) userdata)->OnQuit();
 }
 
 ESGE_ObjQuitEvent::ESGE_ObjQuitEvent(void) {}
-
 ESGE_ObjQuitEvent::~ESGE_ObjQuitEvent(void) {}
 
 void
@@ -28,7 +27,7 @@ void
 ESGE_ObjQuitEvent::OnQuit(void) {}
 
 
-void
+static void
 ESGE_OnKey(void *userdata, SDL_Event *pEvent)
 {
   ESGE_ObjKeyEvent *pThis = (ESGE_ObjKeyEvent*) userdata;
@@ -53,16 +52,7 @@ ESGE_OnKey(void *userdata, SDL_Event *pEvent)
   }
 }
 
-ESGE_ObjKeyEvent::ESGE_ObjKeyEvent(void):
-  ESGE_ObjActive(),
-  windowID(0u)
-{}
-
-ESGE_ObjKeyEvent::ESGE_ObjKeyEvent(Uint32 windowID):
-  ESGE_ObjActive(), 
-  windowID(windowID)
-{}
-
+ESGE_ObjKeyEvent::ESGE_ObjKeyEvent(void)  {}
 ESGE_ObjKeyEvent::~ESGE_ObjKeyEvent(void) {}
 
 void

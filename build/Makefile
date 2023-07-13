@@ -2,7 +2,7 @@ PLATFORM =
 #rpi_1
 BUILD    = debug
 #release
-TARGET	 = ESGE_sceneEditor
+TARGET	 = main
 
 PLATFORM_FIELDS = $(subst _, ,$(PLATFORM))
 PLATFORM_NAME   = $(firstword $(PLATFORM_FIELDS))
@@ -59,8 +59,11 @@ SRCS_C   = $(notdir $(wildcard ../src/util/*.c))
 SRCS_CXX = $(notdir $(wildcard ../src/*.cpp) \
 					 $(wildcard ../src/impl/*.cpp))
 
-OBJS     = $(patsubst %.c,%.o, $(SRCS_C)) \
-					 $(patsubst %.cpp,%.o, $(SRCS_CXX))
+#OBJS     = $(patsubst %.c,%.o, $(SRCS_C)) \
+#					 $(patsubst %.cpp,%.o, $(SRCS_CXX))
+
+#OBJS = ESGE_objSerial.o ESGE_file.o ESGE_scene.o ESGE_mem.o
+#ESGE_objCam.o ESGE_objEditor.o ESGE_objPoint.o
 
 CFLAGS += -I../include
 
@@ -73,12 +76,11 @@ LDFLAGS += $(shell PKG_CONFIG_SYSROOT_DIR=$(SYSROOT) \
 LDLIBS  += $(shell PKG_CONFIG_SYSROOT_DIR=$(SYSROOT) \
 	pkg-config --libs-only-l     sdl2)
 
-LDLIBS += -lstdc++
+CXXFLAGS += -std=c++11 -fno-exceptions -fno-rtti $(CFLAGS)
 
-CPPFLAGS += -std=c++11 $(CFLAGS)
+all:	$(OBJS)
 
-
-all: $(TARGET).o $(OBJS)
+test: $(TARGET).o $(OBJS)
 	$(CC) $(LDFLAGS) $(TARGET).o $(OBJS) $(LDLIBS) -o $(TARGET)
 	
 clean:

@@ -6,10 +6,10 @@
 
 class ESGE_ObjCollider: public virtual ESGE_ObjPoint
 {
-  const SDL_Rect offsetSize;
-
 public:
-  ESGE_ObjCollider(SDL_Point pos, SDL_Rect offsetSize);
+  SDL_Rect offsetSize = {0, 0, 0, 0};
+
+  ESGE_ObjCollider(void);
   virtual ~ESGE_ObjCollider(void) = 0;
   SDL_Rect GetColBox(void);
   void SetColBox(SDL_Rect colBox);

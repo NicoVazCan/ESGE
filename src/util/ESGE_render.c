@@ -38,6 +38,47 @@ static ESGE_Rend      *ESGE_rendList    = NULL;
 static ESGE_Rend      *ESGE_rendNext      = NULL;
 static ESGE_RendData  *ESGE_rendDataNext  = NULL;
 
+typedef struct ESGE_Renderers
+{
+  SDL_Renderer *array;
+  size_t n;
+} ESGE_Renderers;
+
+static ESGE_Renderers ESGE_renders = {NULL, 0};
+
+int
+ESGE_AddRenderer(SDL_Renderer *render)
+{
+  size_t chunks = 0;
+  void *new_ptr;
+
+  for (
+    ;
+    chunks < sizeof (size_t) * 8 && ESGE_renders >> chunks > 1;
+    ++chunks
+  )
+
+  ESGE_renders *= 2;
+
+  new_ptr = SDL_realloc(
+    ESGE_renders.array,
+    sizeof (SDL_Renderer*) * ESGE_renders.n
+  );
+
+  if (new_ptr == NULL) return 1;
+  else
+  {
+    ESGE_renders.array = new_ptr;
+    return 0;
+  }
+}
+
+void
+ESGE_DelRenderer(SDL_Renderer *render)
+{
+
+}
+
 static void
 ESGE_DrawLayers()
 {

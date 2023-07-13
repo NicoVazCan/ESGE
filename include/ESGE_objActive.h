@@ -6,12 +6,16 @@
 class ESGE_ObjActive
 {
   bool enabled = false;
+
 public:
-  ESGE_ObjActive() = default;
-  virtual ~ESGE_ObjActive() = 0;
+  ESGE_ObjActive(void);
+  virtual ~ESGE_ObjActive(void) = 0;
+
   virtual void OnEnable(void);
   virtual void OnDisable(void);
+
   bool IsEnabled(void) const;
+  void SetEnabled(bool enabled);
 };
 
 #endif
