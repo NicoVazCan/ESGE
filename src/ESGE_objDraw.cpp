@@ -1,34 +1,58 @@
 #include "ESGE_objDraw.h"
-#include "ESGE_render.h"
+#define SGLIB_ASSERT SDL_assert
+#include "sglib.h"
 
-ESGE_ObjDraw::ESGE_ObjDraw(void)  {}
-ESGE_ObjDraw::~ESGE_ObjDraw(void) {}
+
+ESGE_ObjDraw *ESGE_ObjDraw::list = NULL;
+
 
 void
-ESGE_OnDraw(void *userdata)
+ESGE_ObjDraw::Draw(void)
 {
-  ESGE_ObjDraw *this = (ESGE_ObjDraw*)userdata;
+  for (ESGE_ObjDraw *obj = list; obj != NULL; obj = obj->next)
+    obj->OnDraw();
+}
 
-  for (
-    ESGE_ObjCam *cam = ESGE_ObjCam::list;
-    cam != NULL;
-    cam = cam->next
-  )
-    this->OnDraw(drawData->cam);
+
+ESGE_ObjDraw::ESGE_ObjDraw(void)
+{}
+
+ESGE_ObjDraw::~ESGE_ObjDraw(void)
+{}
+
+
+#define CMP_OBJ_DRAW(left, right) ((left)->layer - (right)->layer)
+
+void
+ESGE_ObjDraw::EnableDraw(void)
+{
+  if (!next)
+  {
+    SGLIB_SORTED_LIST_ADD(
+      ESGE_ObjDraw,
+      list,
+      this,
+      CMP_OBJ_DRAW,
+      next
+    );
+  }
 }
 
 void
-ESGE_ObjDraw::OnEnable(void)
+ESGE_ObjDraw::DisableDraw(void)
 {
-  ESGE_ObjActive::OnEnable();
+  if (next)
+  {
+    SGLIB_SORTED_LIST_DELETE(ESGE_ObjDraw, list, this, next);
+  }
+}
 
-  SDL_assert(!ESGE_AddDrawCallback(layer, ESGE_OnDraw, this));
+bool
+ESGE_ObjDraw::IsEnabledDraw(void)
+{
+  return next != NULL;
 }
 
 void
-ESGE_ObjDraw::OnDisable(void)
-{
-  ESGE_ObjActive::OnDisable();
-
-  ESGE_DelDrawCallback(layer, ESGE_OnDraw, this);
-}
+ESGE_ObjDraw::OnDraw(void)
+{}

@@ -1,8 +1,9 @@
 PLATFORM = 
 #rpi_1
 BUILD    = debug
+#debug
 #release
-TARGET	 = main
+TARGET	 = ESGE_editor
 
 PLATFORM_FIELDS = $(subst _, ,$(PLATFORM))
 PLATFORM_NAME   = $(firstword $(PLATFORM_FIELDS))
@@ -62,8 +63,8 @@ SRCS_CXX = $(notdir $(wildcard ../src/*.cpp) \
 #OBJS     = $(patsubst %.c,%.o, $(SRCS_C)) \
 #					 $(patsubst %.cpp,%.o, $(SRCS_CXX))
 
-#OBJS = ESGE_objSerial.o ESGE_file.o ESGE_scene.o ESGE_mem.o
-#ESGE_objCam.o ESGE_objEditor.o ESGE_objPoint.o
+OBJS = ESGE_objSerial.o ESGE_file.o ESGE_scene.o ESGE_mem.o \
+	ESGE_display.o ESGE_objDraw.o
 
 CFLAGS += -I../include
 

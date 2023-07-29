@@ -17,14 +17,15 @@
 # elif defined(__HAIKU__)
 #   define ESGE_Exit(exitcode) _exit(exitcode)
 # elif defined(HAVE__EXIT)
-#   define ESGE_Exit(exitcode) _Exit(exitcode);
+#   define ESGE_Exit(exitcode) _Exit(exitcode)
 # else
-#   define ESGE_Exit(exitcode) _exit(exitcode);
+#   define ESGE_Exit(exitcode) _exit(exitcode)
 # endif
 
 # define ESGE_Error(fmt, ...) { \
   SDL_LogError(0, "%s:%s:%d:", SDL_FILE, SDL_FUNCTION, SDL_LINE); \
   SDL_LogError(0, (fmt), ##__VA_ARGS__); \
+  SDL_Quit(); \
   ESGE_Exit(42); \
 }
 

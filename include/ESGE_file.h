@@ -5,21 +5,17 @@
 # include "ESGE_hash.h"
 # include "ESGE_mem.h"
 
-# define ESGE_FILE_NAME_LEN 128
 
 class ESGE_File
 {
 public:
   unsigned watchers = 0;
-  char fileName[ESGE_FILE_NAME_LEN];
-  Uint64 fileID;
+  const char *fileName;
+  const Uint64 fileID;
   ESGE_File *next;
 
   ESGE_File(const char *fileName);
   virtual ~ESGE_File(void);
-
-  virtual int Load(void) = 0;
-  virtual int Save(void) = 0;
 };
 
 template<class C>
@@ -46,20 +42,9 @@ public:
 
     if (*node == NULL || (*node)->fileID != fileID)
     {
-      void *ptr;
       ESGE_File *next = *node;
 
-      if (!(ptr = SDL_malloc(sizeof(C))))
-      {
-        SDL_OutOfMemory();
-        return NULL;
-      }
-      *node = new(ptr) C(fileName);
-      if ((*node)->Load())
-      {
-        SDL_free(ptr);
-        return NULL;
-      }
+      *node = new C(fileName);
       (*node)->next = next;
     }
 
@@ -85,8 +70,7 @@ public:
       {
         ESGE_File *next = ((ESGE_File*)item)->next;
 
-        (*node)->~ESGE_File();
-        SDL_free(*node);
+        delete *node;
 
         *node = next;
       }

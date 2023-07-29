@@ -1,31 +1,17 @@
 #include "ESGE_scene.h"
 #define SGLIB_ASSERT SDL_assert
 #include "sglib.h"
-
-ESGE_ObjScene::ESGE_ObjScene(void) {}
-ESGE_ObjScene::~ESGE_ObjScene(void) {}
+#include "ESGE_error.h"
 
 
-ESGE_Scene::ESGE_Scene(const char *fileName): ESGE_File(fileName) {}
+ESGE_ObjScene::ESGE_ObjScene(void)
+{}
 
-ESGE_Scene::~ESGE_Scene(void)
-{
-  SGLIB_SORTED_LIST_MAP_ON_ELEMENTS(
-    ESGE_ObjScene,
-    objList,
-    obj,
-    next,
-    {
-      obj->~ESGE_ObjScene();
-      SDL_free(obj);
-    }
-  );
-  objList = NULL;
-}
+ESGE_ObjScene::~ESGE_ObjScene(void)
+{}
 
 
-int
-ESGE_Scene::Load(void)
+ESGE_Scene::ESGE_Scene(const char *fileName): ESGE_File(fileName)
 {
   SDL_RWops *io;
 
@@ -33,18 +19,35 @@ ESGE_Scene::Load(void)
   {
     Sint64 size, tell;
 
-    if ((size = SDL_RWsize(io)) == -1) return -1;
-    if ((tell = SDL_RWtell(io)) == -1) return -1;
+    if ((size = SDL_RWsize(io)) == -1)
+    {
+      ESGE_Error(
+        "Cannot get file \"%s\" size: %s",
+        fileName,
+        SDL_GetError()
+      );
+    }
+    if ((tell = SDL_RWtell(io)) == -1)
+      ESGE_Error("Cannot get file \"%s\" position", fileName);
 
     while (tell < size)
     {
       Uint64 typeID;
       ESGE_ObjScene *obj, *member;
 
-      if (ESGE_Read(io, &typeID))                           return -1;
-      if (!(obj = (ESGE_ObjScene*)ESGE_Type::New(typeID)))  return -1;
-      if (ESGE_Read(io, obj->instName, ESGE_INST_NAME_LEN)) return -1;
-      if (obj->OnLoad(io))                                  return -1;
+      typeID = ESGE_ReadU64(io);
+      if (!(obj = (ESGE_ObjScene*)ESGE_Type::New(typeID)))
+      {
+        ESGE_Error(
+          "Cannot create object with typeID=%" SDL_PRIu64 " from "
+          "file \"%s\": %s",
+          typeID,
+          fileName,
+          SDL_GetError()
+        );
+      }
+      ESGE_ReadStr(io, obj->instName, ESGE_INST_NAME_LEN);
+      obj->OnLoad(io);
 
       obj->sceneID = fileID;
       obj->instID = ESGE_Hash(obj->instName);
@@ -58,9 +61,9 @@ ESGE_Scene::Load(void)
         member
       );
       SDL_assert(
-        member == NULL ||
+        !member ||
         member->instID != obj->instID ||
-        "Two objects of the same typeID and instName" == NULL
+        !"Two objects of the same typeID and instName"
       );
 
       tell = SDL_RWtell(io);
@@ -68,8 +71,20 @@ ESGE_Scene::Load(void)
     SDL_RWclose(io);
   }
   else SDL_ClearError();
+}
 
-  return 0;
+ESGE_Scene::~ESGE_Scene(void)
+{
+  SGLIB_SORTED_LIST_MAP_ON_ELEMENTS(
+    ESGE_ObjScene,
+    objList,
+    obj,
+    next,
+    {
+      delete obj;
+    }
+  );
+  objList = NULL;
 }
 
 int
@@ -77,13 +92,20 @@ ESGE_Scene::Save(void)
 {
   SDL_RWops *io;
 
-  if (!(io = SDL_RWFromFile(fileName, "wb"))) return -1;
+  if (!(io = SDL_RWFromFile(fileName, "wb")))
+  {
+    return SDL_SetError(
+      "Cannot open file while saving \"%s\" scene: %s",
+      fileName,
+      SDL_GetError()
+    );
+  }
 
   for (ESGE_ObjScene *obj = objList; obj != NULL; obj = obj->next)
   {
-    if (ESGE_Write(io, obj->typeID)) return -1;
-    if (ESGE_Write(io, obj->instName, ESGE_INST_NAME_LEN)) return -1;
-    if (obj->OnSave(io)) return -1;
+    ESGE_WriteU64(io, obj->typeID);
+    ESGE_WriteStr(io, obj->instName, ESGE_INST_NAME_LEN);
+    obj->OnSave(io);
   }
   SDL_RWclose(io);
 
@@ -99,8 +121,16 @@ ESGE_Scene::AddObj(const char *typeName)
 
   SDL_assert(typeName != NULL);
 
-  if ((obj = (ESGE_ObjScene*)ESGE_Type::New(typeName)) == NULL)
+  if (!(obj = (ESGE_ObjScene*)ESGE_Type::New(typeName)))
+  {
+    SDL_SetError(
+      "Cannot add object of type \"%s\" to \"%s\" scene: %s",
+      typeName,
+      fileName,
+      SDL_GetError()
+    );
     return NULL;
+  }
 
   SDL_strlcpy(obj->instName, typeName, ESGE_INST_NAME_LEN);
   obj->instID = ESGE_Hash(obj->instName);
@@ -185,7 +215,11 @@ ESGE_Scene::GetObj(const char *instName)
   if (obj != NULL && obj->instID == instID) return obj;
   else
   {
-    SDL_SetError("Object with instName=%s not found", instName);
+    SDL_SetError(
+      "Object \"%s\" not found in \"%s\" scene",
+      instName,
+      fileName
+    );
     return NULL;
   }
 }
@@ -221,8 +255,11 @@ ESGE_Scene::RenameObj(const char *instName, const char *newInstName)
 
     if (*node != NULL && (*node)->instID == instID)
     {
-      SDL_SetError("Object with instName=%s already exist", instName);
-      return -1;
+      return SDL_SetError(
+        "Object \"%s\" already exist in \"%s\" scene",
+        instName,
+        fileName
+      );
     }
     else
     {
@@ -235,6 +272,9 @@ ESGE_Scene::RenameObj(const char *instName, const char *newInstName)
     }
   }
 
-  SDL_SetError("Object with instName=%s not found", instName);
-  return -1;
+  return SDL_SetError(
+    "Object \"%s\" not found in \"%s\" scene",
+    instName,
+    fileName
+  );
 }

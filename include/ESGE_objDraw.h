@@ -2,22 +2,26 @@
 # define ESGE_OBJ_DRAW_H_
 
 # include <SDL2/SDL.h>
-# include "ESGE_objActive.h"
-# include "ESGE_objCam.h"
-# include "ESGE_objCam.h"
 
-class ESGE_ObjDraw: public virtual ESGE_ObjActive
+class ESGE_ObjDraw
 {
+  static ESGE_ObjDraw *list;
+
+  ESGE_ObjDraw *next = NULL;
+
 public:
-  unsigned layer = 0;
+  unsigned layer;
+
+  static void Draw(void);
 
   ESGE_ObjDraw(void);
-  virtual ~ESGE_ObjDraw(void);
+  virtual ~ESGE_ObjDraw(void) = 0;
 
-  virtual void OnEnable(void) override;
-  virtual void OnDisable(void) override;
+  void EnableDraw(void);
+  void DisableDraw(void);
+  bool IsEnabledDraw(void);
 
-  virtual void OnDraw(const ESGE_ObjCam *cam) const = 0;
+  virtual void OnDraw(void);
 };
 
 #endif

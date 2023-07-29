@@ -9,8 +9,7 @@
 
 # define ESGE_INST_NAME_LEN 32
 
-class ESGE_ObjScene:
-  public ESGE_ObjSerial
+class ESGE_ObjScene: public ESGE_ObjSerial
 {
 public:
   SDL_FORCE_INLINE Uint64 Cmp(
@@ -41,8 +40,7 @@ public:
   ESGE_Scene(const char *file);
   virtual ~ESGE_Scene(void) override;
 
-  virtual int Load(void) override;
-  virtual int Save(void) override;
+  int Save(void);
 
   ESGE_ObjScene *AddObj(const char *typeName);
   void DelObj(const char *instName);
