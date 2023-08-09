@@ -161,10 +161,12 @@ ESGE_Display::WorldDrawSprite(
 {
   SDL_Rect dstrect;
 
-  dstrect.x = ESGE_Display::WorldToPixel(pos.x - ESGE_Display::cam.x);
-  dstrect.y = ESGE_Display::WorldToPixel(pos.y - ESGE_Display::cam.y);
-  dstrect.w = sprite->clip.w;// * sprite->scale;
-  dstrect.h = sprite->clip.h;// * sprite->scale;
+  dstrect.x = pos.x;
+  dstrect.y = pos.y;
+  dstrect = WorldToDisplayRect(dstrect);
+
+  dstrect.w = sprite->clip.w * sprite->scale;
+  dstrect.h = sprite->clip.h * sprite->scale;
 
   if (
     SDL_RenderCopyEx(

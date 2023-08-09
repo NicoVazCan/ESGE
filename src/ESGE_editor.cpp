@@ -172,6 +172,9 @@ RunShell(SDL_UNUSED void *userdata)
 }
 
 
+#define ESGE_EDITOR_CAM_VEL 1
+#define ESGE_EDITOR_ZOOM 1.01f
+
 void
 UpdateEditor(void)
 {
@@ -180,13 +183,37 @@ UpdateEditor(void)
 	keys = SDL_GetKeyboardState(NULL);
 
 	if (keys[SDL_SCANCODE_UP])
-		ESGE_Display::cam.y -= ESGE_CAM_SCALE;
+		ESGE_Display::cam.y -= ESGE_EDITOR_CAM_VEL;
 	if (keys[SDL_SCANCODE_DOWN])
-		ESGE_Display::cam.y += ESGE_CAM_SCALE;
+		ESGE_Display::cam.y += ESGE_EDITOR_CAM_VEL;
 	if (keys[SDL_SCANCODE_LEFT])
-		ESGE_Display::cam.x -= ESGE_CAM_SCALE;
+		ESGE_Display::cam.x -= ESGE_EDITOR_CAM_VEL;
 	if (keys[SDL_SCANCODE_RIGHT])
-		ESGE_Display::cam.x += ESGE_CAM_SCALE;
+		ESGE_Display::cam.x += ESGE_EDITOR_CAM_VEL;
+
+	if (keys[SDL_SCANCODE_KP_PLUS])
+	{
+		float scaleX, scaleY;
+
+		SDL_RenderGetScale(ESGE_Display::renderer, &scaleX, &scaleY);
+
+		scaleX *= ESGE_EDITOR_ZOOM;
+		scaleY *= ESGE_EDITOR_ZOOM;
+
+		SDL_RenderSetScale(ESGE_Display::renderer, scaleX, scaleY);
+
+	}
+	if (keys[SDL_SCANCODE_KP_MINUS])
+	{
+		float scaleX, scaleY;
+
+		SDL_RenderGetScale(ESGE_Display::renderer, &scaleX, &scaleY);
+
+		scaleX /= ESGE_EDITOR_ZOOM;
+		scaleY /= ESGE_EDITOR_ZOOM;
+
+		SDL_RenderSetScale(ESGE_Display::renderer, scaleX, scaleY);
+	}
 
 	if (keys[SDL_SCANCODE_SPACE])
 	{
@@ -200,8 +227,8 @@ UpdateEditor(void)
 			float scaleX, scaleY;
 
 			SDL_RenderGetScale(ESGE_Display::renderer, &scaleX, &scaleY);
-			ESGE_Display::cam.x -= x * ESGE_CAM_SCALE / scaleX;
-			ESGE_Display::cam.y -= y * ESGE_CAM_SCALE / scaleY;
+			ESGE_Display::cam.x -= SDL_lroundf(((float)x) / scaleX);
+			ESGE_Display::cam.y -= SDL_lroundf(((float)y) / scaleY);
 		}
 	}
 }

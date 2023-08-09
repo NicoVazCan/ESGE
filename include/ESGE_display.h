@@ -4,8 +4,6 @@
 # include <SDL2/SDL.h>
 
 
-# define ESGE_CAM_SCALE 10
-
 struct ESGE_Sprite
 {
   SDL_Texture *texture;
@@ -28,44 +26,19 @@ public:
   static void Update(void);
   static void Quit(void);
 
-  SDL_FORCE_INLINE int
-  PixelToWorld(int pixel)
-  {
-    return pixel*ESGE_CAM_SCALE;
-  }
-  SDL_FORCE_INLINE int
-  SubpixelToWorld(float subpixel)
-  {
-    return subpixel*((float)ESGE_CAM_SCALE);
-  }
-  
-  SDL_FORCE_INLINE int
-  WorldToPixel(int world)
-  {
-    return (
-      (world + ESGE_CAM_SCALE/2 - (ESGE_CAM_SCALE-1)*(world < 0)) /
-      ESGE_CAM_SCALE
-    );
-  }
-  SDL_FORCE_INLINE float
-  WorldToSubpixel(int world)
-  {
-    return ((float)world)/((float)ESGE_CAM_SCALE);
-  }
-
   SDL_FORCE_INLINE SDL_Point
   WorldToDisplayPoint(SDL_Point pos)
   {
-    pos.x = ESGE_Display::WorldToPixel(pos.x - cam.x);
-    pos.y = ESGE_Display::WorldToPixel(pos.y - cam.y);
+    pos.x = pos.x - cam.x;
+    pos.y = pos.y - cam.y;
 
     return pos;
   }
   SDL_FORCE_INLINE SDL_Point
   DisplayToWorldPoint(SDL_Point pos)
   {
-    pos.x = cam.x + ESGE_Display::PixelToWorld(pos.x);
-    pos.y = cam.y + ESGE_Display::PixelToWorld(pos.y);
+    pos.x = cam.x + pos.x;
+    pos.y = cam.y + pos.y;
 
     return pos;
   }
@@ -73,20 +46,16 @@ public:
   SDL_FORCE_INLINE SDL_Rect
   WorldToDisplayRect(SDL_Rect rect)
   {
-    rect.x = ESGE_Display::WorldToPixel(rect.x - cam.x);
-    rect.y = ESGE_Display::WorldToPixel(rect.y - cam.y);
-    rect.w = ESGE_Display::WorldToPixel(rect.w);
-    rect.h = ESGE_Display::WorldToPixel(rect.h);
+    rect.x = rect.x - cam.x;
+    rect.y = rect.y - cam.y;
 
     return rect;
   }
   SDL_FORCE_INLINE SDL_Rect
   DisplayToWorldRect(SDL_Rect rect)
   {
-    rect.x = cam.x + ESGE_Display::PixelToWorld(rect.x);
-    rect.y = cam.y + ESGE_Display::PixelToWorld(rect.y);
-    rect.w = ESGE_Display::PixelToWorld(rect.w);
-    rect.h = ESGE_Display::PixelToWorld(rect.h);
+    rect.x = cam.x + rect.x;
+    rect.y = cam.y + rect.y;
 
     return rect;
   }

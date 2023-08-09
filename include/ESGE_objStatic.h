@@ -3,8 +3,8 @@
 
 # include "ESGE_objCollider.h"
 
-# define ESGE_OBJ_STATIC_W 160
-# define ESGE_OBJ_STATIC_H 160
+# define ESGE_OBJ_STATIC_W 16
+# define ESGE_OBJ_STATIC_H 16
 
 
 class ESGE_ObjStatic: public ESGE_ObjCollider

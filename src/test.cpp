@@ -93,8 +93,7 @@ public:
 
 ESGE_ADD_TYPE(ObjTest)
 
-#define PLAYER_ACC 2
-#define PLAYER_VEL 20
+#define PLAYER_VEL 2
 #define PLAYER_SS "player.sprite.bin"
 
 class ObjPlayer:
@@ -104,7 +103,7 @@ class ObjPlayer:
   public ESGE_ObjDraw
 {
 public:
-  SDL_Point vel = {0, 0}, acc = {0, 0};
+  SDL_Point vel = {0, 0};
   ESGE_Spritesheet *spritesheet;
 
   ObjPlayer(void)
@@ -112,8 +111,8 @@ public:
     layer = 1;
     offsetSize.x = 0;
     offsetSize.y = 0;
-    offsetSize.w = 160;
-    offsetSize.h = 320;
+    offsetSize.w = 16;
+    offsetSize.h = 32;
     spritesheet = ESGE_FileMngr<ESGE_Spritesheet>::Watch(PLAYER_SS);
   }
 
@@ -153,65 +152,18 @@ public:
 
     keys = SDL_GetKeyboardState(NULL);
 
-    vel.x += acc.x;
-    vel.y += acc.y;
-
-    if (keys[SDL_SCANCODE_UP] && !keys[SDL_SCANCODE_DOWN])
-    {
-      if (vel.y < -PLAYER_VEL)
-      {
-        vel.y = -PLAYER_VEL;
-        acc.y = 0;
-      }
-      else acc.y = -PLAYER_ACC;
-    }
-    else if (!keys[SDL_SCANCODE_UP] && keys[SDL_SCANCODE_DOWN])
-    {
-      if (vel.y > PLAYER_VEL)
-      {
-        vel.y = PLAYER_VEL;
-        acc.y = 0;
-      }
-      else acc.y = PLAYER_ACC;
-    }
-    else
-    {
-      if (vel.y == 0)
-      {
-        vel.y = 0;
-        acc.y = 0;
-      }
-      else if (vel.y > 0) acc.y = -PLAYER_ACC;
-      else                acc.y = PLAYER_ACC;
-    }
       
     if (keys[SDL_SCANCODE_LEFT] && !keys[SDL_SCANCODE_RIGHT])
     {
-      if (vel.x < -PLAYER_VEL)
-      {
-        vel.x = -PLAYER_VEL;
-        acc.x = 0;
-      }
-      else acc.x = -PLAYER_ACC;
+      vel.x = -PLAYER_VEL;
     }
     else if (!keys[SDL_SCANCODE_LEFT] && keys[SDL_SCANCODE_RIGHT])
     {
-      if (vel.x > PLAYER_VEL)
-      {
-        vel.x = PLAYER_VEL;
-        acc.x = 0;
-      }
-      else acc.x = PLAYER_ACC;
+      vel.x = PLAYER_VEL;
     }
     else
     {
-      if (vel.x == 0)
-      {
-        vel.x = 0;
-        acc.x = 0;
-      }
-      else if (vel.x > 0) acc.x = -PLAYER_ACC;
-      else                acc.x = PLAYER_ACC;
+      vel.x = 0;
     }
 
     pos.x += vel.x;
@@ -222,8 +174,8 @@ public:
   {
     ESGE_ObjDynamic::OnPhysic();
 
-    ESGE_Display::cam.x = pos.x - 1200;
-    ESGE_Display::cam.y = pos.y - 560;
+    ESGE_Display::cam.x = pos.x - 128 + 8;
+    ESGE_Display::cam.y = pos.y - 72 + 16;
   }
 
   virtual void OnDraw(void) override
