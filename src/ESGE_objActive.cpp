@@ -1,7 +1,10 @@
 #include "ESGE_objActive.h"
 
-ESGE_ObjActive::ESGE_ObjActive()  {}
-ESGE_ObjActive::~ESGE_ObjActive() {}
+ESGE_ObjActive::ESGE_ObjActive(void)
+{}
+
+ESGE_ObjActive::~ESGE_ObjActive(void)
+{}
 
 void
 ESGE_ObjActive::OnEnable(void)

@@ -3,13 +3,14 @@
 
 # include <SDL2/SDL.h>
 # include "ESGE_file.h"
-# include "ESGE_hash.h"
 # include "ESGE_objSerial.h"
-# include "ESGE_objPoint.h"
+# include "ESGE_objActive.h"
 
 # define ESGE_INST_NAME_LEN 32
 
-class ESGE_ObjScene: public ESGE_ObjSerial
+class ESGE_ObjScene:
+  public ESGE_ObjSerial,
+  public virtual ESGE_ObjActive
 {
 public:
   SDL_FORCE_INLINE Uint64 Cmp(
@@ -30,6 +31,9 @@ public:
 
   ESGE_ObjScene(void);
   virtual ~ESGE_ObjScene(void) = 0;
+
+  virtual void OnEditorInit(void);
+  virtual void OnEditorQuit(void);
 };
 
 class ESGE_Scene: public ESGE_File
@@ -40,6 +44,11 @@ public:
   ESGE_Scene(const char *file);
   virtual ~ESGE_Scene(void) override;
 
+  void EditorInit(void);
+  void EditorQuit(void);
+
+  void Enable(void);
+  void Disable(void);
   int Save(void);
 
   ESGE_ObjScene *AddObj(const char *typeName);

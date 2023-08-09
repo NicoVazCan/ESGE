@@ -1,13 +1,25 @@
 #include "ESGE_scene.h"
+
 #define SGLIB_ASSERT SDL_assert
 #include "sglib.h"
+#include "ESGE_hash.h"
 #include "ESGE_error.h"
+#include "ESGE_io.h"
 
 
 ESGE_ObjScene::ESGE_ObjScene(void)
 {}
 
 ESGE_ObjScene::~ESGE_ObjScene(void)
+{}
+
+
+void
+ESGE_ObjScene::OnEditorInit(void)
+{}
+
+void
+ESGE_ObjScene::OnEditorQuit(void)
 {}
 
 
@@ -47,7 +59,7 @@ ESGE_Scene::ESGE_Scene(const char *fileName): ESGE_File(fileName)
         );
       }
       ESGE_ReadStr(io, obj->instName, ESGE_INST_NAME_LEN);
-      obj->OnLoad(io);
+      obj->Load(io);
 
       obj->sceneID = fileID;
       obj->instID = ESGE_Hash(obj->instName);
@@ -87,6 +99,35 @@ ESGE_Scene::~ESGE_Scene(void)
   objList = NULL;
 }
 
+
+void
+ESGE_Scene::EditorInit(void)
+{
+  for (ESGE_ObjScene *obj = objList; obj != NULL; obj = obj->next)
+    obj->OnEditorInit();
+}
+
+void
+ESGE_Scene::EditorQuit(void)
+{
+  for (ESGE_ObjScene *obj = objList; obj != NULL; obj = obj->next)
+    obj->OnEditorQuit();
+}
+
+void
+ESGE_Scene::Enable(void)
+{
+  for (ESGE_ObjScene *obj = objList; obj != NULL; obj = obj->next)
+    obj->OnEnable();
+}
+
+void
+ESGE_Scene::Disable(void)
+{
+  for (ESGE_ObjScene *obj = objList; obj != NULL; obj = obj->next)
+    obj->OnDisable();
+}
+
 int
 ESGE_Scene::Save(void)
 {
@@ -105,7 +146,7 @@ ESGE_Scene::Save(void)
   {
     ESGE_WriteU64(io, obj->typeID);
     ESGE_WriteStr(io, obj->instName, ESGE_INST_NAME_LEN);
-    obj->OnSave(io);
+    obj->Save(io);
   }
   SDL_RWclose(io);
 

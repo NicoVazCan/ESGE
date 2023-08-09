@@ -3,7 +3,6 @@
 
 # include <SDL2/SDL.h>
 # include "ESGE_hash.h"
-# include "ESGE_mem.h"
 
 
 class ESGE_File

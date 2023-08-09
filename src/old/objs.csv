@@ -1,6 +1,0 @@
-class name,typeID
-ObjDisplay,1
-ObjRoomMngr,2
-ObjCam,3
-ObjPlayer,4
-ObjTile,5

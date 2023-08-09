@@ -1,7 +1,6 @@
 #ifndef ESGE_OBJ_ACTIVE_H_
 # define ESGE_OBJ_ACTIVE_H_
 
-# include <SDL2/SDL.h>
 
 class ESGE_ObjActive
 {

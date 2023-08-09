@@ -1,4 +1,5 @@
 #include "ESGE_file.h"
+
 #include "ESGE_error.h"
 
 ESGE_File::ESGE_File(const char *fileName):

@@ -1,16 +1,16 @@
 #ifndef ESGE_OBJ_DRAW_H_
 # define ESGE_OBJ_DRAW_H_
 
-# include <SDL2/SDL.h>
 
 class ESGE_ObjDraw
 {
   static ESGE_ObjDraw *list;
 
-  ESGE_ObjDraw *next = NULL;
+  ESGE_ObjDraw *next;
+  bool enabledDraw = false;
 
 public:
-  unsigned layer;
+  int layer;
 
   static void Draw(void);
 
