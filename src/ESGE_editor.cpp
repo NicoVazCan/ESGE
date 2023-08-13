@@ -41,7 +41,6 @@ RunShell(SDL_UNUSED void *userdata)
   			puts(SDL_GetError());
   			SDL_ClearError();
   		}
-  		obj->OnEditorInit();
   	}
   	else if (!SDL_strcmp(cmd, "delete"))
   	{
@@ -87,17 +86,16 @@ RunShell(SDL_UNUSED void *userdata)
   		}
   		else
   		{
-  			const ESGE_Field *fields;
-  			size_t nFields;
+  			const ESGE_Type *type;
 
-  			fields = obj->GetFields(&nFields);
+  			type = ESGE_Type::Get(obj->typeID);
 
-  			for (size_t i = 0; i < nFields; ++i)
+  			for (size_t i = 0; i < type->nFields; ++i)
   			{
   				char buf[ESGE_FIELD_VALUE_LEN];
   					
-					fields[i].GetValue(buf, ESGE_FIELD_VALUE_LEN);
-					printf("%s = %s\n", fields[i].name, buf);
+					type->fields[i].GetValue(obj, buf, ESGE_FIELD_VALUE_LEN);
+					printf("%s = %s\n", type->fields[i].name, buf);
   			}
   		}
   	}
@@ -119,25 +117,30 @@ RunShell(SDL_UNUSED void *userdata)
   		{
   			while ((fieldName = SDL_strtokr(NULL, delim, &saveptr)))
   			{
-  				const ESGE_Field *fields;
-  				size_t nFields, i = 0;
+	  			const ESGE_Type *type;
+	  			const ESGE_Field *field = NULL;
+	  			Uint64 fieldID;
 
-  				if (!(fieldValue = SDL_strtokr(NULL, delim, &saveptr)))
+	  			if (!(fieldValue = SDL_strtokr(NULL, delim, &saveptr)))
   				{
-  					printf("Missing field %s value\n", fieldName);
+  					printf("Missing field \"%s\" value\n", fieldName);
   					break;
   				}
-  				fields = obj->GetFields(&nFields);
 
-  				for (; i < nFields; ++i)
-  				{
-  					if (!SDL_strcmp(fields[i].name, fieldName))
+	  			type 		= ESGE_Type::Get(obj->typeID);
+	  			fieldID = ESGE_Hash(fieldName);
+
+	  			for (size_t i = 0; i < type->nFields; ++i)
+	  			{
+	  				if (type->fields[i].id == fieldID)
   					{
-  						fields[i].SetValue(fieldValue);
+  						field = type->fields + i;
   						break;
   					}
-  				}
-  				if (i == nFields)	printf("Field %s not found\n", fieldName);
+	  			}
+
+	  			if (field) field->SetValue(obj, fieldValue);
+	  			else 			 printf("Field \"%s\" not found\n", fieldName);
   			}
   		}
   	}
@@ -277,7 +280,6 @@ main(int argc, char *argv[])
 		SDL_ClearError();
 		return -1;
 	}
-	scene->EditorInit();
 	shell = SDL_CreateThread(RunShell, "shell", NULL);
 	ticks = SDL_GetTicks();
 
@@ -293,7 +295,6 @@ main(int argc, char *argv[])
 	}
 
 	SDL_WaitThread(shell, NULL);
-	scene->EditorQuit();
 	ESGE_FileMngr<ESGE_Scene>::Leave(scene);
 	ESGE_Display::Quit();
 	SDL_Quit();

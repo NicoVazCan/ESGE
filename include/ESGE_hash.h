@@ -3,23 +3,14 @@
 
 # include <SDL2/SDL.h>
 
-# ifdef __cplusplus
-extern "C" {
-# endif
+#define ESGE_Hash(STR) ESGE_RecHash(STR, 5381)
 
-SDL_FORCE_INLINE Uint64
-ESGE_Hash(const char *str)
+static constexpr Uint64
+ESGE_RecHash(const char *str, Uint64 hash)
 {
-  Uint64 hash = 5381;
-  int c;
-
-  while ((c = *str++)) hash = ((hash << 5) + hash) + c;
-
-  return hash;
+  return (
+    *str ? ESGE_RecHash(str+1, ((hash << 5) + hash) + *str) : hash
+  );
 }
-
-# ifdef __cplusplus
-}
-# endif
 
 #endif

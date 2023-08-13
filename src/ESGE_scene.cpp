@@ -13,13 +13,23 @@ ESGE_ObjScene::ESGE_ObjScene(void)
 ESGE_ObjScene::~ESGE_ObjScene(void)
 {}
 
-
+#ifdef ESGE_EDITOR
 void
 ESGE_ObjScene::OnEditorInit(void)
 {}
 
 void
 ESGE_ObjScene::OnEditorQuit(void)
+{}
+#endif
+
+
+void
+ESGE_ObjScene::OnInit(void)
+{}
+
+void
+ESGE_ObjScene::OnQuit(void)
 {}
 
 
@@ -45,24 +55,29 @@ ESGE_Scene::ESGE_Scene(const char *fileName): ESGE_File(fileName)
     while (tell < size)
     {
       Uint64 typeID;
+      const ESGE_Type *type;
       ESGE_ObjScene *obj, *member;
 
       typeID = ESGE_ReadU64(io);
-      if (!(obj = (ESGE_ObjScene*)ESGE_Type::New(typeID)))
+
+      if (!(type = ESGE_Type::Get(typeID)))
       {
         ESGE_Error(
-          "Cannot create object with typeID=%" SDL_PRIu64 " from "
+          "Cannot find type of typeID=%" SDL_PRIu64 " from "
           "file \"%s\": %s",
           typeID,
           fileName,
           SDL_GetError()
         );
       }
-      ESGE_ReadStr(io, obj->instName, ESGE_INST_NAME_LEN);
-      obj->Load(io);
+      obj = (ESGE_ObjScene*)type->New();
 
       obj->sceneID = fileID;
-      obj->instID = ESGE_Hash(obj->instName);
+      obj->typeID  = typeID;
+      ESGE_ReadStr(io, obj->instName, ESGE_INST_NAME_LEN);
+      obj->instID  = ESGE_Hash(obj->instName);
+
+      obj->Load(io);
 
       SGLIB_SORTED_LIST_ADD_IF_NOT_MEMBER(
         ESGE_ObjScene,
@@ -81,12 +96,30 @@ ESGE_Scene::ESGE_Scene(const char *fileName): ESGE_File(fileName)
       tell = SDL_RWtell(io);
     }
     SDL_RWclose(io);
+
+
+    for (ESGE_ObjScene *obj = objList; obj != NULL; obj = obj->next)
+    {
+#ifdef ESGE_EDITOR
+      obj->OnEditorInit();
+#else
+      obj->OnInit();
+#endif
+    }
   }
   else SDL_ClearError();
 }
 
 ESGE_Scene::~ESGE_Scene(void)
 {
+  for (ESGE_ObjScene *obj = objList; obj != NULL; obj = obj->next)
+  {
+#ifdef ESGE_EDITOR
+    obj->OnEditorQuit();
+#else
+    obj->OnQuit();
+#endif
+  }
   SGLIB_SORTED_LIST_MAP_ON_ELEMENTS(
     ESGE_ObjScene,
     objList,
@@ -99,20 +132,6 @@ ESGE_Scene::~ESGE_Scene(void)
   objList = NULL;
 }
 
-
-void
-ESGE_Scene::EditorInit(void)
-{
-  for (ESGE_ObjScene *obj = objList; obj != NULL; obj = obj->next)
-    obj->OnEditorInit();
-}
-
-void
-ESGE_Scene::EditorQuit(void)
-{
-  for (ESGE_ObjScene *obj = objList; obj != NULL; obj = obj->next)
-    obj->OnEditorQuit();
-}
 
 void
 ESGE_Scene::Enable(void)
@@ -157,25 +176,29 @@ ESGE_Scene::Save(void)
 ESGE_ObjScene*
 ESGE_Scene::AddObj(const char *typeName)
 {
+  const ESGE_Type *type;
   ESGE_ObjScene *obj, *member;
-  Uint64 instCnt = 0;
+  Uint64 typeID, instCnt = 0;
 
   SDL_assert(typeName != NULL);
 
-  if (!(obj = (ESGE_ObjScene*)ESGE_Type::New(typeName)))
+  typeID = ESGE_Hash(typeName);
+
+  if (!(type = ESGE_Type::Get(typeID)))
   {
     SDL_SetError(
-      "Cannot add object of type \"%s\" to \"%s\" scene: %s",
+      "Cannot find type \"%s\" in \"%s\" scene",
       typeName,
-      fileName,
-      SDL_GetError()
+      fileName
     );
     return NULL;
   }
+  obj = (ESGE_ObjScene*)type->New();
 
+  obj->sceneID = fileID;
+  obj->typeID  = typeID;
   SDL_strlcpy(obj->instName, typeName, ESGE_INST_NAME_LEN);
   obj->instID = ESGE_Hash(obj->instName);
-  obj->sceneID = fileID;
 
   SGLIB_SORTED_LIST_ADD_IF_NOT_MEMBER(
     ESGE_ObjScene,
@@ -206,6 +229,11 @@ ESGE_Scene::AddObj(const char *typeName)
       member
     );
   }
+#ifdef ESGE_EDITOR
+  obj->OnEditorInit();
+#else
+  obj->OnInit();
+#endif
 
   return obj;
 }
@@ -230,9 +258,13 @@ ESGE_Scene::DelObj(const char *instName)
   {
     ESGE_ObjScene *next = (*node)->next;
 
-    (*node)->~ESGE_ObjScene();
-    SDL_free(*node);
+#ifdef ESGE_EDITOR
+    (*node)->OnEditorQuit();
+#else
+    (*node)->OnQuit();
+#endif
 
+    delete *node;
     *node = next;
   }
 }
@@ -253,7 +285,10 @@ ESGE_Scene::GetObj(const char *instName)
     obj = obj->next
   );
 
-  if (obj != NULL && obj->instID == instID) return obj;
+  if (obj != NULL && obj->instID == instID)
+  {
+    return obj;
+  }
   else
   {
     SDL_SetError(
@@ -265,6 +300,7 @@ ESGE_Scene::GetObj(const char *instName)
   }
 }
 
+#ifdef ESGE_EDITOR
 int
 ESGE_Scene::RenameObj(const char *instName, const char *newInstName)
 {
@@ -319,3 +355,4 @@ ESGE_Scene::RenameObj(const char *instName, const char *newInstName)
     fileName
   );
 }
+#endif

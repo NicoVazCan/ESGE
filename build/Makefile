@@ -1,23 +1,20 @@
-PLATFORM = 
-#rpi_1
-BUILD    = debug
+PLATFORM_NAME = 
+PLATFORM_VER  =
+#rpi
+BUILD    			= debug
 #debug
 #release
 
-PLATFORM_FIELDS = $(subst _, ,$(PLATFORM))
-PLATFORM_NAME   = $(firstword $(PLATFORM_FIELDS))
-PLATFORM_VER    = $(lastword $(PLATFORM_FIELDS))
-
-ifeq ($(PLATFORM_NAME),rpi)
-	ifeq ($(PLATFORM_VER),1)
+ifeq ($(PLATFORM_NAME), rpi)
+	ifeq (		 $(PLATFORM_VER), 1)
 		CFLAGS += -mcpu=arm1176jzf-s \
 			-mfloat-abi=hard \
 			-mfpu=vfp 
-	else ifeq ($(PLATFORM_VER),2)
+	else ifeq ($(PLATFORM_VER), 2)
 		CFLAGS += -mcpu=cortex-a7 \
 			-mfloat-abi=hard \
 			-mfpu=neon-vfpv4
-	else ifeq ($(PLATFORM_VER),3)
+	else ifeq ($(PLATFORM_VER), 3)
 		CFLAGS += -mcpu=cortex-a53 \
 			-mfloat-abi=hard \
 			-mfpu=neon-fp-armv8 \
@@ -48,27 +45,7 @@ else ifeq ($(BUILD), debug)
 	CFLAGS += -Wall -Wextra -pedantic -ggdb3
 endif
 
-vpath %.h ../include
-vpath %.c ../src:../src/util:../src/test:../src/impl
-vpath %.cpp ../src:../src/util:../src/test:../src/impl
-
-HDRS		 = $(wildcard ../include/*.h)
-
-#SRCS_C   = $(notdir $(wildcard ../src/util/*.c))
-
-SRCS_CXX = $(notdir $(wildcard ../src/*.cpp) \
-					 $(wildcard ../src/impl/*.cpp))
-
-#OBJS     = $(patsubst %.c,%.o, $(SRCS_C)) \
-#					 $(patsubst %.cpp,%.o, $(SRCS_CXX))
-
-OBJS = ESGE_io.o ESGE_stdlib.o ESGE_objSerial.o ESGE_file.o \
-	ESGE_scene.o ESGE_display.o ESGE_objDraw.o ESGE_objActive.o \
-	ESGE_objEvent.o ESGE_objUpdate.o ESGE_objPoint.o \
-	ESGE_objCollider.o ESGE_spritesheet.o ESGE_objPhysic.o \
-	ESGE_objStatic.o ESGE_objDynamic.o test.o
-
-CFLAGS += -I../include
+CFLAGS += -I../include 
 
 CFLAGS  += $(shell PKG_CONFIG_SYSROOT_DIR=$(SYSROOT) \
 	pkg-config --cflags          sdl2)
@@ -81,19 +58,39 @@ LDLIBS  += $(shell PKG_CONFIG_SYSROOT_DIR=$(SYSROOT) \
 
 CXXFLAGS += -std=c++11 -nostdinc++ -fno-exceptions -fno-rtti $(CFLAGS)
 
-all: ESGE_editor ESGE_game
 
-ESGE_editor: ESGE_editor.o $(OBJS)
-	$(CC) $(LDFLAGS) ESGE_editor.o $(OBJS) $(LDLIBS) -o ESGE_editor
+vpath %.h 	../include
+vpath %.c 	../src
+vpath %.cpp ../src
 
-ESGE_game: ESGE_game.o $(OBJS)
-	$(CC) $(LDFLAGS) ESGE_game.o $(OBJS) $(LDLIBS) -o ESGE_game
+OBJS_GAME = \
+	ESGE_game.o \
+	ESGE_io.o ESGE_stdlib.o ESGE_objSerial.o ESGE_file.o \
+	ESGE_scene.o ESGE_display.o ESGE_objDraw.o ESGE_objActive.o \
+	ESGE_objEvent.o ESGE_objUpdate.o ESGE_objPoint.o \
+	ESGE_objCollider.o ESGE_spritesheet.o ESGE_objPhysic.o \
+	ESGE_objStatic.o ESGE_objDynamic.o ESGE_objDrawSprite.o
+	
+OBJS_EDIT = \
+	ESGE_editor_edit.o \
+	ESGE_io.o ESGE_stdlib.o ESGE_objSerial.o ESGE_file.o \
+	ESGE_scene_edit.o ESGE_display.o ESGE_objDraw.o ESGE_objActive.o \
+	ESGE_objEvent.o ESGE_objUpdate.o ESGE_objPoint.o \
+	ESGE_objCollider.o ESGE_spritesheet.o ESGE_objPhysic.o \
+	ESGE_objStatic.o ESGE_objDynamic.o ESGE_objDrawSprite.o
 
+
+all: libESGE_GAME.a libESGE_EDIT.a
+
+libESGE_GAME.a: libESGE_GAME.a($(OBJS_GAME))
+libESGE_EDIT.a: libESGE_EDIT.a($(OBJS_EDIT))
+
+ESGE_game.o: ESGE_file.o ESGE_scene.o ESGE_display.o \
+	ESGE_objEvent.o ESGE_objUpdate.o ESGE_objPhysic.o ESGE_objDraw.o
 ESGE_io.o: ESGE_io.h
-
 ESGE_objSerial.o: ESGE_objSerial.h ESGE_io.o ESGE_stdlib.o
 ESGE_file.o: ESGE_file.h ESGE_stdlib.o ESGE_stdlib.o
-ESGE_scene.o: ESGE_io.h ESGE_file.h ESGE_stdlib.o ESGE_stdlib.o
+ESGE_scene.o: ESGE_io.h ESGE_file.h ESGE_stdlib.o
 ESGE_display.o: ESGE_display.h ESGE_stdlib.o
 ESGE_objDraw.o: ESGE_objDraw.h ESGE_stdlib.o
 ESGE_objActive.o: ESGE_objActive.h ESGE_stdlib.o
@@ -105,6 +102,17 @@ ESGE_spritesheet.o: ESGE_spritesheet.h ESGE_file.o ESGE_stdlib.o
 ESGE_objPhysic.o: ESGE_objPhysic.h ESGE_stdlib.o
 ESGE_objStatic.o: ESGE_objStatic.h ESGE_stdlib.o
 ESGE_objDynamic.o: ESGE_objDynamic.h ESGE_stdlib.o
+ESGE_objDrawSprite.o: ESGE_objDrawSprite.h ESGE_stdlib.o
+
+%_edit.o : %.c
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) -DESGE_EDITOR $< -o $@
+%_edit.o : %.cpp
+	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) -DESGE_EDITOR $< -o $@
+
+ESGE_editor_edit.o: ESGE_file.o ESGE_scene_edit.o ESGE_display.o \
+	ESGE_objDraw.o
+ESGE_scene_edit.o: ESGE_io.h ESGE_file.h ESGE_stdlib.o \
+	ESGE_objSerial.o
 
 clean:
 	$(RM) *.o

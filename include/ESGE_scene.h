@@ -32,8 +32,13 @@ public:
   ESGE_ObjScene(void);
   virtual ~ESGE_ObjScene(void) = 0;
 
+# ifdef ESGE_EDITOR
   virtual void OnEditorInit(void);
   virtual void OnEditorQuit(void);
+# endif
+
+  virtual void OnInit(void);
+  virtual void OnQuit(void);
 };
 
 class ESGE_Scene: public ESGE_File
@@ -44,20 +49,20 @@ public:
   ESGE_Scene(const char *file);
   virtual ~ESGE_Scene(void) override;
 
-  void EditorInit(void);
-  void EditorQuit(void);
-
   void Enable(void);
   void Disable(void);
+
   int Save(void);
 
   ESGE_ObjScene *AddObj(const char *typeName);
   void DelObj(const char *instName);
   ESGE_ObjScene *GetObj(const char *instName);
+# ifdef ESGE_EDITOR
   int RenameObj(
     const char *instName,
     const char *newInstName
   );
+# endif
 };
 
 #endif
