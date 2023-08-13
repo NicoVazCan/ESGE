@@ -194,13 +194,9 @@ ESGE_WriteFloat(SDL_RWops *io, float value)
 }
 
 void
-ESGE_WriteStr(SDL_RWops *io, const char *str, size_t n)
+ESGE_WriteStr(SDL_RWops *io, const char *str)
 {
   SDL_assert(str);
 
-  for (const char *c = str; n > 0; --n)
-  {
-    ESGE_WriteU8(io, *(Uint8*)c);
-    if (*c++ == '\0') return;
-  }
+  while (*str != '\0') ESGE_WriteU8(io, *(Uint8*)str++);
 }

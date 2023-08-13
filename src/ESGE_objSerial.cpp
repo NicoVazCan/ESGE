@@ -9,23 +9,24 @@
 void
 ESGE_Field::GetValue(void *obj, char *value, size_t len) const
 {
-  const void *data;
-
-  data = get(obj);
-
   switch (type)
   {
   case ESGE_Field::C:
-    if (!SDL_snprintf(value, len, "%d", (Sint8)*(char*)data))
+    if (SDL_snprintf(value, len, "%d", (Sint8)valueC.get(obj)) == -1)
       ESGE_Error("Cannot convert field \"%s\" to string", name);
     break;
   case ESGE_Field::I:
-    if (!SDL_snprintf(value, len, "%d", (Sint16)*(int*)data))
+    if (SDL_snprintf(value, len, "%d", (Sint16)valueI.get(obj)) == -1)
       ESGE_Error("Cannot convert field \"%s\" to string", name);
     break;
   case ESGE_Field::L:
     if (
-      !SDL_snprintf(value, len, "%" SDL_PRIs32, (Sint32)*(long*)data)
+      SDL_snprintf(
+        value,
+        len,
+        "%" SDL_PRIs32,
+        (Sint32)valueL.get(obj)
+      ) == -1
     )
       ESGE_Error("Cannot convert field \"%s\" to string", name);
     break;
@@ -35,21 +36,23 @@ ESGE_Field::GetValue(void *obj, char *value, size_t len) const
         value,
         len,
         "%" SDL_PRIs64,
-        (Sint64)*(long long*)data
-      )
+        (Sint64)valueLL.get(obj)
+      ) == -1
     )
       ESGE_Error("Cannot convert field \"%s\" to string", name);
     break;
   case ESGE_Field::F:
-    if (SDL_snprintf(value, len, "%f", *(float*)data))
+    if (SDL_snprintf(value, len, "%f", valueF.get(obj)) == -1)
       ESGE_Error("Cannot convert field \"%s\" to string", name);
     break;
   case ESGE_Field::S:
-    if (
-      SDL_snprintf(value, len, "\"%s\"", (char*)data) !=
-      2 + (int)SDL_strlen((char*)data)
-    )
-      ESGE_Error("Cannot convert field \"%s\" to string", name);
+    size_t n;
+
+    valueS.get(obj, value+1, len-2);
+
+    n = SDL_strlen(value+1);
+    value[0] = value[n+1] = '\"';
+    value[n+2] = '\0';
     break;
   default:
     SDL_assert(!"unrecognised type");
@@ -65,42 +68,22 @@ ESGE_Field::SetValue(void *obj, const char *value) const
     switch (type)
     {
     case ESGE_Field::C:
-      {
-        char var;
-        var = SDL_atoi(value);
-        set(obj, &var);
-      }
+      valueC.set(obj, SDL_atoi(value));
       break;
     case ESGE_Field::I:
-      {
-        int var;
-        var = SDL_atoi(value);
-        set(obj, &var);
-      }
+      valueI.set(obj, SDL_atoi(value));
       break;
     case ESGE_Field::L:
-      {
-        long var;
-        var = SDL_strtol(value, NULL, 10);
-        set(obj, &var);
-      }
+      valueL.set(obj, SDL_strtol(value, NULL, 10));
       break;
     case ESGE_Field::LL:
-      {
-        long long var;
-        var = SDL_strtoll(value, NULL, 10);
-        set(obj, &var);
-      }
+      valueLL.set(obj, SDL_strtoll(value, NULL, 10));
       break;
     case ESGE_Field::F:
-      {
-        float var;
-        var = SDL_atof(value);
-        set(obj, &var);
-      }
+      valueF.set(obj, SDL_atof(value));
       break;
     case ESGE_Field::S:
-      set(obj, value);
+      valueS.set(obj, value);
       break;
     default:
       SDL_assert(!"unrecognised type");
@@ -172,46 +155,24 @@ ESGE_ObjSerial::Load(SDL_RWops *io)
         switch (tEnum)
         {
         case ESGE_Field::C:
-          {
-            char var;
-            var = ESGE_ReadS8(io);
-            f->set(this, &var);
-          }
+          f->valueC.set(this, ESGE_ReadS8(io));
           break;
         case ESGE_Field::I:
-          {
-            int var;
-            var = ESGE_ReadS16(io);
-            f->set(this, &var);
-          }
+          f->valueI.set(this, ESGE_ReadS16(io));
           break;
         case ESGE_Field::L:
-          {
-            long var;
-            var = ESGE_ReadS32(io);
-            f->set(this, &var);
-          }
+          f->valueL.set(this, ESGE_ReadS32(io));
           break;
         case ESGE_Field::LL:
-          {
-            long long var;
-            var = ESGE_ReadS64(io);
-            f->set(this, &var);
-          }
+          f->valueLL.set(this, ESGE_ReadS64(io));
           break;
         case ESGE_Field::F:
-          {
-            float var;
-            var = ESGE_ReadFloat(io);
-            f->set(this, &var);
-          }
+          f->valueF.set(this, ESGE_ReadFloat(io));
           break;
         case ESGE_Field::S:
-          {
-            char var[ESGE_MAX_STR];
-            ESGE_ReadStr(io, var, ESGE_MAX_STR);
-            f->set(this, var);
-          }
+          char str[ESGE_MAX_STR];
+          ESGE_ReadStr(io, str, ESGE_MAX_STR);
+          f->valueS.set(this, ESGE_ReadStr(io, str, ESGE_MAX_STR));
           break;
         default:
           SDL_assert(!"unrecognised type");
@@ -274,46 +235,23 @@ ESGE_ObjSerial::Save(SDL_RWops *io)
     switch (f->type)
     {
     case ESGE_Field::C:
-      {
-        const char *data;
-        data = (const char*)f->get(this);
-        ESGE_WriteS8(io, *data);
-      }
+      ESGE_WriteS8(io, f->valueC.get(this));
       break;
     case ESGE_Field::I:
-      {
-        const int *data;
-        data = (const int*)f->get(this);
-        ESGE_WriteS16(io, *data);
-      }
+      ESGE_WriteS16(io, f->valueI.get(this));
       break;
     case ESGE_Field::L:
-      {
-        const long *data;
-        data = (const long*)f->get(this);
-        ESGE_WriteS32(io, *data);
-      }
+      ESGE_WriteS32(io, f->valueL.get(this));
       break;
     case ESGE_Field::LL:
-      {
-        const long long *data;
-        data = (const long long*)f->get(this);
-        ESGE_WriteS64(io, *data);
-      }
+      ESGE_WriteS64(io, f->valueLL.get(this));
       break;
     case ESGE_Field::F:
-      {
-        const float *data;
-        data = (const float*)f->get(this);
-        ESGE_WriteFloat(io, *data);
-      }
+      ESGE_WriteFloat(io, f->valueF.get(this));
       break;
     case ESGE_Field::S:
-      {
-        const char *data;
-        data = (const char*)f->get(this);
-        ESGE_WriteStr(io, data, ESGE_MAX_STR);
-      }
+      char str[ESGE_MAX_STR];
+      ESGE_WriteStr(io, f->valueS.get(this, str, ESGE_MAX_STR));
       break;
     default:
       SDL_assert(!"unrecognised type");

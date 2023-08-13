@@ -37,22 +37,22 @@ public:
   ESGE_Spritesheet *spritesheet;
 
 
-  static const void *GetPosX(void *obj)
+  static int GetPosX(void *obj)
   {
-    return &((ObjPlayer*)obj)->pos.x;
+    return ((ObjPlayer*)obj)->pos.x;
   }
-  static void SetPosX(void *obj, const void *value)
+  static void SetPosX(void *obj, int value)
   {
-    ((ObjPlayer*)obj)->pos.x = *(const int*)value;
+    ((ObjPlayer*)obj)->pos.x = value;
   }
 
-  static const void *GetPosY(void *obj)
+  static int GetPosY(void *obj)
   {
-    return &((ObjPlayer*)obj)->pos.y;
+    return ((ObjPlayer*)obj)->pos.y;
   }
-  static void SetPosY(void *obj, const void *value)
+  static void SetPosY(void *obj, int value)
   {
-    ((ObjPlayer*)obj)->pos.y = *(const int*)value;
+    ((ObjPlayer*)obj)->pos.y = value;
   }
 
 
@@ -254,39 +254,31 @@ public:
   SDL_Point spriteCell = {0, 0};
 
 
-  static const void *GetCellX(void *obj)
+  static int GetCellX(void *obj)
   {
-    static int cellX;
-
-    cellX = ((ObjTile*)obj)->pos.x / ESGE_OBJ_STATIC_W;
-
-    return &cellX;
+    return ((ObjTile*)obj)->pos.x / ESGE_OBJ_STATIC_W;
   }
-  static void SetCellX(void *obj, const void *value)
+  static void SetCellX(void *obj, int value)
   {
-    ((ObjTile*)obj)->pos.x = (*(const int*)value) * ESGE_OBJ_STATIC_W;
+    ((ObjTile*)obj)->pos.x = value * ESGE_OBJ_STATIC_W;
   }
 
-  static const void *GetCellY(void *obj)
+  static int GetCellY(void *obj)
   {
-    static int cellY;
-
-    cellY = ((ObjTile*)obj)->pos.y / ESGE_OBJ_STATIC_H;
-    
-    return &cellY;
+    return ((ObjTile*)obj)->pos.y / ESGE_OBJ_STATIC_H;
   }
-  static void SetCellY(void *obj, const void *value)
+  static void SetCellY(void *obj, int value)
   {
-    ((ObjTile*)obj)->pos.y = (*(const int*)value) * ESGE_OBJ_STATIC_H;
+    ((ObjTile*)obj)->pos.y = value * ESGE_OBJ_STATIC_H;
   }
 
-  static const void *GetSpriteCellX(void *obj)
+  static int GetSpriteCellX(void *obj)
   {
-    return &((ObjTile*)obj)->spriteCell.x;
+    return ((ObjTile*)obj)->spriteCell.x;
   }
-  static void SetSpriteCellX(void *obj, const void *value)
+  static void SetSpriteCellX(void *obj, int value)
   {
-    ((ObjTile*)obj)->spriteCell.x = *(const int*)value;
+    ((ObjTile*)obj)->spriteCell.x = value;
     ((ObjTile*)obj)->spritesheet->GetSprite(
       &((ObjTile*)obj)->sprite,
       ((ObjTile*)obj)->spriteCell.x,
@@ -294,13 +286,13 @@ public:
     );
   }
 
-  static const void *GetSpriteCellY(void *obj)
+  static int GetSpriteCellY(void *obj)
   {
-    return &((ObjTile*)obj)->spriteCell.y;
+    return ((ObjTile*)obj)->spriteCell.y;
   }
-  static void SetSpriteCellY(void *obj, const void *value)
+  static void SetSpriteCellY(void *obj, int value)
   {
-    ((ObjTile*)obj)->spriteCell.y = *(const int*)value;
+    ((ObjTile*)obj)->spriteCell.y = value;
     ((ObjTile*)obj)->spritesheet->GetSprite(
       &((ObjTile*)obj)->sprite,
       ((ObjTile*)obj)->spriteCell.x,

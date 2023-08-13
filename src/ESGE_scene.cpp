@@ -164,7 +164,7 @@ ESGE_Scene::Save(void)
   for (ESGE_ObjScene *obj = objList; obj != NULL; obj = obj->next)
   {
     ESGE_WriteU64(io, obj->typeID);
-    ESGE_WriteStr(io, obj->instName, ESGE_INST_NAME_LEN);
+    ESGE_WriteStr(io, obj->instName);
     obj->Save(io);
   }
   SDL_RWclose(io);

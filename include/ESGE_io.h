@@ -27,7 +27,7 @@ void ESGE_WriteU32(  SDL_RWops *io, Uint32 value);
 void ESGE_WriteS64(  SDL_RWops *io, Sint64 value);
 void ESGE_WriteU64(  SDL_RWops *io, Uint64 value);
 void ESGE_WriteFloat(SDL_RWops *io, float  value);
-void ESGE_WriteStr(  SDL_RWops *io, const char *str, size_t n);
+void ESGE_WriteStr(  SDL_RWops *io, const char *str);
 
 # ifdef __cplusplus
 }

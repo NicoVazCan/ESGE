@@ -8,7 +8,12 @@
 # define ESGE_NO_FIELD
 
 # define ESGE_FIELD(TYPE_ID, NAME, GET, SET, NEXT) \
-{ ESGE_Field::TYPE_ID, ESGE_Hash(#NAME), #NAME, GET, SET }, NEXT
+{ \
+  ESGE_Field::TYPE_ID, \
+  ESGE_Hash(#NAME), \
+  #NAME, \
+  { (void*)GET, (void*)SET } \
+}, NEXT
 
 # define ESGE_TYPE(CLASS, FIELDS) \
 static const ESGE_TypeImpl<CLASS, ESGE_Hash(#CLASS)> \
@@ -20,16 +25,36 @@ const ESGE_Field ESGE_TypeImpl<CLASS, ESGE_Hash(#CLASS)>::fields[] = \
 
 # define ESGE_MAX_STR 256
 
-typedef const void *(*ESGE_FieldGetter)(void *obj);
-typedef void (*ESGE_FieldSetter)(void *obj, const void *data);
+template<typename T>
+struct ESGE_FieldValue
+{
+  T    (*const get)(void *obj);
+  void (*const set)(void *obj, T value);
+};
+
+template<>
+struct ESGE_FieldValue<char*>
+{
+  char* (*const get)(void *obj, char* str, size_t n);
+  void  (*const set)(void *obj, const char* str);
+};
+
 
 struct ESGE_Field
 {
   const enum {C,I,L,LL,F,S} type;
   const Uint64 id;
   const char *name;
-  const ESGE_FieldGetter get;
-  const ESGE_FieldSetter set;
+  union
+  {
+    struct { void *const get, *const set; } value;
+    ESGE_FieldValue<char>                   valueC;
+    ESGE_FieldValue<int>                    valueI;
+    ESGE_FieldValue<long>                   valueL;
+    ESGE_FieldValue<long long>              valueLL;
+    ESGE_FieldValue<float>                  valueF;
+    ESGE_FieldValue<char*>                  valueS;
+  };
 
   void GetValue(void *obj, char *value, size_t len) const;
   void SetValue(void *obj, const char *value) const;
