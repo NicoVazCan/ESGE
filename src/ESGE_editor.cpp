@@ -174,9 +174,10 @@ RunShell(SDL_UNUSED void *userdata)
 	return 0;
 }
 
+Uint32 ESGE_deltaTm = 16;
 
-#define ESGE_EDITOR_CAM_VEL 1
-#define ESGE_EDITOR_ZOOM 1.01f
+#define ESGE_EDITOR_CAM_VEL (ESGE_deltaTm / 16)
+#define ESGE_EDITOR_ZOOM 1.f + 0.01f * ((float)ESGE_deltaTm) / 16.f
 
 void
 UpdateEditor(void)
@@ -245,7 +246,7 @@ main(int argc, char *argv[])
 	const char *title = "editor", *sceneFile = "scene.bin";
 	int w = 256, h = 144;
 	SDL_Thread *shell;
-	Uint32 ticks, delta, maxDelta = 16;
+	Uint32 ticks, delta;
 
 	for (int i = 1; i < argc; ++i)
 	{
@@ -263,6 +264,10 @@ main(int argc, char *argv[])
 				break;
 			case 'h':
 				SDL_sscanf(argv[++i], "%d", &h);
+				break;
+			case 'f':
+				SDL_sscanf(argv[++i], "%" SDL_PRIu32, &ESGE_deltaTm);
+				ESGE_deltaTm = 1000 / ESGE_deltaTm;
 				break;
 			default:
 				puts("help");
@@ -291,7 +296,7 @@ main(int argc, char *argv[])
 		ESGE_Display::Update();
 
 		ticks += delta = SDL_GetTicks() - ticks;
-  	if (delta < maxDelta) SDL_Delay(maxDelta - delta);
+  	if (delta < ESGE_deltaTm) SDL_Delay(ESGE_deltaTm - delta);
 	}
 
 	SDL_WaitThread(shell, NULL);

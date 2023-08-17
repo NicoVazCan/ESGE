@@ -161,8 +161,8 @@ ESGE_Display::WorldDrawSprite(
 {
   SDL_Rect dstrect;
 
-  dstrect.x = pos.x;
-  dstrect.y = pos.y;
+  dstrect.x = pos.x + sprite->offset.x;
+  dstrect.y = pos.y + sprite->offset.y;
   dstrect = WorldToDisplayRect(dstrect);
 
   dstrect.w = sprite->clip.w * sprite->scale;

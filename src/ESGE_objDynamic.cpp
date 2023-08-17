@@ -81,7 +81,7 @@ ESGE_ObjDynamic::OnPhysic(void)
           thisColBox.x = otherColBox.x - thisColBox.w;
           break;
         }
-        test.y += ESGE_OBJ_STATIC_H;
+        test.y += ESGE_ObjStatic::cellH;
       }
       if (!otherH)
       {
@@ -113,7 +113,7 @@ ESGE_ObjDynamic::OnPhysic(void)
           thisColBox.x = otherColBox.x + otherColBox.w;
           break;
         }
-        test.y += ESGE_OBJ_STATIC_H;
+        test.y += ESGE_ObjStatic::cellH;
       }
       if (!otherH)
       {
@@ -148,7 +148,7 @@ ESGE_ObjDynamic::OnPhysic(void)
           thisColBox.y = otherColBox.y - thisColBox.h;
           break;
         }
-        test.x += ESGE_OBJ_STATIC_W;
+        test.x += ESGE_ObjStatic::cellW;
       }
       if (!otherV)
       {
@@ -180,7 +180,7 @@ ESGE_ObjDynamic::OnPhysic(void)
           thisColBox.y = otherColBox.y + otherColBox.h;
           break;
         }
-        test.x += ESGE_OBJ_STATIC_W;
+        test.x += ESGE_ObjStatic::cellW;
       }
       if (!otherV)
       {

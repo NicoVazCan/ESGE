@@ -143,77 +143,47 @@ ESGE_ObjSerial::Load(SDL_RWops *io)
   {
     bool fMatch = false;
     Uint8 tEnum;
+    const ESGE_Field *f;
 
     tEnum = ESGE_ReadU8(io);
 
     for (size_t i = 0; i < t->nFields && !fMatch; ++i)
     {
-      const ESGE_Field *f = t->fields + i;
-
-      if (f->id == fieldID && tEnum == f->type)
-      {
-        switch (tEnum)
-        {
-        case ESGE_Field::C:
-          f->valueC.set(this, ESGE_ReadS8(io));
-          break;
-        case ESGE_Field::I:
-          f->valueI.set(this, ESGE_ReadS16(io));
-          break;
-        case ESGE_Field::L:
-          f->valueL.set(this, ESGE_ReadS32(io));
-          break;
-        case ESGE_Field::LL:
-          f->valueLL.set(this, ESGE_ReadS64(io));
-          break;
-        case ESGE_Field::F:
-          f->valueF.set(this, ESGE_ReadFloat(io));
-          break;
-        case ESGE_Field::S:
-          char str[ESGE_MAX_STR];
-          ESGE_ReadStr(io, str, ESGE_MAX_STR);
-          f->valueS.set(this, ESGE_ReadStr(io, str, ESGE_MAX_STR));
-          break;
-        default:
-          SDL_assert(!"unrecognised type");
-        }
-        fMatch = true;
-      }
+      f = t->fields + i;
+      fMatch = f->id == fieldID && tEnum == f->type;
     }
 
-    if (!fMatch)
+    switch (tEnum)
     {
-      Sint64 offset = 0;
+    case ESGE_Field::C:
+      if (fMatch) f->valueC.set(this, ESGE_ReadS8(io));
+      else        ESGE_ReadS8(io);
+      break;
+    case ESGE_Field::I:
+      if (fMatch) f->valueI.set(this, ESGE_ReadS16(io));
+      else        ESGE_ReadS16(io);
+      break;
+    case ESGE_Field::L:
+      if (fMatch) f->valueL.set(this, ESGE_ReadS32(io));
+      else        ESGE_ReadS32(io);
+      break;
+    case ESGE_Field::LL:
+      if (fMatch) f->valueLL.set(this, ESGE_ReadS64(io));
+      else        ESGE_ReadS64(io);
+      break;
+    case ESGE_Field::F:
+      if (fMatch) f->valueF.set(this, ESGE_ReadFloat(io));
+      else        ESGE_ReadFloat(io);
+      break;
+    case ESGE_Field::S:
+      char str[ESGE_MAX_STR];
 
-      switch (tEnum)
-      {
-      case ESGE_Field::C:
-      case ESGE_Field::S:
-        offset = 1;
-        break;
-      case ESGE_Field::I:
-        offset = 2;
-        break;
-      case ESGE_Field::L:
-        offset = 4;
-        break;
-      case ESGE_Field::LL:
-        offset = 8;
-        break;
-      case ESGE_Field::F:
-        offset = 4;
-        break;
-      default:
-        SDL_assert(!"unrecognised type");
-      }
-      if (SDL_RWseek(io, offset, RW_SEEK_CUR) == -1)
-      {
-        ESGE_Error(
-          "Cannot seek file when loading obj with typeID=%"
-          SDL_PRIu64,
-          typeID
-        );
-      }
+      ESGE_ReadStr(io, str, ESGE_MAX_STR);
+      if (fMatch)
+        f->valueS.set(this, ESGE_ReadStr(io, str, ESGE_MAX_STR));
+      break;
+    default:
+      SDL_assert(!"unrecognised type");
     }
   }
 }

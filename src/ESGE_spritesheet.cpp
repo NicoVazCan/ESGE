@@ -21,8 +21,10 @@ ESGE_Spritesheet::ESGE_Spritesheet(const char *fileName):
     );
   }
   ESGE_ReadStr(io, img, ESGE_IMG_NAME_LEN);
-  spriteW = ESGE_ReadU32(io);
-  spriteH = ESGE_ReadU32(io);
+  spriteW  = ESGE_ReadS16(io);
+  spriteH  = ESGE_ReadS16(io);
+  offset.x = ESGE_ReadS16(io);
+  offset.y = ESGE_ReadS16(io);
 
   SDL_RWclose(io);
 
@@ -46,10 +48,12 @@ ESGE_Spritesheet::~ESGE_Spritesheet(void)
 void
 ESGE_Spritesheet::GetSprite(ESGE_Sprite *sprite, int col, int row)
 {
-  SDL_assert(col < w && row < h);
+  SDL_assert(col >= 0 && col < w && row >= 0 && row < h);
+
   sprite->texture = texture;
   sprite->clip.x = col*spriteW;
   sprite->clip.y = row*spriteH;
   sprite->clip.w = spriteW;
   sprite->clip.h = spriteH;
+  sprite->offset = offset;
 }

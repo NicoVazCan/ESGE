@@ -56,7 +56,7 @@ ESGE_Scene::ESGE_Scene(const char *fileName): ESGE_File(fileName)
     {
       Uint64 typeID;
       const ESGE_Type *type;
-      ESGE_ObjScene *obj, *member;
+      ESGE_ObjScene *obj, **node;
 
       typeID = ESGE_ReadU64(io);
 
@@ -79,19 +79,16 @@ ESGE_Scene::ESGE_Scene(const char *fileName): ESGE_File(fileName)
 
       obj->Load(io);
 
-      SGLIB_SORTED_LIST_ADD_IF_NOT_MEMBER(
-        ESGE_ObjScene,
-        objList,
-        obj,
-        ESGE_ObjScene::Cmp,
-        next,
-        member
+      for (
+        node = &objList;
+        *node != NULL && (*node)->instID < obj->instID;
+        node = &(*node)->next
       );
-      SDL_assert(
-        !member ||
-        member->instID != obj->instID ||
-        !"Two objects of the same typeID and instName"
-      );
+
+      SDL_assert(!*node || (*node)->instID != obj->instID);
+
+      obj->next = *node;
+      *node = obj;
 
       tell = SDL_RWtell(io);
     }
@@ -177,7 +174,7 @@ ESGE_ObjScene*
 ESGE_Scene::AddObj(const char *typeName)
 {
   const ESGE_Type *type;
-  ESGE_ObjScene *obj, *member;
+  ESGE_ObjScene *obj, **node;
   Uint64 typeID, instCnt = 0;
 
   SDL_assert(typeName != NULL);
@@ -198,18 +195,15 @@ ESGE_Scene::AddObj(const char *typeName)
   obj->sceneID = fileID;
   obj->typeID  = typeID;
   SDL_strlcpy(obj->instName, typeName, ESGE_INST_NAME_LEN);
-  obj->instID = ESGE_Hash(obj->instName);
+  obj->instID = typeID;
 
-  SGLIB_SORTED_LIST_ADD_IF_NOT_MEMBER(
-    ESGE_ObjScene,
-    objList,
-    obj,
-    ESGE_ObjScene::Cmp,
-    next,
-    member
+  for (
+    node = &objList;
+    *node != NULL && (*node)->instID < obj->instID;
+    node = &(*node)->next
   );
 
-  while (member != NULL && member->instID == obj->instID)
+  while (*node && (*node)->instID == obj->instID)
   {
     SDL_snprintf(
       obj->instName,
@@ -220,15 +214,16 @@ ESGE_Scene::AddObj(const char *typeName)
     );
     obj->instID = ESGE_Hash(obj->instName);
 
-    SGLIB_SORTED_LIST_ADD_IF_NOT_MEMBER(
-      ESGE_ObjScene,
-      objList,
-      obj,
-      ESGE_ObjScene::Cmp,
-      next,
-      member
+    for (
+      node = &objList;
+      *node != NULL && (*node)->instID < obj->instID;
+      node = &(*node)->next
     );
   }
+
+  obj->next = *node;
+  *node = obj;
+
 #ifdef ESGE_EDITOR
   obj->OnEditorInit();
 #else

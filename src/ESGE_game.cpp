@@ -9,6 +9,8 @@
 #include "ESGE_objDraw.h"
 
 
+Uint32 ESGE_deltaTm = 16;
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -18,7 +20,7 @@ main(int argc, const char *argv[])
 	const char *title = "game", *sceneFile = "scene.bin";
 	int w = 256, h = 144;
 	ESGE_Scene *scene;
-	Uint32 ticks, delta, maxDelta = 16;
+	Uint32 ticks, delta;
 
 	for (int i = 1; i < argc; ++i)
 	{
@@ -41,8 +43,8 @@ main(int argc, const char *argv[])
 				SDL_sscanf(argv[++i], "%d", &h);
 				break;
 			case 'f':
-				SDL_sscanf(argv[++i], "%" SDL_PRIu32, &maxDelta);
-				maxDelta = 1000 / maxDelta;
+				SDL_sscanf(argv[++i], "%" SDL_PRIu32, &ESGE_deltaTm);
+				ESGE_deltaTm = 1000 / ESGE_deltaTm;
 				break;
 			default:
 				puts("help");
@@ -74,7 +76,7 @@ main(int argc, const char *argv[])
 		ESGE_Display::Update();
 
 		ticks += delta = SDL_GetTicks() - ticks;
-  	if (delta < maxDelta) SDL_Delay(maxDelta - delta);
+  	if (delta < ESGE_deltaTm) SDL_Delay(ESGE_deltaTm - delta);
 	}
 
 	scene->Disable();

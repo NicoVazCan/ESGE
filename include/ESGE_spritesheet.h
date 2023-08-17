@@ -10,6 +10,7 @@ class ESGE_Spritesheet: public ESGE_File
 public:
   SDL_Texture *texture;
   int w, h, spriteW, spriteH;
+  SDL_Point offset;
 
   ESGE_Spritesheet(const char *file);
   virtual ~ESGE_Spritesheet(void);

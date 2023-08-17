@@ -69,7 +69,8 @@ OBJS_GAME = \
 	ESGE_scene.o ESGE_display.o ESGE_objDraw.o ESGE_objActive.o \
 	ESGE_objEvent.o ESGE_objUpdate.o ESGE_objPoint.o \
 	ESGE_objCollider.o ESGE_spritesheet.o ESGE_objPhysic.o \
-	ESGE_objStatic.o ESGE_objDynamic.o ESGE_objDrawSprite.o
+	ESGE_objStatic.o ESGE_objDynamic.o ESGE_objDrawSprite.o \
+	ESGE_anim.o ESGE_objGrid.o
 	
 OBJS_EDIT = \
 	ESGE_editor_edit.o \
@@ -77,7 +78,8 @@ OBJS_EDIT = \
 	ESGE_scene_edit.o ESGE_display.o ESGE_objDraw.o ESGE_objActive.o \
 	ESGE_objEvent.o ESGE_objUpdate.o ESGE_objPoint.o \
 	ESGE_objCollider.o ESGE_spritesheet.o ESGE_objPhysic.o \
-	ESGE_objStatic.o ESGE_objDynamic.o ESGE_objDrawSprite.o
+	ESGE_objStatic.o ESGE_objDynamic.o ESGE_objDrawSprite.o \
+	ESGE_anim.o ESGE_objGrid.o
 
 
 all: libESGE_GAME.a libESGE_EDIT.a
@@ -90,7 +92,7 @@ ESGE_game.o: ESGE_file.o ESGE_scene.o ESGE_display.o \
 ESGE_io.o: ESGE_io.h
 ESGE_objSerial.o: ESGE_objSerial.h ESGE_io.o ESGE_stdlib.o
 ESGE_file.o: ESGE_file.h ESGE_stdlib.o ESGE_stdlib.o
-ESGE_scene.o: ESGE_io.h ESGE_file.h ESGE_stdlib.o
+ESGE_scene.o: ESGE_scene.h ESGE_io.h ESGE_file.h ESGE_stdlib.o
 ESGE_display.o: ESGE_display.h ESGE_stdlib.o
 ESGE_objDraw.o: ESGE_objDraw.h ESGE_stdlib.o
 ESGE_objActive.o: ESGE_objActive.h ESGE_stdlib.o
@@ -101,8 +103,10 @@ ESGE_objCollider.o: ESGE_objCollider.h ESGE_objPoint.o ESGE_stdlib.o
 ESGE_spritesheet.o: ESGE_spritesheet.h ESGE_file.o ESGE_stdlib.o
 ESGE_objPhysic.o: ESGE_objPhysic.h ESGE_stdlib.o
 ESGE_objStatic.o: ESGE_objStatic.h ESGE_stdlib.o
-ESGE_objDynamic.o: ESGE_objDynamic.h ESGE_stdlib.o
+ESGE_objDynamic.o: ESGE_objDynamic.h ESGE_objStatic.o ESGE_stdlib.o
 ESGE_objDrawSprite.o: ESGE_objDrawSprite.h ESGE_stdlib.o
+ESGE_anim.o: ESGE_anim.h ESGE_display.o ESGE_spritesheet.o
+ESGE_objGrid.o: ESGE_objGrid.h ESGE_objPoint.o
 
 %_edit.o : %.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) -DESGE_EDITOR $< -o $@

@@ -198,5 +198,9 @@ ESGE_WriteStr(SDL_RWops *io, const char *str)
 {
   SDL_assert(str);
 
-  while (*str != '\0') ESGE_WriteU8(io, *(Uint8*)str++);
+  do
+  {
+    ESGE_WriteU8(io, *(Uint8*)str);
+  }
+  while (*str++ != '\0');
 }

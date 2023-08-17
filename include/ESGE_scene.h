@@ -13,12 +13,12 @@ class ESGE_ObjScene:
   public virtual ESGE_ObjActive
 {
 public:
-  SDL_FORCE_INLINE Uint64 Cmp(
+  static inline Uint64 Cmp(
     const ESGE_ObjScene *left,
     const ESGE_ObjScene *right
   )
   {
-     int diff;
+    Uint64 diff;
 
     if ((diff = left->sceneID - right->sceneID)) return diff;
     return      left->instID  - right->instID;

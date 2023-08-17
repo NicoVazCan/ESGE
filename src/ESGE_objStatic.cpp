@@ -3,48 +3,36 @@
 #include <SDL2/SDL.h>
 
 
-ESGE_ObjStatic::ESGE_ObjStaticList *ESGE_ObjStatic::hList = NULL;
+ESGE_ListH *ESGE_ObjStatic::listH = NULL;
 
 
 ESGE_ObjStatic*
 ESGE_ObjStatic::GetObjAt(SDL_Point pos)
 {
   unsigned col, row;
-  ESGE_ObjStaticList *hNode;
+  ESGE_ListH *nodeH;
 
-  col = ((unsigned)pos.x)/ESGE_OBJ_STATIC_W;
-  row = ((unsigned)pos.y)/ESGE_OBJ_STATIC_H;
+  col = ((unsigned)pos.x)/cellW;
+  row = ((unsigned)pos.y)/cellH;
 
   for (
-    hNode = hList;
-    (
-      hNode != NULL &&
-      ((unsigned)hNode->vList->pos.x) / ESGE_OBJ_STATIC_W < col
-    );
-    hNode = hNode->next
+    nodeH = listH;
+    nodeH && nodeH->col < col;
+    nodeH = nodeH->next
   );
 
-  if (
-    hNode != NULL &&
-    ((unsigned)hNode->vList->pos.x) / ESGE_OBJ_STATIC_W == col
-  )
+  if (nodeH && nodeH->col == col)
   {
-    ESGE_ObjStatic *vNode;
+    ESGE_ListV *nodeV;
 
     for (
-      vNode = hNode->vList;
-      (
-        vNode != NULL &&
-        ((unsigned)vNode->pos.y) / ESGE_OBJ_STATIC_H < row
-      );
-      vNode = vNode->next
+      nodeV = nodeH->listV;
+      nodeV && nodeV->row < row;
+      nodeV = nodeV->next
     );
 
-    if (
-      vNode != NULL &&
-      ((unsigned)vNode->pos.y) / ESGE_OBJ_STATIC_H == row
-    )
-      return vNode;
+    if (nodeV && nodeV->row == row)
+      return nodeV->obj;
   }
   return NULL;
 }
@@ -54,99 +42,176 @@ ESGE_ObjStatic::ESGE_ObjStatic(void)
 {
   offsetSize.x = 0;
   offsetSize.y = 0;
-  offsetSize.w = ESGE_OBJ_STATIC_W;
-  offsetSize.h = ESGE_OBJ_STATIC_H;
 }
 
 ESGE_ObjStatic::~ESGE_ObjStatic(void)
 {}
 
 
+int
+ESGE_ObjStatic::GetColW(void)
+{
+  return offsetSize.w / cellW;
+}
+
+void
+ESGE_ObjStatic::SetColW(int colW)
+{
+  offsetSize.w = colW * cellW;
+}
+
+
+int
+ESGE_ObjStatic::GetRowH(void)
+{
+  return offsetSize.h / cellH;
+}
+
+void
+ESGE_ObjStatic::SetRowH(int rowH)
+{
+  offsetSize.h = rowH * cellH;
+}
+
+
 void
 ESGE_ObjStatic::EnableStatic(void)
 {
-  unsigned col, row;
-  ESGE_ObjStaticList **hNode;
-  ESGE_ObjStatic **vNode;
+  unsigned col, row, colW, rowH;
+  ESGE_ListH **nodeH;
+  ESGE_ListV **nodeV;
 
   enabledStatic = true;
 
-  col = ((unsigned)pos.x)/ESGE_OBJ_STATIC_W;
-  row = ((unsigned)pos.y)/ESGE_OBJ_STATIC_H;
+  colW = GetColW();
+  rowH = GetRowH();
+
+
+  col = GetCol();
 
   for (
-    hNode = &hList;
-    (
-      *hNode != NULL &&
-      ((unsigned)(*hNode)->vList->pos.x) / ESGE_OBJ_STATIC_W < col
-    );
-    hNode = &(*hNode)->next
+    nodeH = &listH;
+    *nodeH && (*nodeH)->col < col;
+    nodeH = &(*nodeH)->next
   );
 
-  if (
-    *hNode == NULL ||
-    ((unsigned)(*hNode)->vList->pos.x) / ESGE_OBJ_STATIC_W != col
-  )
-    *hNode = new ESGE_ObjStaticList{NULL, *hNode};
+  if (!*nodeH || (*nodeH)->col != col)
+    *nodeH = new ESGE_ListH{col, NULL, *nodeH};
+
+
+  row = GetRow();
 
   for (
-    vNode = &(*hNode)->vList;
-    (
-      *vNode != NULL &&
-      ((unsigned)(*vNode)->pos.y) / ESGE_OBJ_STATIC_H < row
+    nodeV = &(*nodeH)->listV;
+    *nodeV && (*nodeV)->row < row;
+    nodeV = &(*nodeV)->next
+  );
+
+  SDL_assert(!*nodeV || (*nodeV)->row != row);
+
+  *nodeV = new ESGE_ListV{row, this, *nodeV};
+
+  for (unsigned i = 1; i < rowH; ++i)
+  {
+    row++;
+    nodeV = &(*nodeV)->next;
+
+    SDL_assert(!*nodeV || (*nodeV)->row != row);
+
+    *nodeV = new ESGE_ListV{row, this, *nodeV};
+  }
+
+
+
+  for (unsigned j = 1; j < colW; ++j)
+  {
+    col++;
+    nodeH = &(*nodeH)->next;
+
+    if (!*nodeH || (*nodeH)->col != col)
+      *nodeH = new ESGE_ListH{col, NULL, *nodeH};
+
+
+    row = GetRow();
+
+    for (
+      nodeV = &(*nodeH)->listV;
+      *nodeV && (*nodeV)->row < row;
+      nodeV = &(*nodeV)->next
     );
-    vNode = &(*vNode)->next
-  );
 
-  SDL_assert(
-    *vNode == NULL ||
-    ((unsigned)(*vNode)->pos.y) / ESGE_OBJ_STATIC_H != row
-  );
+    SDL_assert(!*nodeV || (*nodeV)->row != row);
 
-  next = *vNode;
-  *vNode = this;
+    *nodeV = new ESGE_ListV{row, this, *nodeV};
+
+    for (unsigned i = 1; i < rowH; ++i)
+    {
+      row++;
+      nodeV = &(*nodeV)->next;
+
+      SDL_assert(!*nodeV || (*nodeV)->row != row);
+
+      *nodeV = new ESGE_ListV{row, this, *nodeV};
+    }
+  }
 }
 
 void
 ESGE_ObjStatic::DisableStatic(void)
 {
-  unsigned col;
-  ESGE_ObjStaticList **hNode;
-  ESGE_ObjStatic **vNode;
+  unsigned colW, rowH;
 
   enabledStatic = false;
 
-  col = ((unsigned)pos.x)/ESGE_OBJ_STATIC_W;
+  colW = GetColW();
+  rowH = GetRowH();
 
-  for (
-    hNode = &hList;
-    (
-      *hNode != NULL &&
-      ((unsigned)(*hNode)->vList->pos.x) / ESGE_OBJ_STATIC_W < col
-    );
-    hNode = &((*hNode)->next)
-  );
-
-  if (
-    *hNode != NULL &&
-    ((unsigned)(*hNode)->vList->pos.x) / ESGE_OBJ_STATIC_W == col
-  )
+  for (unsigned j = 0; j < colW; ++j)
   {
+    ESGE_ListH **nodeH;
+    unsigned col;
+
+    col = GetCol() + j;
+
     for (
-      vNode = &((*hNode)->vList);
-      *vNode != NULL && *vNode != this;
-      vNode = &((*vNode)->next)
+      nodeH = &listH;
+      *nodeH && (*nodeH)->col < col;
+      nodeH = &(*nodeH)->next
     );
 
-    if (*vNode != NULL && *vNode != this)
+    if (*nodeH && (*nodeH)->col == col)
     {
-      *vNode = (*vNode)->next;
-
-      if ((*hNode)->vList == NULL)
+      for (unsigned i = 0; i < rowH; ++i)
       {
-        ESGE_ObjStaticList *hNodeNext = (*hNode)->next;
-        delete *hNode;
-        *hNode = hNodeNext;
+        ESGE_ListV **nodeV;
+        unsigned row;
+
+        row = GetRow() + i;
+
+        for (
+          nodeV = &(*nodeH)->listV;
+          *nodeV && (*nodeV)->row < row;
+          nodeV = &(*nodeV)->next
+        );
+
+        if (*nodeV && (*nodeV)->row == row)
+        {
+          {
+            ESGE_ListV *next;
+
+            next = (*nodeV)->next;
+            delete *nodeV;
+            *nodeV = next;
+          }
+          if (!(*nodeH)->listV)
+          {
+            ESGE_ListH *next;
+
+            next = (*nodeH)->next;
+            delete *nodeH;
+            *nodeH = next;
+          }
+        }
       }
     }
   }

@@ -62,10 +62,10 @@ CXXFLAGS += -std=c++11 -nostdinc++ -fno-exceptions -fno-rtti $(CFLAGS)
 vpath %.a ../../build
 
 OBJS_GAME = \
-	test.o
+	player.o tileCol.o
 	
 OBJS_EDIT = \
-	test_edit.o
+	player_edit.o tileCol_edit.o
 
 all: game editor
 
