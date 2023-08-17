@@ -48,6 +48,10 @@ ESGE_ObjDynamic::IsEnabledDynamic(void)
 
 
 void
+ESGE_ObjDynamic::OnInside(SDL_UNUSED ESGE_ObjDynamic *other)
+{}
+
+void
 ESGE_ObjDynamic::OnPhysic(void)
 {
   SDL_Rect thisColBox;
@@ -224,8 +228,8 @@ ESGE_ObjDynamic::OnPhysic(void)
 
     if (SDL_HasIntersection(&thisColBox, &otherColBox))
     {
-      OnCollide(other);
-      other->OnCollide(this);
+      OnInside(other);
+      other->OnInside(this);
     }
   }
 }

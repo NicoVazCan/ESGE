@@ -3,6 +3,8 @@
 #include "ESGE_spritesheet.h"
 #include "ESGE_anim.h"
 #include "ESGE_time.h"
+#include "ESGE_audio.h"
+#include "ESGE_file.h"
 
 #include "ESGE_objStatic.h"
 #include "ESGE_objDynamic.h"
@@ -93,7 +95,9 @@ enum PlayerAnim: size_t
   ((int)(ESGE_deltaTm * ESGE_deltaTm)) * 0x0010 / 256 \
 )
 #define PLAYER_JMP (((int)ESGE_deltaTm) * 0x0200 / 16)
+#define PLAYER_JMP_SND "jump.wav"
 #define PLAYER_SS "player.sprite.bin"
+#define PLAYER_MUS "brinstar.wav"
 
 #define ROUND(T, S, N) ( \
   ((N + (1<<(S-1)) + (N>>(sizeof(T)*8-1))) & (~((1<<S)-1))) >> S \
@@ -111,6 +115,8 @@ public:
   SDL_Point fPos;
   ESGE_Spritesheet *spritesheet;
   ESGE_AnimPlayer animPlayer;
+  ESGE_Music *music;
+  ESGE_Sound *jmpSnd;
 
 
   static int GetPosX(void *obj)
@@ -148,11 +154,16 @@ public:
 
     animPlayer.Start(anims + RUN_R);
     animPlayer.GetSprite(&sprite);
+
+    music = ESGE_FileMngr<ESGE_Music>::Watch(PLAYER_MUS);
+    jmpSnd = ESGE_FileMngr<ESGE_Sound>::Watch(PLAYER_JMP_SND);
   }
 
   virtual ~ObjPlayer(void) override
   {
     ESGE_FileMngr<ESGE_Spritesheet>::Leave(spritesheet);
+    ESGE_FileMngr<ESGE_Music>::Leave(music);
+    ESGE_FileMngr<ESGE_Sound>::Leave(jmpSnd);
   }
 
 
@@ -160,6 +171,7 @@ public:
   {
     fPos.x = pos.x << PLAYER_POS_SCALE;
     fPos.y = pos.y << PLAYER_POS_SCALE;
+    music->Play();
   }
 
 
@@ -247,6 +259,7 @@ public:
         if (!onAir)
         {
           fVel.y = -PLAYER_JMP;
+          jmpSnd->Play();
         }
       }
     }

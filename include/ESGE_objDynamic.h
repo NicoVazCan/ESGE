@@ -21,6 +21,8 @@ public:
   void DisableDynamic(void);
   bool IsEnabledDynamic(void);
 
+  virtual void OnInside(ESGE_ObjDynamic *other);
+
   virtual void OnPhysic(void) override;
 };
 

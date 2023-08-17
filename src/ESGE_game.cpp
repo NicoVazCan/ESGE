@@ -2,6 +2,7 @@
 #include "ESGE_file.h"
 #include "ESGE_scene.h"
 #include "ESGE_display.h"
+#include "ESGE_audio.h"
 
 #include "ESGE_objEvent.h"
 #include "ESGE_objUpdate.h"
@@ -54,8 +55,9 @@ main(int argc, const char *argv[])
 		else sceneFile = argv[i];
 	}
 
-	SDL_Init(SDL_INIT_VIDEO);
+	SDL_Init(SDL_INIT_EVENTS | SDL_INIT_VIDEO | SDL_INIT_AUDIO);
 	ESGE_Display::Init(title, w, h);
+	ESGE_InitAudio();
 	if (!(scene = ESGE_FileMngr<ESGE_Scene>::Watch(sceneFile)))
 	{
 		puts(SDL_GetError());
@@ -81,6 +83,7 @@ main(int argc, const char *argv[])
 
 	scene->Disable();
 	ESGE_FileMngr<ESGE_Scene>::Leave(scene);
+	ESGE_QuitAudio();
 	ESGE_Display::Quit();
 	SDL_Quit();
 

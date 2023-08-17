@@ -277,7 +277,7 @@ main(int argc, char *argv[])
 		else sceneFile = argv[i];
 	}
 
-	SDL_Init(SDL_INIT_VIDEO);
+	SDL_Init(SDL_INIT_EVENTS | SDL_INIT_VIDEO);
 	ESGE_Display::Init(title, w, h);
 	if (!(scene = ESGE_FileMngr<ESGE_Scene>::Watch(sceneFile)))
 	{

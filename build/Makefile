@@ -70,7 +70,7 @@ OBJS_GAME = \
 	ESGE_objEvent.o ESGE_objUpdate.o ESGE_objPoint.o \
 	ESGE_objCollider.o ESGE_spritesheet.o ESGE_objPhysic.o \
 	ESGE_objStatic.o ESGE_objDynamic.o ESGE_objDrawSprite.o \
-	ESGE_anim.o ESGE_objGrid.o
+	ESGE_anim.o ESGE_objGrid.o audio.o ESGE_audio.o
 	
 OBJS_EDIT = \
 	ESGE_editor_edit.o \
@@ -79,7 +79,7 @@ OBJS_EDIT = \
 	ESGE_objEvent.o ESGE_objUpdate.o ESGE_objPoint.o \
 	ESGE_objCollider.o ESGE_spritesheet.o ESGE_objPhysic.o \
 	ESGE_objStatic.o ESGE_objDynamic.o ESGE_objDrawSprite.o \
-	ESGE_anim.o ESGE_objGrid.o
+	ESGE_anim.o ESGE_objGrid.o audio.o ESGE_audio.o
 
 
 all: libESGE_GAME.a libESGE_EDIT.a
@@ -88,7 +88,8 @@ libESGE_GAME.a: libESGE_GAME.a($(OBJS_GAME))
 libESGE_EDIT.a: libESGE_EDIT.a($(OBJS_EDIT))
 
 ESGE_game.o: ESGE_file.o ESGE_scene.o ESGE_display.o \
-	ESGE_objEvent.o ESGE_objUpdate.o ESGE_objPhysic.o ESGE_objDraw.o
+	ESGE_objEvent.o ESGE_objUpdate.o ESGE_objPhysic.o ESGE_objDraw.o \
+	ESGE_audio.o
 ESGE_io.o: ESGE_io.h
 ESGE_objSerial.o: ESGE_objSerial.h ESGE_io.o ESGE_stdlib.o
 ESGE_file.o: ESGE_file.h ESGE_stdlib.o ESGE_stdlib.o
@@ -105,8 +106,11 @@ ESGE_objPhysic.o: ESGE_objPhysic.h ESGE_stdlib.o
 ESGE_objStatic.o: ESGE_objStatic.h ESGE_stdlib.o
 ESGE_objDynamic.o: ESGE_objDynamic.h ESGE_objStatic.o ESGE_stdlib.o
 ESGE_objDrawSprite.o: ESGE_objDrawSprite.h ESGE_stdlib.o
-ESGE_anim.o: ESGE_anim.h ESGE_display.o ESGE_spritesheet.o
-ESGE_objGrid.o: ESGE_objGrid.h ESGE_objPoint.o
+ESGE_anim.o: ESGE_anim.h ESGE_display.o ESGE_spritesheet.o \
+	ESGE_stdlib.o
+ESGE_objGrid.o: ESGE_objGrid.h ESGE_objPoint.o ESGE_stdlib.o
+audio.o: ../src/audio.h
+ESGE_audio.o: ESGE_audio.h audio.o ESGE_stdlib.o
 
 %_edit.o : %.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) -DESGE_EDITOR $< -o $@
@@ -114,7 +118,7 @@ ESGE_objGrid.o: ESGE_objGrid.h ESGE_objPoint.o
 	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) -DESGE_EDITOR $< -o $@
 
 ESGE_editor_edit.o: ESGE_file.o ESGE_scene_edit.o ESGE_display.o \
-	ESGE_objDraw.o
+	ESGE_objDraw.o ESGE_audio.o
 ESGE_scene_edit.o: ESGE_io.h ESGE_file.h ESGE_stdlib.o \
 	ESGE_objSerial.o
 
