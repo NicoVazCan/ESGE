@@ -259,8 +259,6 @@ public:
 
   ObjPlayer(void)
   {
-    layer = 1;
-
     offsetSize.x = 0;
     offsetSize.y = 0;
     offsetSize.w = 16;
@@ -271,7 +269,7 @@ public:
     animPlayer.sprts = spritesheet;
     animPlayer.speed = 100;
 
-    animPlayer.Start(anims + BALL);
+    animPlayer.Start(anims + RUN_R);
     animPlayer.GetSprite(&sprite);
 
     music = ESGE_FileMngr<ESGE_Music>::Watch(PLAYER_MUS);

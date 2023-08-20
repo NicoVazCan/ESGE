@@ -1,7 +1,7 @@
 #ifndef ESGE_OBJ_STATIC_H_
 # define ESGE_OBJ_STATIC_H_
 
-# include "ESGE_objGrid.h"
+# include "ESGE_objCell.h"
 # include "ESGE_objCollider.h"
 
 
@@ -20,7 +20,7 @@ struct ESGE_ListH
 };
 
 
-class ESGE_ObjStatic: public ESGE_ObjGrid, public ESGE_ObjCollider
+class ESGE_ObjStatic: public ESGE_ObjCell, public ESGE_ObjCollider
 {
   static ESGE_ListH *listH;
 

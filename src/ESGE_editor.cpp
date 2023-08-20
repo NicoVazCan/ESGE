@@ -177,7 +177,7 @@ RunShell(SDL_UNUSED void *userdata)
 	return 0;
 }
 
-Uint32 ESGE_deltaTm = 16;
+Uint32 ESGE_deltaTm = 16, ESGE_realDeltaTm;
 
 #define ESGE_EDITOR_CAM_VEL (ESGE_deltaTm / 16)
 #define ESGE_EDITOR_ZOOM 1.f + 0.01f * ((float)ESGE_deltaTm) / 16.f
@@ -249,7 +249,7 @@ main(int argc, char *argv[])
 	const char *title = "editor", *sceneFile = "scene.bin";
 	int w = 256, h = 144;
 	SDL_Thread *shell;
-	Uint32 ticks, delta;
+	Uint32 ticks;
 
 	for (int i = 1; i < argc; ++i)
 	{
@@ -295,8 +295,9 @@ main(int argc, char *argv[])
 		ESGE_ObjDraw::Draw();
 		ESGE_Display::Update();
 
-		ticks += delta = SDL_GetTicks() - ticks;
-  	if (delta < ESGE_deltaTm) SDL_Delay(ESGE_deltaTm - delta);
+		ticks += ESGE_realDeltaTm = SDL_GetTicks() - ticks;
+  	if (ESGE_realDeltaTm < ESGE_deltaTm)
+  		SDL_Delay(ESGE_deltaTm - ESGE_realDeltaTm);
 	}
 
 	SDL_WaitThread(shell, NULL);

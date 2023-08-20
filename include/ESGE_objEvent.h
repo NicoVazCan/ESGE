@@ -6,14 +6,22 @@
 
 class ESGE_Event
 {
-  ESGE_Event(void);
-  ~ESGE_Event(void);
+  static ESGE_Event *list;
+
+  ESGE_Event *next = NULL;
+  bool enabledEvent = false;
 
 public:
-  static SDL_Event event;
-  static bool quit;
+  static void Event(void);
 
-  static void Loop(void);
+  ESGE_Event(void);
+  virtual ~ESGE_Event(void) = 0;
+
+  void EnableEvent(void);
+  void DisableEvent(void);
+  bool IsEnabledEvent(void);
+
+  virtual void OnEvent(void);
 };
 
 class ESGE_ObjKeyEvent
@@ -38,5 +46,10 @@ public:
   virtual void OnKeyDown(SDL_Keycode key, SDL_Keymod mod);
   virtual void OnKeyUp(SDL_Keycode key, SDL_Keymod mod);
 };
+
+extern SDL_Event ESGE_event;
+extern bool ESGE_quit;
+
+void ESGE_EventLoop(void);
 
 #endif

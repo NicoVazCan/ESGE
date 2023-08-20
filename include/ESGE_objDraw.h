@@ -10,7 +10,7 @@ class ESGE_ObjDraw
   bool enabledDraw = false;
 
 public:
-  int layer;
+  int layer = 0;
 
   static void Draw(void);
 

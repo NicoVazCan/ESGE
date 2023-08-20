@@ -63,10 +63,10 @@ vpath %.h ../../include
 vpath %.a ../../build
 
 OBJS_GAME = \
-	player.o tileCol.o
+	player.o tileCol.o tileSet.o
 	
 OBJS_EDIT = \
-	player_edit.o tileCol_edit.o
+	player_edit.o tileCol_edit.o tileSet_edit.o
 
 all: game editor
 
@@ -82,6 +82,8 @@ player.o: ESGE_scene.h ESGE_spritesheet.h ESGE_anim.h ESGE_time.h \
 
 tileCol.o: ESGE_scene.h ESGE_display.h ESGE_objStatic.h ESGE_objDraw.h
 
+tileSet.o: ESGE_scene.h 
+
 %_edit.o : %.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) -DESGE_EDITOR $< -o $@
 %_edit.o : %.cpp
@@ -93,6 +95,8 @@ player_edit.o: ESGE_scene.h ESGE_spritesheet.h ESGE_anim.h \
 
 tileCol_edit.o: ESGE_scene.h ESGE_display.h ESGE_objStatic.h \
 	ESGE_objDraw.h
+
+tileSet_edit.o: ESGE_scene.h
 
 clean:
 	$(RM) *.o

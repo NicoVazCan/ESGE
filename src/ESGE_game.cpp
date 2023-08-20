@@ -10,7 +10,7 @@
 #include "ESGE_objDraw.h"
 
 
-Uint32 ESGE_deltaTm = 16;
+Uint32 ESGE_deltaTm = 16, ESGE_realDeltaTm;
 
 #ifdef __cplusplus
 extern "C"
@@ -20,7 +20,7 @@ main(int argc, const char *argv[])
 {
 	const char *title = "game", *sceneFile = "scene.bin";
 	int w = 256, h = 144;
-	Uint32 ticks, delta;
+	Uint32 ticks;
 
 	for (int i = 1; i < argc; ++i)
 	{
@@ -62,9 +62,10 @@ main(int argc, const char *argv[])
 
 	ticks = SDL_GetTicks();
 
-	while (!ESGE_Event::quit)
+	for (;;)
 	{
-		ESGE_Event::Loop();
+		ESGE_EventLoop();
+		if (ESGE_quit) break;
 
 		ESGE_ObjUpdate::Update();
 		ESGE_ObjPhysic::Physic();
@@ -72,8 +73,9 @@ main(int argc, const char *argv[])
 
 		ESGE_Display::Update();
 
-		ticks += delta = SDL_GetTicks() - ticks;
-  	if (delta < ESGE_deltaTm) SDL_Delay(ESGE_deltaTm - delta);
+		ticks += ESGE_realDeltaTm = SDL_GetTicks() - ticks;
+  	if (ESGE_realDeltaTm < ESGE_deltaTm)
+  		SDL_Delay(ESGE_deltaTm - ESGE_realDeltaTm);
 	}
 
 	ESGE_SceneMngr::Quit();

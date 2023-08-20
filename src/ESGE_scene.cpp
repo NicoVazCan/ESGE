@@ -369,8 +369,9 @@ ESGE_SceneMngr::EnableScene(ESGE_Scene *scene)
 {
   scene->next = enabledList;
   enabledList = scene;
-
+#ifndef ESGE_EDITOR
   scene->Enable();
+#endif
 }
 
 void
@@ -387,8 +388,9 @@ ESGE_SceneMngr::DisableScene(ESGE_Scene *scene)
     disabledList = nextDisabled;
   }
   else nDisabled++;
-
+#ifndef ESGE_EDITOR
   scene->Disable();
+#endif
 }
 
 
@@ -411,8 +413,10 @@ ESGE_SceneMngr::Init(int maxDisabled)
 void
 ESGE_SceneMngr::Quit(void)
 {
+#ifndef ESGE_EDITOR
   for (ESGE_Scene *s = enabledList; s; s = s->next)
     s->Disable();
+#endif
 
   for (ESGE_Scene *s = enabledList; s; s = s->next)
     delete s;

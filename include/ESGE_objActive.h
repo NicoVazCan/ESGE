@@ -4,7 +4,7 @@
 
 class ESGE_ObjActive
 {
-  bool enabled = false;
+  bool enabled = false, dirty = false;
 
 public:
   ESGE_ObjActive(void);
@@ -14,7 +14,6 @@ public:
   virtual void OnDisable(void);
 
   bool IsEnabled(void) const;
-  void SetEnabled(bool enabled);
 };
 
 #endif
