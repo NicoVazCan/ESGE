@@ -48,10 +48,6 @@ ESGE_ObjDynamic::IsEnabledDynamic(void)
 
 
 void
-ESGE_ObjDynamic::OnInside(SDL_UNUSED ESGE_ObjDynamic *other)
-{}
-
-void
 ESGE_ObjDynamic::OnPhysic(void)
 {
   SDL_Rect thisColBox;
@@ -200,17 +196,42 @@ ESGE_ObjDynamic::OnPhysic(void)
       }
     }
 
-    SetColBox(thisColBox);
+    
+
+    if (
+      !isTrigger &&
+      (
+        (otherH && !otherH->isTrigger) ||
+        (otherV && !otherV->isTrigger)
+      )
+    )
+      SetColBox(thisColBox);
 
     if (otherH)
     {
-      OnCollide(otherH);
-      otherH->OnCollide(this);
+      if (isTrigger || otherH->isTrigger)
+      {
+        OnTrigger(otherH);
+        otherH->OnTrigger(this);
+      }
+      else
+      {
+        OnCollide(otherH);
+        otherH->OnCollide(this);
+      }
     }
     if (otherV)
     {
-      OnCollide(otherV);
-      otherV->OnCollide(this);
+      if (isTrigger || otherV->isTrigger)
+      {
+        OnTrigger(otherV);
+        otherV->OnTrigger(this);
+      }
+      else
+      {
+        OnCollide(otherV);
+        otherV->OnCollide(this);
+      }
     }
 
     prevPos = pos;
@@ -228,8 +249,16 @@ ESGE_ObjDynamic::OnPhysic(void)
 
     if (SDL_HasIntersection(&thisColBox, &otherColBox))
     {
-      OnInside(other);
-      other->OnInside(this);
+      if (isTrigger || other->isTrigger)
+      {
+        OnTrigger(other);
+        other->OnTrigger(this);
+      }
+      else
+      {
+        OnCollide(other);
+        other->OnCollide(this);
+      }
     }
   }
 }

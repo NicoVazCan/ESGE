@@ -102,8 +102,8 @@ ESGE_objUpdate.o: ESGE_objUpdate.h ESGE_stdlib.o
 ESGE_objPoint.o: ESGE_objPoint.h ESGE_stdlib.o
 ESGE_objCollider.o: ESGE_objCollider.h ESGE_objPoint.o ESGE_stdlib.o
 ESGE_spritesheet.o: ESGE_spritesheet.h ESGE_file.o ESGE_stdlib.o
-ESGE_objPhysic.o: ESGE_objPhysic.h ESGE_stdlib.o
-ESGE_objStatic.o: ESGE_objStatic.h ESGE_stdlib.o
+ESGE_objPhysic.o: ESGE_objPhysic.h ESGE_objCollider.o ESGE_stdlib.o
+ESGE_objStatic.o: ESGE_objStatic.h ESGE_objCollider.o ESGE_stdlib.o
 ESGE_objDynamic.o: ESGE_objDynamic.h ESGE_objStatic.o ESGE_stdlib.o
 ESGE_objDrawSprite.o: ESGE_objDrawSprite.h ESGE_stdlib.o
 ESGE_anim.o: ESGE_anim.h ESGE_display.o ESGE_spritesheet.o \

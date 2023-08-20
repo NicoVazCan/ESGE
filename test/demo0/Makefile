@@ -59,6 +59,7 @@ LDLIBS  += $(shell PKG_CONFIG_SYSROOT_DIR=$(SYSROOT) \
 CXXFLAGS += -std=c++11 -nostdinc++ -fno-exceptions -fno-rtti $(CFLAGS)
 
 
+vpath %.h ../../include
 vpath %.a ../../build
 
 OBJS_GAME = \
@@ -75,10 +76,23 @@ game: $(OBJS_GAME) -lESGE_GAME
 editor: $(OBJS_EDIT) -lESGE_EDIT
 	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
+player.o: ESGE_scene.h ESGE_spritesheet.h ESGE_anim.h ESGE_time.h \
+	ESGE_audio.h ESGE_file.h ESGE_objStatic.h ESGE_objDynamic.h \
+	ESGE_objUpdate.h ESGE_objDrawSprite.h
+
+tileCol.o: ESGE_scene.h ESGE_display.h ESGE_objStatic.h ESGE_objDraw.h
+
 %_edit.o : %.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) -DESGE_EDITOR $< -o $@
 %_edit.o : %.cpp
 	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) -DESGE_EDITOR $< -o $@
+
+player_edit.o: ESGE_scene.h ESGE_spritesheet.h ESGE_anim.h \
+	ESGE_time.h ESGE_audio.h ESGE_file.h ESGE_objStatic.h \
+	ESGE_objDynamic.h ESGE_objUpdate.h ESGE_objDrawSprite.h
+
+tileCol_edit.o: ESGE_scene.h ESGE_display.h ESGE_objStatic.h \
+	ESGE_objDraw.h
 
 clean:
 	$(RM) *.o

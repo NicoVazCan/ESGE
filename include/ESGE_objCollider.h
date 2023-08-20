@@ -9,12 +9,16 @@ class ESGE_ObjCollider: public virtual ESGE_ObjPoint
 {
 public:
   SDL_Rect offsetSize = {0, 0, 0, 0};
+  bool isTrigger = false;
 
   ESGE_ObjCollider(void);
   virtual ~ESGE_ObjCollider(void) = 0;
+
   SDL_Rect GetColBox(void);
   void SetColBox(SDL_Rect colBox);
+
   virtual void OnCollide(ESGE_ObjCollider *other);
+  virtual void OnTrigger(ESGE_ObjCollider *other);
 };
 
 #endif

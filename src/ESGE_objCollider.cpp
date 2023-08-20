@@ -25,6 +25,11 @@ ESGE_ObjCollider::SetColBox(SDL_Rect colBox)
   pos.y = colBox.y - offsetSize.y;
 }
 
+
 void
 ESGE_ObjCollider::OnCollide(SDL_UNUSED ESGE_ObjCollider *other)
+{}
+
+void
+ESGE_ObjCollider::OnTrigger(SDL_UNUSED ESGE_ObjCollider *other)
 {}
