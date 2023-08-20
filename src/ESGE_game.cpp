@@ -20,7 +20,6 @@ main(int argc, const char *argv[])
 {
 	const char *title = "game", *sceneFile = "scene.bin";
 	int w = 256, h = 144;
-	ESGE_Scene *scene;
 	Uint32 ticks, delta;
 
 	for (int i = 1; i < argc; ++i)
@@ -58,13 +57,9 @@ main(int argc, const char *argv[])
 	SDL_Init(SDL_INIT_EVENTS | SDL_INIT_VIDEO | SDL_INIT_AUDIO);
 	ESGE_Display::Init(title, w, h);
 	ESGE_InitAudio();
-	if (!(scene = ESGE_FileMngr<ESGE_Scene>::Watch(sceneFile)))
-	{
-		puts(SDL_GetError());
-		SDL_ClearError();
-		return -1;
-	}
-	scene->Enable();
+	ESGE_SceneMngr::Init(8);
+	ESGE_SceneMngr::AddScene(sceneFile);
+
 	ticks = SDL_GetTicks();
 
 	while (!ESGE_Event::quit)
@@ -81,8 +76,7 @@ main(int argc, const char *argv[])
   	if (delta < ESGE_deltaTm) SDL_Delay(ESGE_deltaTm - delta);
 	}
 
-	scene->Disable();
-	ESGE_FileMngr<ESGE_Scene>::Leave(scene);
+	ESGE_SceneMngr::Quit();
 	ESGE_QuitAudio();
 	ESGE_Display::Quit();
 	SDL_Quit();

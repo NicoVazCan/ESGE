@@ -69,20 +69,139 @@ static const ESGE_Frm frmsRunL[] = {
   {9, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10}
 };
 
+
+static const ESGE_Frm frmsJmpR[] = {
+  {0, 6, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+  {1, 6, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+  {2, 6, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+};
+
+static const ESGE_Frm frmsJmpL[] = {
+  {0, 7, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+  {1, 7, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+  {2, 7, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+};
+
+
+static const ESGE_Frm frmsJmpUR[] = {
+  {0, 8, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+  {1, 8, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+  {2, 8, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+};
+
+static const ESGE_Frm frmsJmpUL[] = {
+  {0, 9, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+  {1, 9, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+  {2, 9, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+};
+
+
+static const ESGE_Frm frmsFallR[] = {
+  {0, 10, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+  {1, 10, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+};
+
+static const ESGE_Frm frmsFallL[] = {
+  {0, 11, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+  {1, 11, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+};
+
+
+static const ESGE_Frm frmsFallUR[] = {
+  {0, 12, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+  {1, 12, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+};
+
+static const ESGE_Frm frmsFallUL[] = {
+  {0, 13, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+  {1, 13, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+};
+
+
+static const ESGE_Frm frmsDmgR[] = {
+  {0, 14, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*50},
+  {1, 14, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*50},
+};
+
+static const ESGE_Frm frmsDmgL[] = {
+  {0, 15, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*50},
+  {1, 15, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*50},
+};
+
+
+static const ESGE_Frm frmsBall[] = {
+  {0, 16, 1., 0., {0, 0}, SDL_FLIP_NONE, 0},
+};
+
+
+static const ESGE_Frm frmsBallR[] = {
+  {0, 16, 1., 45.,  {20, 36}, SDL_FLIP_NONE, 16*10},
+  {0, 16, 1., 90.,  {20, 36}, SDL_FLIP_NONE, 16*10},
+  {0, 16, 1., 135., {20, 36}, SDL_FLIP_NONE, 16*10},
+  {0, 16, 1., 180., {20, 36}, SDL_FLIP_NONE, 16*10},
+  {0, 16, 1., 225., {20, 36}, SDL_FLIP_NONE, 16*10},
+  {0, 16, 1., 270., {20, 36}, SDL_FLIP_NONE, 16*10},
+  {0, 16, 1., 315., {20, 36}, SDL_FLIP_NONE, 16*10},
+  {0, 16, 1., 360., {20, 36}, SDL_FLIP_NONE, 16*10},
+};
+
+static const ESGE_Frm frmsBallL[] = {
+  {0, 16, 1., -45.,  {20, 36}, SDL_FLIP_NONE, 16*10},
+  {0, 16, 1., -90.,  {20, 36}, SDL_FLIP_NONE, 16*10},
+  {0, 16, 1., -135., {20, 36}, SDL_FLIP_NONE, 16*10},
+  {0, 16, 1., -180., {20, 36}, SDL_FLIP_NONE, 16*10},
+  {0, 16, 1., -225., {20, 36}, SDL_FLIP_NONE, 16*10},
+  {0, 16, 1., -270., {20, 36}, SDL_FLIP_NONE, 16*10},
+  {0, 16, 1., -315., {20, 36}, SDL_FLIP_NONE, 16*10},
+  {0, 16, 1., -360., {20, 36}, SDL_FLIP_NONE, 16*10},
+};
+
+
 static const ESGE_Anim anims[] = {
   {frmsStandR, SDL_arraysize(frmsStandR), -1},
   {frmsStandL, SDL_arraysize(frmsStandL), -1},
+
   {frmsStandUR, SDL_arraysize(frmsStandUR), -1},
   {frmsStandUR, SDL_arraysize(frmsStandUR), -1},
+
   {frmsRunR, SDL_arraysize(frmsRunR), -1},
   {frmsRunL, SDL_arraysize(frmsRunL), -1},
+
+  {frmsJmpR, SDL_arraysize(frmsJmpR), 0},
+  {frmsJmpL, SDL_arraysize(frmsJmpL), 0},
+
+  {frmsJmpUR, SDL_arraysize(frmsJmpUR), 0},
+  {frmsJmpUL, SDL_arraysize(frmsJmpUL), 0},
+
+  {frmsFallR, SDL_arraysize(frmsFallR), 0},
+  {frmsFallL, SDL_arraysize(frmsFallL), 0},
+
+  {frmsFallUR, SDL_arraysize(frmsFallUR), 0},
+  {frmsFallUL, SDL_arraysize(frmsFallUL), 0},
+
+  {frmsDmgR, SDL_arraysize(frmsDmgR), 0},
+  {frmsDmgL, SDL_arraysize(frmsDmgL), 0},
+
+  {frmsBall, SDL_arraysize(frmsBall), 0},
+
+  {frmsBallR, SDL_arraysize(frmsBallR), -1},
+  {frmsBallL, SDL_arraysize(frmsBallL), -1},
 };
 
 
 
 enum PlayerAnim: size_t
 {
-  STAND_R, STAND_L, STAND_U_R, STAND_U_L, RUN_R, RUN_L
+  STAND_R, STAND_L,
+  STAND_U_R, STAND_U_L,
+  RUN_R, RUN_L,
+  JMP_R, JMP_L,
+  JMP_U_R, JMP_U_L,
+  FALL_R, FALL_L,
+  FALL_U_R, FALL_U_L,
+  DMG_R, DMG_L,
+  BALL,
+  BALL_R, BALL_L
 };
 
 
@@ -152,7 +271,7 @@ public:
     animPlayer.sprts = spritesheet;
     animPlayer.speed = 100;
 
-    animPlayer.Start(anims + RUN_R);
+    animPlayer.Start(anims + BALL);
     animPlayer.GetSprite(&sprite);
 
     music = ESGE_FileMngr<ESGE_Music>::Watch(PLAYER_MUS);

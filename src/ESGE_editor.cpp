@@ -11,12 +11,15 @@
 
 
 static bool run = true; 
-static ESGE_Scene *scene;
 
 
 static int
 RunShell(SDL_UNUSED void *userdata)
 {
+	ESGE_Scene *scene;
+
+	scene = ESGE_SceneMngr::GetActiveScene();
+
 	for (;;)
 	{
 		static const char *const help = "help";
@@ -279,12 +282,9 @@ main(int argc, char *argv[])
 
 	SDL_Init(SDL_INIT_EVENTS | SDL_INIT_VIDEO);
 	ESGE_Display::Init(title, w, h);
-	if (!(scene = ESGE_FileMngr<ESGE_Scene>::Watch(sceneFile)))
-	{
-		puts(SDL_GetError());
-		SDL_ClearError();
-		return -1;
-	}
+	ESGE_SceneMngr::Init(8);
+	ESGE_SceneMngr::AddScene(sceneFile);
+
 	shell = SDL_CreateThread(RunShell, "shell", NULL);
 	ticks = SDL_GetTicks();
 
@@ -300,7 +300,8 @@ main(int argc, char *argv[])
 	}
 
 	SDL_WaitThread(shell, NULL);
-	ESGE_FileMngr<ESGE_Scene>::Leave(scene);
+
+	ESGE_SceneMngr::Quit();
 	ESGE_Display::Quit();
 	SDL_Quit();
 

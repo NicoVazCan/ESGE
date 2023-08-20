@@ -18,7 +18,7 @@ ESGE_AnimPlayer::Update(Uint32 deltaTm)
   {
     Uint32 dur = anim->frms[frm].dur * 100;
 
-    while (ticks >= dur)
+    while (ticks >= dur && !done)
     {
       ticks -= dur;
 

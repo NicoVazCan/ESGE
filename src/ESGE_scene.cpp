@@ -33,11 +33,15 @@ ESGE_ObjScene::OnQuit(void)
 {}
 
 
-ESGE_Scene::ESGE_Scene(const char *fileName): ESGE_File(fileName)
+ESGE_Scene::ESGE_Scene(const char *sceneFile):
+  id(ESGE_Hash(sceneFile))
 {
   SDL_RWops *io;
 
-  if ((io = SDL_RWFromFile(fileName, "rb")))
+  if(!(this->sceneFile = SDL_strdup(sceneFile)))
+    ESGE_Error("Cannot duplicate \"%s\"string", sceneFile);
+
+  if ((io = SDL_RWFromFile(sceneFile, "rb")))
   {
     Sint64 size, tell;
 
@@ -45,12 +49,12 @@ ESGE_Scene::ESGE_Scene(const char *fileName): ESGE_File(fileName)
     {
       ESGE_Error(
         "Cannot get file \"%s\" size: %s",
-        fileName,
+        sceneFile,
         SDL_GetError()
       );
     }
     if ((tell = SDL_RWtell(io)) == -1)
-      ESGE_Error("Cannot get file \"%s\" position", fileName);
+      ESGE_Error("Cannot get file \"%s\" position", sceneFile);
 
     while (tell < size)
     {
@@ -66,13 +70,13 @@ ESGE_Scene::ESGE_Scene(const char *fileName): ESGE_File(fileName)
           "Cannot find type of typeID=%" SDL_PRIu64 " from "
           "file \"%s\": %s",
           typeID,
-          fileName,
+          sceneFile,
           SDL_GetError()
         );
       }
       obj = (ESGE_ObjScene*)type->New();
 
-      obj->sceneID = fileID;
+      obj->sceneID = id;
       obj->typeID  = typeID;
       ESGE_ReadStr(io, obj->instName, ESGE_INST_NAME_LEN);
       obj->instID  = ESGE_Hash(obj->instName);
@@ -126,7 +130,7 @@ ESGE_Scene::~ESGE_Scene(void)
       delete obj;
     }
   );
-  objList = NULL;
+  SDL_free((void*)sceneFile);
 }
 
 
@@ -149,11 +153,11 @@ ESGE_Scene::Save(void)
 {
   SDL_RWops *io;
 
-  if (!(io = SDL_RWFromFile(fileName, "wb")))
+  if (!(io = SDL_RWFromFile(sceneFile, "wb")))
   {
     return SDL_SetError(
       "Cannot open file while saving \"%s\" scene: %s",
-      fileName,
+      sceneFile,
       SDL_GetError()
     );
   }
@@ -186,13 +190,13 @@ ESGE_Scene::AddObj(const char *typeName)
     SDL_SetError(
       "Cannot find type \"%s\" in \"%s\" scene",
       typeName,
-      fileName
+      sceneFile
     );
     return NULL;
   }
   obj = (ESGE_ObjScene*)type->New();
 
-  obj->sceneID = fileID;
+  obj->sceneID = id;
   obj->typeID  = typeID;
   SDL_strlcpy(obj->instName, typeName, ESGE_INST_NAME_LEN);
   obj->instID = typeID;
@@ -289,7 +293,7 @@ ESGE_Scene::GetObj(const char *instName)
     SDL_SetError(
       "Object \"%s\" not found in \"%s\" scene",
       instName,
-      fileName
+      sceneFile
     );
     return NULL;
   }
@@ -330,7 +334,7 @@ ESGE_Scene::RenameObj(const char *instName, const char *newInstName)
       return SDL_SetError(
         "Object \"%s\" already exist in \"%s\" scene",
         instName,
-        fileName
+        sceneFile
       );
     }
     else
@@ -347,7 +351,171 @@ ESGE_Scene::RenameObj(const char *instName, const char *newInstName)
   return SDL_SetError(
     "Object \"%s\" not found in \"%s\" scene",
     instName,
-    fileName
+    sceneFile
   );
 }
 #endif
+
+
+ESGE_Scene *ESGE_SceneMngr::active = NULL;
+ESGE_Scene *ESGE_SceneMngr::enabledList = NULL;
+ESGE_Scene *ESGE_SceneMngr::disabledList = NULL;
+ESGE_Scene *ESGE_SceneMngr::lastDisabled = NULL;
+int ESGE_SceneMngr::nDisabled = 0;
+
+
+void
+ESGE_SceneMngr::EnableScene(ESGE_Scene *scene)
+{
+  scene->next = enabledList;
+  enabledList = scene;
+
+  scene->Enable();
+}
+
+void
+ESGE_SceneMngr::DisableScene(ESGE_Scene *scene)
+{
+  scene->next = lastDisabled;
+  lastDisabled = scene;
+
+  if (nDisabled == maxDisabled)
+  {
+    ESGE_Scene *nextDisabled = disabledList->next;
+
+    delete disabledList;
+    disabledList = nextDisabled;
+  }
+  else nDisabled++;
+
+  scene->Disable();
+}
+
+
+ESGE_SceneMngr::ESGE_SceneMngr(void)
+{}
+
+ESGE_SceneMngr::~ESGE_SceneMngr(void)
+{}
+
+
+int ESGE_SceneMngr::maxDisabled;
+
+
+void
+ESGE_SceneMngr::Init(int maxDisabled)
+{
+  ESGE_SceneMngr::maxDisabled = maxDisabled;
+}
+
+void
+ESGE_SceneMngr::Quit(void)
+{
+  for (ESGE_Scene *s = enabledList; s; s = s->next)
+    s->Disable();
+
+  for (ESGE_Scene *s = enabledList; s; s = s->next)
+    delete s;
+
+  for (ESGE_Scene *s = disabledList; s; s = s->next)
+    delete s;
+}
+
+
+void
+ESGE_SceneMngr::AddScene(const char *sceneFile)
+{
+  ESGE_Scene **node;
+  Uint64 sceneID;
+
+  sceneID = ESGE_Hash(sceneFile);
+
+  for (
+    node = &disabledList;
+    *node && (*node)->id != sceneID;
+    node = &(*node)->next
+  );
+
+  if (*node)
+  {
+    active = *node;
+
+    *node = active->next;
+    nDisabled--;
+  }
+  else active = new ESGE_Scene(sceneFile);
+
+  EnableScene(active);
+}
+
+void
+ESGE_SceneMngr::ChangeScene(const char *sceneFile)
+{
+  ESGE_Scene **node, *enabled;
+  Uint64 sceneID;
+
+  sceneID = ESGE_Hash(sceneFile);
+
+  for (
+    node = &disabledList;
+    *node && (*node)->id != sceneID;
+    node = &(*node)->next
+  );
+
+  if (*node)
+  {
+    active = *node;
+    
+    *node = active->next;
+    nDisabled--;
+  }
+  else active = new ESGE_Scene(sceneFile);
+
+  enabled = enabledList;
+
+  while (enabled)
+  {
+    ESGE_Scene *next = enabled->next;
+
+    DisableScene(enabled);
+
+    enabled = next;
+  }
+
+  enabledList = NULL;
+  EnableScene(active);
+}
+
+
+void
+ESGE_SceneMngr::CloseScene(const char *sceneFile)
+{
+  ESGE_Scene **node;
+  Uint64 sceneID;
+
+  sceneID = ESGE_Hash(sceneFile);
+
+  for (
+    node = &enabledList;
+    *node && (*node)->id != sceneID;
+    node = &(*node)->next
+  );
+
+  if (*node && (*node)->id == sceneID)
+  {
+    ESGE_Scene *scene = *node;
+
+    *node = (*node)->next;
+
+    if (scene == active) active = *node;
+
+    DisableScene(scene);
+  }
+}
+
+
+ESGE_Scene*
+ESGE_SceneMngr::GetActiveScene(void)
+{
+  return active;
+}

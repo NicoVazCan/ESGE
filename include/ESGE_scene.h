@@ -24,9 +24,9 @@ public:
     return      left->instID  - right->instID;
   }
 
-  Uint64 sceneID = 0;
+  Uint64 sceneID;
   char instName[ESGE_INST_NAME_LEN];
-  Uint64 instID = 0;
+  Uint64 instID;
   ESGE_ObjScene *next;
 
   ESGE_ObjScene(void);
@@ -41,13 +41,16 @@ public:
   virtual void OnQuit(void);
 };
 
-class ESGE_Scene: public ESGE_File
+class ESGE_Scene
 {
 public:
+  const char *sceneFile;
+  const Uint64 id;
   ESGE_ObjScene *objList = NULL;
+  ESGE_Scene *next;
   
-  ESGE_Scene(const char *file);
-  virtual ~ESGE_Scene(void) override;
+  ESGE_Scene(const char *sceneFile);
+  ~ESGE_Scene(void);
 
   void Enable(void);
   void Disable(void);
@@ -63,6 +66,37 @@ public:
     const char *newInstName
   );
 # endif
+};
+
+
+
+class ESGE_SceneMngr
+{
+  static ESGE_Scene
+    *active,
+    *enabledList,
+    *disabledList,
+    *lastDisabled;
+  static int nDisabled;
+
+  static void EnableScene(ESGE_Scene *scene);
+  static void DisableScene(ESGE_Scene *scene);
+
+  ESGE_SceneMngr(void);
+  ~ESGE_SceneMngr(void);
+
+public:
+  static int maxDisabled;
+
+  static void Init(int maxDisabled);
+  static void Quit(void);
+
+  static void AddScene(const char *sceneFile);
+  static void ChangeScene(const char *sceneFile);
+
+  static void CloseScene(const char *sceneFile);
+
+  static ESGE_Scene *GetActiveScene(void);
 };
 
 #endif
