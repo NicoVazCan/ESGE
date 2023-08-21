@@ -57,7 +57,7 @@ main(int argc, const char *argv[])
 	SDL_Init(SDL_INIT_EVENTS | SDL_INIT_VIDEO | SDL_INIT_AUDIO);
 	ESGE_Display::Init(title, w, h);
 	ESGE_InitAudio();
-	ESGE_SceneMngr::Init(8);
+	ESGE_SceneMngr::Init(1);
 	ESGE_SceneMngr::AddScene(sceneFile);
 
 	ticks = SDL_GetTicks();

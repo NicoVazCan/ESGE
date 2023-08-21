@@ -11,9 +11,10 @@ class ESGE_ObjDynamic: public ESGE_ObjPhysic, public ESGE_ObjCollider
 
   ESGE_ObjDynamic *next;
   bool enabledDynamic = false;
-  SDL_Point prevPos = {0, 0};
 
 public:
+  SDL_Point prevPos = {0, 0};
+  
   ESGE_ObjDynamic(void);
   virtual ~ESGE_ObjDynamic(void) = 0;
 

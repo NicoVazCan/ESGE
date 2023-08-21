@@ -5,7 +5,14 @@
 # include "ESGE_hash.h"
 
 
-# define ESGE_NO_FIELD
+# define ESGE_TYPE(CLASS) \
+static const ESGE_TypeImpl<CLASS> ESGE__type##CLASS( \
+  ESGE_Hash(#CLASS), \
+  NULL, \
+  0 \
+);
+
+# define ESGE_END_FIELD
 
 # define ESGE_FIELD(TYPE_ID, NAME, GET, SET, NEXT) \
 { \
@@ -15,12 +22,15 @@
   { (void*)GET, (void*)SET } \
 }, NEXT
 
-# define ESGE_TYPE(CLASS, FIELDS) \
-static const ESGE_TypeImpl<CLASS, ESGE_Hash(#CLASS)> \
-ESGE__type##CLASS; \
-template<> \
-const ESGE_Field ESGE_TypeImpl<CLASS, ESGE_Hash(#CLASS)>::fields[] = \
-{ FIELDS };
+# define ESGE_TYPE_FIELDS(CLASS, FIELDS) \
+static const ESGE_Field ESGE__fields##CLASS[] = \
+{ FIELDS }; \
+static const ESGE_TypeImpl<CLASS> ESGE__type##CLASS( \
+  ESGE_Hash(#CLASS), \
+  ESGE__fields##CLASS, \
+  SDL_arraysize(ESGE__fields##CLASS) \
+);
+
 
 
 # define ESGE_MAX_STR 256
@@ -80,7 +90,7 @@ public:
   virtual void *New(void) const = 0;
 };
 
-template<class C, Uint64 ID>
+template<class C>
 class ESGE_TypeImpl: ESGE_Type
 {
   virtual void *New(void) const
@@ -89,10 +99,8 @@ class ESGE_TypeImpl: ESGE_Type
   }
 
 public:
-  static const ESGE_Field fields[];
-
-  ESGE_TypeImpl(void):
-    ESGE_Type(ID, fields, sizeof(fields) / sizeof(ESGE_Field))
+  ESGE_TypeImpl(Uint64 id, const ESGE_Field *fields, size_t nFields):
+    ESGE_Type(id, fields, nFields)
   {}
   virtual ~ESGE_TypeImpl(void)
   {}

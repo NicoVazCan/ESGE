@@ -44,6 +44,38 @@ RunShell(SDL_UNUSED void *userdata)
   			puts(SDL_GetError());
   			SDL_ClearError();
   		}
+  		else
+  		{
+  			char *fieldName, *fieldValue;
+  			
+  			while ((fieldName = SDL_strtokr(NULL, delim, &saveptr)))
+  			{
+	  			const ESGE_Type *type;
+	  			const ESGE_Field *field = NULL;
+	  			Uint64 fieldID;
+
+	  			if (!(fieldValue = SDL_strtokr(NULL, delim, &saveptr)))
+  				{
+  					printf("Missing field \"%s\" value\n", fieldName);
+  					break;
+  				}
+
+	  			type 		= ESGE_Type::Get(obj->typeID);
+	  			fieldID = ESGE_Hash(fieldName);
+
+	  			for (size_t i = 0; i < type->nFields; ++i)
+	  			{
+	  				if (type->fields[i].id == fieldID)
+  					{
+  						field = type->fields + i;
+  						break;
+  					}
+	  			}
+
+	  			if (field) field->SetValue(obj, fieldValue);
+	  			else 			 printf("Field \"%s\" not found\n", fieldName);
+  			}
+  		}
   	}
   	else if (!SDL_strcmp(cmd, "delete"))
   	{
@@ -104,7 +136,7 @@ RunShell(SDL_UNUSED void *userdata)
   	}
   	else if (!SDL_strcmp(cmd, "edit"))
   	{
-  		char *instName, *fieldName, *fieldValue;
+  		char *instName;
   		ESGE_ObjScene *obj;
 
   		if (!(instName = SDL_strtokr(NULL, delim, &saveptr)))
@@ -118,6 +150,8 @@ RunShell(SDL_UNUSED void *userdata)
   		}
   		else
   		{
+  			char *fieldName, *fieldValue;
+
   			while ((fieldName = SDL_strtokr(NULL, delim, &saveptr)))
   			{
 	  			const ESGE_Type *type;

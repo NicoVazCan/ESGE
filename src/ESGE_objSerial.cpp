@@ -108,20 +108,35 @@ ESGE_Type::Get(Uint64 id)
 }
 
 
-#define ESGE_CMP_TYPE(left, right) ((left)->id - (right)->id)
-
 ESGE_Type::ESGE_Type(
   Uint64 id,
   const ESGE_Field *fields,
   size_t nFields
 ): id(id), fields(fields), nFields(nFields)
 {
-  SGLIB_SORTED_LIST_ADD(ESGE_Type, list, this, ESGE_CMP_TYPE, next);
+  ESGE_Type **node;;
+
+  for (
+    node = &list;
+    *node && (*node)->id < id;
+    node = &(*node)->next
+  );
+  SDL_assert(!*node || (*node)->id != id);
+  next = *node;
+  *node = this;
 }
 
 ESGE_Type::~ESGE_Type(void)
 {
-  SGLIB_SORTED_LIST_DELETE(ESGE_Type, list, this, next);
+  ESGE_Type **node;;
+
+  for (
+    node = &list;
+    *node && (*node)->id < id;
+    node = &(*node)->next
+  );
+  SDL_assert(*node && (*node)->id == id);
+  *node = next;
 }
 
 

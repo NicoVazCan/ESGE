@@ -117,7 +117,7 @@ public:
 };
 
 
-ESGE_TYPE(
+ESGE_TYPE_FIELDS(
   ObjTileSet,
   ESGE_FIELD(
     I,
@@ -144,7 +144,7 @@ ESGE_TYPE(
             spriteFlip,
             ObjTileSet::GetSpriteFlip,
             ObjTileSet::SetSpriteFlip,
-            ESGE_NO_FIELD
+            ESGE_END_FIELD
           )
         )
       )

@@ -4,7 +4,7 @@
 
 class ESGE_ObjActive
 {
-  bool enabled = false, dirty = false;
+  bool enabled = false;
 
 public:
   ESGE_ObjActive(void);

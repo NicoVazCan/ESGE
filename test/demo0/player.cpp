@@ -12,6 +12,8 @@
 #include "ESGE_objUpdate.h"
 #include "ESGE_objDrawSprite.h"
 
+#include "roomMngr.h"
+
 
 static const ESGE_Frm frmsStandR[] = {
   {0, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*50},
@@ -245,6 +247,7 @@ public:
   static void SetPosX(void *obj, int value)
   {
     ((ObjPlayer*)obj)->pos.x = value;
+    ((ObjPlayer*)obj)->prevPos.x = value;
   }
 
   static int GetPosY(void *obj)
@@ -254,6 +257,7 @@ public:
   static void SetPosY(void *obj, int value)
   {
     ((ObjPlayer*)obj)->pos.y = value;
+    ((ObjPlayer*)obj)->prevPos.y = value;
   }
 
 
@@ -291,7 +295,13 @@ public:
     music->Play();
   }
 
+  virtual void OnStart(void)
+  {
+    ObjRoomMngr *roomMngr;
 
+    if ((roomMngr = ESGE_GetObj<ObjRoomMngr>(sceneID, "ObjRoomMngr")))
+      roomMngr->SetFocusCenter(pos.x + 8, pos.y + 16);
+  }
 
   virtual void OnUpdate(void)
   {
@@ -397,10 +407,15 @@ public:
 
   virtual void OnPhysic(void) override
   {
+    ObjRoomMngr *roomMngr;
+
     ESGE_ObjDynamic::OnPhysic();
 
-    ESGE_Display::cam.x = pos.x - 128 + 8;
-    ESGE_Display::cam.y = pos.y - 72 + 16;
+    ESGE_Display::cam.x = pos.x - 256 + 8;
+    ESGE_Display::cam.y = pos.y - 144 + 16;
+
+    if ((roomMngr = ESGE_GetObj<ObjRoomMngr>(sceneID, "ObjRoomMngr")))
+      roomMngr->SetFocusCenter(pos.x + 8, pos.y + 16);
   }
 
   virtual void OnCollide(SDL_UNUSED ESGE_ObjCollider *other)
@@ -467,7 +482,7 @@ public:
 #endif
 };
 
-ESGE_TYPE(
+ESGE_TYPE_FIELDS(
   ObjPlayer,
   ESGE_FIELD(
     I,
@@ -479,7 +494,7 @@ ESGE_TYPE(
       pos.y,
       ObjPlayer::GetPosY,
       ObjPlayer::SetPosY,
-      ESGE_NO_FIELD
+      ESGE_END_FIELD
     )
   )
 )

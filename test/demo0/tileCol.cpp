@@ -91,7 +91,7 @@ public:
   }
 };
 
-ESGE_TYPE(
+ESGE_TYPE_FIELDS(
   ObjTileCol,
   ESGE_FIELD(
     I,
@@ -113,7 +113,7 @@ ESGE_TYPE(
           rowH,
           ObjTileCol::GetRowH,
           ObjTileCol::SetRowH,
-          ESGE_NO_FIELD
+          ESGE_END_FIELD
         )
       )
     )
