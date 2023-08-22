@@ -10,7 +10,215 @@
 #define ESGE_FIELD_VALUE_LEN 32
 
 
-static bool run = true; 
+static bool run = true;
+
+
+static void
+CmdAdd(ESGE_Scene *scene, const char *delim, char **saveptr)
+{
+	char *typeName;
+	ESGE_ObjScene *obj;
+
+	if (!(typeName = SDL_strtokr(NULL, delim, saveptr)))
+	{
+		puts("Missing field name");
+	}
+	else if (!(obj = scene->AddObj(typeName)))
+	{
+		puts(SDL_GetError());
+		SDL_ClearError();
+	}
+	else
+	{
+		char *fieldName, *fieldValue;
+		
+		while ((fieldName = SDL_strtokr(NULL, delim, saveptr)))
+		{
+			const ESGE_Type *type;
+			const ESGE_Field *field = NULL;
+			Uint64 fieldID;
+
+			if (!(fieldValue = SDL_strtokr(NULL, delim, saveptr)))
+			{
+				printf("Missing field \"%s\" value\n", fieldName);
+				break;
+			}
+
+			type 		= ESGE_Type::Get(obj->typeID);
+			fieldID = ESGE_Hash(fieldName);
+
+			for (size_t i = 0; i < type->nFields; ++i)
+			{
+				if (type->fields[i].id == fieldID)
+				{
+					field = type->fields + i;
+					break;
+				}
+			}
+
+			if (field) field->SetValue(obj, fieldValue);
+			else 			 printf("Field \"%s\" not found\n", fieldName);
+		}
+	}
+}
+
+static void
+CmdDelete(ESGE_Scene *scene, const char *delim, char **saveptr)
+{
+	char *instName;
+
+	if (!(instName = SDL_strtokr(NULL, delim, saveptr)))
+	{
+		puts("Missing instance name");
+	}
+	else scene->DelObj(instName);
+}
+
+static void
+CmdRename(ESGE_Scene *scene, const char *delim, char **saveptr)
+{
+	char *instName, *newInstName;
+
+	if (!(instName = SDL_strtokr(NULL, delim, saveptr)))
+	{
+		puts("Missing old instance name");
+	}
+	else if (!(newInstName = SDL_strtokr(NULL, delim, saveptr)))
+	{
+		puts("Missing new instance name");
+	}
+	else if (scene->RenameObj(instName, newInstName))
+	{
+		puts(SDL_GetError());
+		SDL_ClearError();
+	}
+}
+
+static void
+CmdPrint(ESGE_Scene *scene, const char *delim, char **saveptr)
+{
+	char *instName;
+	ESGE_ObjScene *obj;
+
+	if (!(instName = SDL_strtokr(NULL, delim, saveptr)))
+	{
+		puts("Missing instance name");
+	}
+	else if (!(obj = scene->GetObj(instName)))
+	{
+		puts(SDL_GetError());
+		SDL_ClearError();
+	}
+	else
+	{
+		const ESGE_Type *type;
+
+		type = ESGE_Type::Get(obj->typeID);
+
+		for (size_t i = 0; i < type->nFields; ++i)
+		{
+			char buf[ESGE_FIELD_VALUE_LEN];
+				
+			type->fields[i].GetValue(obj, buf, ESGE_FIELD_VALUE_LEN);
+			printf("%s = %s\n", type->fields[i].name, buf);
+		}
+	}
+}
+
+static void
+CmdEdit(ESGE_Scene *scene, const char *delim, char **saveptr)
+{
+	char *instName;
+	ESGE_ObjScene *obj;
+
+	if (!(instName = SDL_strtokr(NULL, delim, saveptr)))
+	{
+		puts("Missing instance name");
+	}
+	else if (!(obj = scene->GetObj(instName)))
+	{
+		puts(SDL_GetError());
+		SDL_ClearError();
+	}
+	else
+	{
+		char *fieldName, *fieldValue;
+
+		while ((fieldName = SDL_strtokr(NULL, delim, saveptr)))
+		{
+			const ESGE_Type *type;
+			const ESGE_Field *field = NULL;
+			Uint64 fieldID;
+
+			if (!(fieldValue = SDL_strtokr(NULL, delim, saveptr)))
+			{
+				printf("Missing field \"%s\" value\n", fieldName);
+				break;
+			}
+
+			type 		= ESGE_Type::Get(obj->typeID);
+			fieldID = ESGE_Hash(fieldName);
+
+			for (size_t i = 0; i < type->nFields; ++i)
+			{
+				if (type->fields[i].id == fieldID)
+				{
+					field = type->fields + i;
+					break;
+				}
+			}
+
+			if (field) field->SetValue(obj, fieldValue);
+			else 			 printf("Field \"%s\" not found\n", fieldName);
+		}
+	}
+}
+
+static void
+CmdList(ESGE_Scene *scene)
+{
+	for (
+		ESGE_ObjScene *obj = scene->objList;
+		obj != NULL;
+		obj = obj->next
+	)
+	{
+		puts(obj->instName);
+	}
+}
+
+static void
+CmdSave(ESGE_Scene *scene)
+{
+	if(scene->Save())
+	{
+		puts(SDL_GetError());
+		SDL_ClearError();
+	}
+}
+
+static void
+CmdChange(ESGE_Scene **scene, const char *delim, char **saveptr)
+{
+	char *sceneFile;
+
+	if (!(sceneFile = SDL_strtokr(NULL, delim, saveptr)))
+	{
+		puts("Missing scene file");
+	}
+	else if(ESGE_SceneMngr::SetActiveScene(sceneFile))
+	{
+		puts(SDL_GetError());
+		SDL_ClearError();
+	}
+	else *scene = ESGE_SceneMngr::GetActiveScene();
+}
+
+static void
+CmdGoing(ESGE_Scene *scene)
+{
+	printf("\"%s\"\n", scene->sceneFile);
+}
 
 
 static int
@@ -30,181 +238,72 @@ RunShell(SDL_UNUSED void *userdata)
     fgets(line, ESGE_CMD_LEN, stdin);
     if (!(cmd = SDL_strtokr(line, delim, &saveptr))) continue;
 
-    if (!SDL_strcmp(cmd, "add"))
-  	{
-  		char *typeName;
-  		ESGE_ObjScene *obj;
+    if (cmd[1])
+    {
+	    if (!SDL_strcmp(cmd, "add"))
+	  		CmdAdd(scene, delim, &saveptr);
+	  	else if (!SDL_strcmp(cmd, "delete"))
+	  		CmdDelete(scene, delim, &saveptr);
+	  	else if (!SDL_strcmp(cmd, "rename"))
+	  		CmdRename(scene, delim, &saveptr);
+	  	else if (!SDL_strcmp(cmd, "print"))
+	  		CmdPrint(scene, delim, &saveptr);
+	  	else if (!SDL_strcmp(cmd, "edit"))
+	  		CmdEdit(scene, delim, &saveptr);
+	  	else if (!SDL_strcmp(cmd, "list"))
+	  		CmdList(scene);
+	  	else if (!SDL_strcmp(cmd, "save"))
+	  		CmdSave(scene);
+	  	else if (!SDL_strcmp(cmd, "change"))
+	  		CmdChange(&scene, delim, &saveptr);
+	  	else if (!SDL_strcmp(cmd, "going"))
+	  		CmdGoing(scene);
+	  	else if (!SDL_strcmp(cmd, "quit"))
+	  		break;
+	  	else puts(help);
+		}
+		else
+		{
+			bool stop = false;
 
-  		if (!(typeName = SDL_strtokr(NULL, delim, &saveptr)))
-  		{
-  			puts(help);
-  		}
-  		else if (!(obj = scene->AddObj(typeName)))
-  		{
-  			puts(SDL_GetError());
-  			SDL_ClearError();
-  		}
-  		else
-  		{
-  			char *fieldName, *fieldValue;
-  			
-  			while ((fieldName = SDL_strtokr(NULL, delim, &saveptr)))
-  			{
-	  			const ESGE_Type *type;
-	  			const ESGE_Field *field = NULL;
-	  			Uint64 fieldID;
-
-	  			if (!(fieldValue = SDL_strtokr(NULL, delim, &saveptr)))
-  				{
-  					printf("Missing field \"%s\" value\n", fieldName);
-  					break;
-  				}
-
-	  			type 		= ESGE_Type::Get(obj->typeID);
-	  			fieldID = ESGE_Hash(fieldName);
-
-	  			for (size_t i = 0; i < type->nFields; ++i)
-	  			{
-	  				if (type->fields[i].id == fieldID)
-  					{
-  						field = type->fields + i;
-  						break;
-  					}
-	  			}
-
-	  			if (field) field->SetValue(obj, fieldValue);
-	  			else 			 printf("Field \"%s\" not found\n", fieldName);
-  			}
-  		}
-  	}
-  	else if (!SDL_strcmp(cmd, "delete"))
-  	{
-  		char *instName;
-
-  		if (!(instName = SDL_strtokr(NULL, delim, &saveptr)))
-  		{
-  			puts(help);
-  		}
-  		else scene->DelObj(instName);
-  	}
-  	else if (!SDL_strcmp(cmd, "rename"))
-  	{
-  		char *instName, *newInstName;
-
-  		if (!(instName = SDL_strtokr(NULL, delim, &saveptr)))
-  		{
-  			puts(help);
-  		}
-  		else if (!(newInstName = SDL_strtokr(NULL, delim, &saveptr)))
-  		{
-  			puts(help);
-  		}
-  		else if (scene->RenameObj(instName, newInstName))
-  		{
-  			puts(SDL_GetError());
-  			SDL_ClearError();
-  		}
-  	}
-  	else if (!SDL_strcmp(cmd, "print"))
-  	{
-  		char *instName;
-  		ESGE_ObjScene *obj;
-
-  		if (!(instName = SDL_strtokr(NULL, delim, &saveptr)))
-  		{
-  			puts(help);
-  		}
-  		else if (!(obj = scene->GetObj(instName)))
-  		{
-  			puts(SDL_GetError());
-  			SDL_ClearError();
-  		}
-  		else
-  		{
-  			const ESGE_Type *type;
-
-  			type = ESGE_Type::Get(obj->typeID);
-
-  			for (size_t i = 0; i < type->nFields; ++i)
-  			{
-  				char buf[ESGE_FIELD_VALUE_LEN];
-  					
-					type->fields[i].GetValue(obj, buf, ESGE_FIELD_VALUE_LEN);
-					printf("%s = %s\n", type->fields[i].name, buf);
-  			}
-  		}
-  	}
-  	else if (!SDL_strcmp(cmd, "edit"))
-  	{
-  		char *instName;
-  		ESGE_ObjScene *obj;
-
-  		if (!(instName = SDL_strtokr(NULL, delim, &saveptr)))
-  		{
-  			puts(help);
-  		}
-  		else if (!(obj = scene->GetObj(instName)))
-  		{
-  			puts(SDL_GetError());
-  			SDL_ClearError();
-  		}
-  		else
-  		{
-  			char *fieldName, *fieldValue;
-
-  			while ((fieldName = SDL_strtokr(NULL, delim, &saveptr)))
-  			{
-	  			const ESGE_Type *type;
-	  			const ESGE_Field *field = NULL;
-	  			Uint64 fieldID;
-
-	  			if (!(fieldValue = SDL_strtokr(NULL, delim, &saveptr)))
-  				{
-  					printf("Missing field \"%s\" value\n", fieldName);
-  					break;
-  				}
-
-	  			type 		= ESGE_Type::Get(obj->typeID);
-	  			fieldID = ESGE_Hash(fieldName);
-
-	  			for (size_t i = 0; i < type->nFields; ++i)
-	  			{
-	  				if (type->fields[i].id == fieldID)
-  					{
-  						field = type->fields + i;
-  						break;
-  					}
-	  			}
-
-	  			if (field) field->SetValue(obj, fieldValue);
-	  			else 			 printf("Field \"%s\" not found\n", fieldName);
-  			}
-  		}
-  	}
-  	else if (!SDL_strcmp(cmd, "list"))
-  	{
-  		for (
-  			ESGE_ObjScene *obj = scene->objList;
-  			obj != NULL;
-  			obj = obj->next
-  		)
-  		{
-  			puts(obj->instName);
-  		}
-  	}
-  	else if (!SDL_strcmp(cmd, "save"))
-  	{
-  		if(scene->Save())
-  		{
-  			puts(SDL_GetError());
-				SDL_ClearError();
+			switch (cmd[0])
+			{
+			case 'a':
+				CmdAdd(scene, delim, &saveptr);
+				break;
+			case 'd':
+				CmdDelete(scene, delim, &saveptr);
+				break;
+			case 'r':
+				CmdRename(scene, delim, &saveptr);
+				break;
+			case 'p':
+				CmdPrint(scene, delim, &saveptr);
+				break;
+			case 'e':
+				CmdEdit(scene, delim, &saveptr);
+				break;
+			case 'l':
+				CmdList(scene);
+				break;
+			case 's':
+				CmdSave(scene);
+				break;
+			case 'c':
+				CmdChange(&scene, delim, &saveptr);
+				break;
+			case 'g':
+				CmdGoing(scene);
+				break;
+			case 'q':
+				stop = true;
+				break;
+			default:
+				puts(help);
 			}
-  	}
-  	else if (!SDL_strcmp(cmd, "exit"))
-  	{
-  		break;
-  	}
-  	else puts(help);
+
+			if (stop) break;
+		}
 	}
 	run = false;
 
@@ -280,10 +379,14 @@ extern "C"
 int
 main(int argc, char *argv[])
 {
-	const char *title = "editor", *sceneFile = "scene.bin";
+	const char *title = "editor";
 	int w = 256, h = 144;
 	SDL_Thread *shell;
 	Uint32 ticks;
+
+	SDL_Init(SDL_INIT_EVENTS | SDL_INIT_VIDEO);
+	ESGE_Display::Init(title, w, h);
+	ESGE_SceneMngr::Init(0);
 
 	for (int i = 1; i < argc; ++i)
 	{
@@ -311,13 +414,8 @@ main(int argc, char *argv[])
 				return 0;
 			}
 		}
-		else sceneFile = argv[i];
+		else ESGE_SceneMngr::AddScene(argv[i]);
 	}
-
-	SDL_Init(SDL_INIT_EVENTS | SDL_INIT_VIDEO);
-	ESGE_Display::Init(title, w, h);
-	ESGE_SceneMngr::Init(8);
-	ESGE_SceneMngr::AddScene(sceneFile);
 
 	shell = SDL_CreateThread(RunShell, "shell", NULL);
 	ticks = SDL_GetTicks();

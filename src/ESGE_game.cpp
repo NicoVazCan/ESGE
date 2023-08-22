@@ -19,7 +19,7 @@ int
 main(int argc, const char *argv[])
 {
 	const char *title = "game", *sceneFile = "scene.bin";
-	int w = 256, h = 144;
+	int w = 256, h = 144, nDisabledScene = 4;
 	Uint32 ticks;
 
 	for (int i = 1; i < argc; ++i)
@@ -46,6 +46,9 @@ main(int argc, const char *argv[])
 				SDL_sscanf(argv[++i], "%" SDL_PRIu32, &ESGE_deltaTm);
 				ESGE_deltaTm = 1000 / ESGE_deltaTm;
 				break;
+			case 'd':
+				SDL_sscanf(argv[++i], "%d", &nDisabledScene);
+				break;
 			default:
 				puts("help");
 				return 0;
@@ -57,7 +60,7 @@ main(int argc, const char *argv[])
 	SDL_Init(SDL_INIT_EVENTS | SDL_INIT_VIDEO | SDL_INIT_AUDIO);
 	ESGE_Display::Init(title, w, h);
 	ESGE_InitAudio();
-	ESGE_SceneMngr::Init(1);
+	ESGE_SceneMngr::Init(nDisabledScene);
 	ESGE_SceneMngr::AddScene(sceneFile);
 
 	ticks = SDL_GetTicks();

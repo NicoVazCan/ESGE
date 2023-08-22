@@ -542,3 +542,25 @@ ESGE_SceneMngr::GetActiveScene(void)
 {
   return active;
 }
+
+int
+ESGE_SceneMngr::SetActiveScene(const char *sceneFile)
+{
+  ESGE_Scene *scene;
+  Uint64 sceneID;
+
+  sceneID = ESGE_Hash(sceneFile);
+
+  for (
+    scene = enabledList;
+    scene && scene->id != sceneID;
+    scene = scene->next
+  );
+
+  if (scene && scene->id == sceneID)
+  {
+    active = scene;
+    return 0;
+  }
+  return SDL_SetError("Scene \"%s\" not loaded", sceneFile);
+}

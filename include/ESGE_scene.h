@@ -207,6 +207,7 @@ public:
   static void CloseScene(const char *sceneFile);
 
   static ESGE_Scene *GetActiveScene(void);
+  static int SetActiveScene(const char *sceneFile);
 };
 
 #endif
