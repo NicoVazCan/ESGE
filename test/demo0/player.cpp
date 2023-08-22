@@ -1,18 +1,14 @@
-#include <SDL2/SDL.h>
-#include "ESGE_scene.h"
+#include "player.h"
+
 #include "ESGE_spritesheet.h"
-#include "ESGE_anim.h"
 #include "ESGE_time.h"
 #include "ESGE_audio.h"
 #include "ESGE_file.h"
-
 #include "ESGE_objStatic.h"
 #include "ESGE_objDynamic.h"
 
-#include "ESGE_objUpdate.h"
-#include "ESGE_objDrawSprite.h"
-
 #include "roomMngr.h"
+#include "camMngr.h"
 
 
 static const ESGE_Frm frmsStandR[] = {
@@ -46,29 +42,29 @@ static const ESGE_Frm frmsStandUL[] = {
 
 
 static const ESGE_Frm frmsRunR[] = {
-  {0, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {1, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {2, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {3, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {4, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {5, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {6, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {7, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {8, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {9, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10}
+  {0, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {1, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {2, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {3, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {4, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {5, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {6, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {7, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {8, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {9, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8}
 };
 
 static const ESGE_Frm frmsRunL[] = {
-  {0, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {1, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {2, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {3, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {4, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {5, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {6, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {7, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {8, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {9, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10}
+  {0, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {1, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {2, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {3, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {4, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {5, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {6, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {7, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {8, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {9, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8}
 };
 
 
@@ -207,280 +203,308 @@ enum PlayerAnim: size_t
 };
 
 
-#define PLAYER_POS_SCALE 8
-#define PLAYER_ACC ( \
+#define POS_SCALE 8
+#define ACC ( \
   ((int)(ESGE_deltaTm * ESGE_deltaTm)) * 0x0010 / 256 \
 )
-#define PLAYER_VEL (((int)ESGE_deltaTm) * 0x0100 / 16)
-#define PLAYER_GRA ( \
-  ((int)(ESGE_deltaTm * ESGE_deltaTm)) * 0x0010 / 256 \
+#define VEL (((int)ESGE_deltaTm) * 0x0100 / 16)
+#define GRA ( \
+  ((int)(ESGE_deltaTm * ESGE_deltaTm)) * 0x000A / 256 \
 )
-#define PLAYER_JMP (((int)ESGE_deltaTm) * 0x0200 / 16)
-#define PLAYER_JMP_SND "jump.wav"
-#define PLAYER_SS "player.sprite.bin"
-#define PLAYER_MUS "brinstar.wav"
+#define JMP (((int)ESGE_deltaTm) * 0x0200 / 16)
+#define JMP_SND "sounds/jump.wav"
+#define SS "sprites/player.sprite.bin"
 
 #define ROUND(T, S, N) ( \
   ((N + (1<<(S-1)) + (N>>(sizeof(T)*8-1))) & (~((1<<S)-1))) >> S \
 )
 
-class ObjPlayer:
-  public ESGE_ObjScene,
-  public ESGE_ObjUpdate,
-  public ESGE_ObjDynamic,
-  public ESGE_ObjDrawSprite
+int
+ObjPlayer::GetPosX(void *obj)
 {
-public:
-  SDL_Point fAcc = {0, 0};
-  SDL_Point fVel = {0, 0};
-  SDL_Point fPos;
-  ESGE_Spritesheet *spritesheet;
-  ESGE_AnimPlayer animPlayer;
-  ESGE_Music *music;
-  ESGE_Sound *jmpSnd;
+  return ((ObjPlayer*)obj)->pos.x;
+}
+void
+ObjPlayer::SetPosX(void *obj, int value)
+{
+  ((ObjPlayer*)obj)->pos.x = value;
+  ((ObjPlayer*)obj)->prevPos.x = value;
+}
+
+int
+ObjPlayer::GetPosY(void *obj)
+{
+  return ((ObjPlayer*)obj)->pos.y;
+}
+void
+ObjPlayer::SetPosY(void *obj, int value)
+{
+  ((ObjPlayer*)obj)->pos.y = value;
+  ((ObjPlayer*)obj)->prevPos.y = value;
+}
 
 
-  static int GetPosX(void *obj)
+ObjPlayer::ObjPlayer(void)
+{
+  layer = 1;
+  
+  offsetSize.x = 0;
+  offsetSize.y = 0;
+  offsetSize.w = 16;
+  offsetSize.h = 32;
+
+  spritesheet = ESGE_FileMngr<ESGE_Spritesheet>::Watch(SS);
+
+  animPlayer.sprts = spritesheet;
+  animPlayer.speed = 100;
+
+  facingR = true;
+  animPlayer.Start(anims + STAND_R);
+  animPlayer.GetSprite(&sprite);
+
+  jmpSnd = ESGE_FileMngr<ESGE_Sound>::Watch(JMP_SND);
+}
+
+ObjPlayer::~ObjPlayer(void)
+{
+  ESGE_FileMngr<ESGE_Spritesheet>::Leave(spritesheet);
+  ESGE_FileMngr<ESGE_Sound>::Leave(jmpSnd);
+}
+
+
+void
+ObjPlayer::OnInit(void)
+{
+  fPos.x = pos.x << POS_SCALE;
+  fPos.y = pos.y << POS_SCALE;
+}
+
+void
+ObjPlayer::OnStart(void)
+{
+  ObjRoomMngr *roomMngr;
+  ObjCamMngr *camMngr;
+
+  if ((roomMngr = ESGE_GetObj<ObjRoomMngr>(sceneID, "ObjRoomMngr")))
+    roomMngr->SetFocusCenter(pos.x + 8, pos.y + 16);
+
+  if ((camMngr = ESGE_GetObj<ObjCamMngr>(sceneID, "ObjCamMngr")))
+    camMngr->SetCamCenter(pos.x + 8, pos.y + 16);
+}
+
+void
+ObjPlayer::OnUpdate(void)
+{
+  const Uint8 *keys;
+
+  if (fVel.y + fAcc.y >= JMP)
   {
-    return ((ObjPlayer*)obj)->pos.x;
+    fAcc.y = 0;
+    fVel.y = JMP;
   }
-  static void SetPosX(void *obj, int value)
+  else fAcc.y = GRA;
+
+  keys = SDL_GetKeyboardState(NULL);
+    
+  if (keys[SDL_SCANCODE_LEFT] && !keys[SDL_SCANCODE_RIGHT])
   {
-    ((ObjPlayer*)obj)->pos.x = value;
-    ((ObjPlayer*)obj)->prevPos.x = value;
-  }
-
-  static int GetPosY(void *obj)
-  {
-    return ((ObjPlayer*)obj)->pos.y;
-  }
-  static void SetPosY(void *obj, int value)
-  {
-    ((ObjPlayer*)obj)->pos.y = value;
-    ((ObjPlayer*)obj)->prevPos.y = value;
-  }
-
-
-  ObjPlayer(void)
-  {
-    offsetSize.x = 0;
-    offsetSize.y = 0;
-    offsetSize.w = 16;
-    offsetSize.h = 32;
-
-    spritesheet = ESGE_FileMngr<ESGE_Spritesheet>::Watch(PLAYER_SS);
-
-    animPlayer.sprts = spritesheet;
-    animPlayer.speed = 100;
-
-    animPlayer.Start(anims + RUN_R);
-    animPlayer.GetSprite(&sprite);
-
-    music = ESGE_FileMngr<ESGE_Music>::Watch(PLAYER_MUS);
-    jmpSnd = ESGE_FileMngr<ESGE_Sound>::Watch(PLAYER_JMP_SND);
-  }
-
-  virtual ~ObjPlayer(void) override
-  {
-    ESGE_FileMngr<ESGE_Spritesheet>::Leave(spritesheet);
-    ESGE_FileMngr<ESGE_Music>::Leave(music);
-    ESGE_FileMngr<ESGE_Sound>::Leave(jmpSnd);
-  }
-
-
-  virtual void OnInit(void)
-  {
-    fPos.x = pos.x << PLAYER_POS_SCALE;
-    fPos.y = pos.y << PLAYER_POS_SCALE;
-    music->Play();
-  }
-
-  virtual void OnStart(void)
-  {
-    ObjRoomMngr *roomMngr;
-
-    if ((roomMngr = ESGE_GetObj<ObjRoomMngr>(sceneID, "ObjRoomMngr")))
-      roomMngr->SetFocusCenter(pos.x + 8, pos.y + 16);
-  }
-
-  virtual void OnUpdate(void)
-  {
-    const Uint8 *keys;
-
-    if (fVel.y + fAcc.y >= PLAYER_JMP)
+    if (fVel.x - ACC < -VEL)
     {
-      fAcc.y = 0;
-      fVel.y = PLAYER_JMP;
+      fAcc.x = 0;
+      fVel.x = -VEL;
     }
-    else fAcc.y = PLAYER_GRA;
+    else fAcc.x = -ACC;
 
-    keys = SDL_GetKeyboardState(NULL);
-      
-    if (keys[SDL_SCANCODE_LEFT] && !keys[SDL_SCANCODE_RIGHT])
+    facingR = false;
+  }
+  else if (!keys[SDL_SCANCODE_LEFT] && keys[SDL_SCANCODE_RIGHT])
+  {
+    if (fVel.x + ACC > VEL)
     {
-      if (fVel.x - PLAYER_ACC < -PLAYER_VEL)
-      {
-        fAcc.x = 0;
-        fVel.x = -PLAYER_VEL;
-      }
-      else fAcc.x = -PLAYER_ACC;
+      fAcc.x = 0;
+      fVel.x = VEL;
     }
-    else if (!keys[SDL_SCANCODE_LEFT] && keys[SDL_SCANCODE_RIGHT])
+    else fAcc.x = ACC;
+
+    facingR = true;
+  }
+  else
+  {
+    if (fVel.x > 0)
     {
-      if (fVel.x + PLAYER_ACC > PLAYER_VEL)
-      {
-        fAcc.x = 0;
-        fVel.x = PLAYER_VEL;
-      }
-      else fAcc.x = PLAYER_ACC;
-    }
-    else
-    {
-      if (fVel.x > 0)
-      {
-        if (fVel.x + fAcc.x <= 0)
-        {
-          fAcc.x = 0;
-          fVel.x = 0;
-        }
-        else fAcc.x = -PLAYER_ACC;
-      }
-      else if ((fVel.x < 0))
-      {
-        if (fVel.x + fAcc.x >= 0)
-        {
-          fAcc.x = 0;
-          fVel.x = 0;
-        }
-        else fAcc.x = PLAYER_ACC;
-      }
-      else
+      if (fVel.x + fAcc.x <= 0)
       {
         fAcc.x = 0;
         fVel.x = 0;
       }
+      else fAcc.x = -ACC;
     }
-
-    if (keys[SDL_SCANCODE_SPACE])
+    else if ((fVel.x < 0))
     {
-      if (fVel.y >> PLAYER_POS_SCALE == 0)
+      if (fVel.x + fAcc.x >= 0)
       {
-        SDL_Point test;
-        SDL_Rect thisColBox;
-        bool onAir = true;
-
-        thisColBox = GetColBox();
-        test.x = thisColBox.x;
-        test.y = thisColBox.y + thisColBox.h;
-
-        while (test.x < thisColBox.x + thisColBox.w && onAir)
-        {
-          onAir = ESGE_ObjStatic::GetObjAt(test) == NULL;
-          test.x += ESGE_ObjStatic::cellW;
-        }
-        if (onAir)
-        {
-          test.x = thisColBox.x + thisColBox.w - 1;
-          onAir = ESGE_ObjStatic::GetObjAt(test) == NULL;
-        }
-        if (!onAir)
-        {
-          fVel.y = -PLAYER_JMP;
-          jmpSnd->Play();
-        }
+        fAcc.x = 0;
+        fVel.x = 0;
       }
+      else fAcc.x = ACC;
     }
-    else if (fVel.y < 0)
+    else
     {
-      fVel.y = 0;
-    }
-
-    fPos.x += fVel.x += fAcc.x;
-    fPos.y += fVel.y += fAcc.y;
-
-    pos.x = ROUND(int, PLAYER_POS_SCALE, fPos.x);
-    pos.y = ROUND(int, PLAYER_POS_SCALE, fPos.y);
-
-    animPlayer.Update(ESGE_deltaTm);
-    animPlayer.GetSprite(&sprite);
-  }
-
-  virtual void OnPhysic(void) override
-  {
-    ObjRoomMngr *roomMngr;
-
-    ESGE_ObjDynamic::OnPhysic();
-
-    ESGE_Display::cam.x = pos.x - 256 + 8;
-    ESGE_Display::cam.y = pos.y - 144 + 16;
-
-    if ((roomMngr = ESGE_GetObj<ObjRoomMngr>(sceneID, "ObjRoomMngr")))
-      roomMngr->SetFocusCenter(pos.x + 8, pos.y + 16);
-  }
-
-  virtual void OnCollide(SDL_UNUSED ESGE_ObjCollider *other)
-  {
-    SDL_Rect thisColBox, otherColBox;
-
-    thisColBox  = GetColBox();
-    otherColBox = other->GetColBox();
-
-    if ((
-        thisColBox.x++,
-        SDL_HasIntersection(&thisColBox, &otherColBox)
-      ) || (
-        thisColBox.x -= 2,
-        SDL_HasIntersection(&thisColBox, &otherColBox)
-      )
-    )
-    {
-      fPos.x = pos.x << PLAYER_POS_SCALE;
+      fAcc.x = 0;
       fVel.x = 0;
     }
-    thisColBox.x = pos.x;
-    if ((
-        thisColBox.y++,
-        SDL_HasIntersection(&thisColBox, &otherColBox)
-      ) || (
-        thisColBox.y -= 2,
-        SDL_HasIntersection(&thisColBox, &otherColBox)
-      )
-    )
+  }
+
+  if (keys[SDL_SCANCODE_SPACE])
+  {
+    if (fVel.y >> POS_SCALE == 0)
     {
-      fPos.y = pos.y << PLAYER_POS_SCALE;
-      fVel.y = 0;
+      SDL_Point test;
+      SDL_Rect thisColBox;
+      bool onAir = true;
+
+      thisColBox = GetColBox();
+      test.x = thisColBox.x;
+      test.y = thisColBox.y + thisColBox.h;
+
+      while (test.x < thisColBox.x + thisColBox.w && onAir)
+      {
+        onAir = ESGE_ObjStatic::GetObjAt(test) == NULL;
+        test.x += ESGE_ObjStatic::cellW;
+      }
+      if (onAir)
+      {
+        test.x = thisColBox.x + thisColBox.w - 1;
+        onAir = ESGE_ObjStatic::GetObjAt(test) == NULL;
+      }
+      if (!onAir)
+      {
+        fVel.y = -JMP;
+        jmpSnd->Play();
+      }
+    }
+  }
+  else if (fVel.y < 0)
+  {
+    fVel.y = 0;
+  }
+
+  fPos.x += fVel.x += fAcc.x;
+  fPos.y += fVel.y += fAcc.y;
+
+  if (facingR)
+  {
+    if (fVel.x == 0)
+    {
+      if (animPlayer.anim != anims + STAND_R)
+        animPlayer.Start(anims + STAND_R);
+    }
+    else
+    {
+      if (animPlayer.anim != anims + RUN_R)
+        animPlayer.Start(anims + RUN_R);
+    }
+  }
+  else
+  {
+    if (fVel.x == 0)
+    {
+      if (animPlayer.anim != anims + STAND_L)
+        animPlayer.Start(anims + STAND_L);
+    }
+    else
+    {
+      if (animPlayer.anim != anims + RUN_L)
+        animPlayer.Start(anims + RUN_L);
     }
   }
 
+  pos.x = ROUND(int, POS_SCALE, fPos.x);
+  pos.y = ROUND(int, POS_SCALE, fPos.y);
 
-  virtual void OnEnable(void) override
-  {
-    ESGE_ObjScene::OnEnable();
-    EnableUpdate();
-    EnableDynamic();
-    EnableDraw();
-  }
+  animPlayer.Update(ESGE_deltaTm);
+  animPlayer.GetSprite(&sprite);
+}
 
-  virtual void OnDisable(void) override
+void
+ObjPlayer::OnPhysic(void)
+{
+  ObjRoomMngr *roomMngr;
+  ObjCamMngr *camMngr;
+
+  ESGE_ObjDynamic::OnPhysic();
+
+  if ((roomMngr = ESGE_GetObj<ObjRoomMngr>(sceneID, "ObjRoomMngr")))
+    roomMngr->SetFocusCenter(pos.x + 8, pos.y + 16);
+
+  if ((camMngr = ESGE_GetObj<ObjCamMngr>(sceneID, "ObjCamMngr")))
+    camMngr->SetCamCenter(pos.x + 8, pos.y + 16);
+}
+
+void
+ObjPlayer::OnCollide(ESGE_ObjCollider *other)
+{
+  SDL_Rect thisColBox, otherColBox;
+
+  thisColBox  = GetColBox();
+  otherColBox = other->GetColBox();
+
+  if ((
+      thisColBox.x++,
+      SDL_HasIntersection(&thisColBox, &otherColBox)
+    ) || (
+      thisColBox.x -= 2,
+      SDL_HasIntersection(&thisColBox, &otherColBox)
+    )
+  )
   {
-    ESGE_ObjScene::OnDisable();
-    DisableUpdate();
-    DisableDynamic();
-    DisableDraw();
+    fPos.x = pos.x << POS_SCALE;
+    fVel.x = 0;
   }
+  thisColBox.x = pos.x;
+  if ((
+      thisColBox.y++,
+      SDL_HasIntersection(&thisColBox, &otherColBox)
+    ) || (
+      thisColBox.y -= 2,
+      SDL_HasIntersection(&thisColBox, &otherColBox)
+    )
+  )
+  {
+    fPos.y = pos.y << POS_SCALE;
+    fVel.y = 0;
+  }
+}
+
+void
+ObjPlayer::OnEnable(void)
+{
+  ESGE_ObjScene::OnEnable();
+  EnableUpdate();
+  EnableDynamic();
+  EnableDraw();
+}
+void
+ObjPlayer::OnDisable(void)
+{
+  ESGE_ObjScene::OnDisable();
+  DisableUpdate();
+  DisableDynamic();
+  DisableDraw();
+}
 
 #ifdef ESGE_EDITOR
-  virtual void OnEditorInit(void) override
-  {
-    EnableDraw();
-  }
-
-  virtual void OnEditorQuit(void) override
-  {
-    DisableDraw();
-  }
+void
+ObjPlayer::OnEditorInit(void)
+{
+  EnableDraw();
+}
+void
+ObjPlayer::OnEditorQuit(void)
+{
+  DisableDraw();
+}
 #endif
-};
 
 ESGE_TYPE_FIELDS(
   ObjPlayer,

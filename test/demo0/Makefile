@@ -63,10 +63,13 @@ vpath %.h ../../include
 vpath %.a ../../build
 
 OBJS_GAME = \
-	player.o tileCol.o tileSet.o roomMngr.o
+	player.o tileCol.o tileSet.o roomMngr.o camMngr.o sceneChanger.o \
+	musicPlayer.o bgnd.o parlxBgnd.o alive.o flyEnemy.o
 	
 OBJS_EDIT = \
-	player_edit.o tileCol_edit.o tileSet_edit.o roomMngr.o
+	player_edit.o tileCol_edit.o tileSet_edit.o roomMngr_edit.o \
+	camMngr_edit.o sceneChanger_edit.o musicPlayer_edit.o \
+	bgnd_edit.o parlxBgnd_edit.o alive_edit.o flyEnemy_edit.o
 
 all: game editor
 

@@ -1,6 +1,4 @@
 #include "roomMngr.h"
-#define SGLIB_ASSERT SDL_assert
-#include "sglib.h"
 
 #include "ESGE_display.h"
 
@@ -13,6 +11,31 @@ static Room _rooms[] = {
   {{256*2*1, 0, 256*2, 144}, "room1.bin", false},
   {{256*2*2, 0, 256*2, 144}, "room2.bin", false}
 };
+
+
+void
+ObjRoomMngr::LoadRooms(void)
+{
+  for (size_t i = 0; i < nRooms; ++i)
+  {
+    if (SDL_HasIntersection(&rooms[i].area, &focus))
+    {
+      if (!rooms[i].loaded)
+      {
+        ESGE_SceneMngr::AddScene(rooms[i].sceneFile);
+        rooms[i].loaded = true;
+      }
+    }
+    else
+    {
+      if (rooms[i].loaded)
+      {
+        ESGE_SceneMngr::StashScene(rooms[i].sceneFile);
+        rooms[i].loaded = false;
+      }
+    }
+  }
+}
 
 
 ObjRoomMngr::ObjRoomMngr(void):
@@ -28,13 +51,20 @@ ObjRoomMngr::~ObjRoomMngr(void)
 void
 ObjRoomMngr::OnEnable(void)
 {
+  ESGE_ObjScene::OnEnable();
   ESGE_ShareObj<ObjRoomMngr>(this);
+
+  ObjRoomMngr::LoadRooms();
 }
 
 void
 ObjRoomMngr::OnDisable(void)
 {
+  ESGE_ObjScene::OnDisable();
   ESGE_UnshareObj<ObjRoomMngr>(this);
+
+  for (size_t i = 0; i < nRooms; ++i)
+    rooms[i].loaded = false;
 }
 
 
@@ -49,27 +79,11 @@ ObjRoomMngr::SetFocusCenter(int x, int y)
     focus.x = x;
     focus.y = y;
 
-    for (size_t i = 0; i < nRooms; ++i)
-    {
-      if (SDL_HasIntersection(&rooms[i].area, &focus))
-      {
-        if (!rooms[i].loaded)
-        {
-          ESGE_SceneMngr::AddScene(rooms[i].sceneFile);
-          rooms[i].loaded = true;
-        }
-      }
-      else
-      {
-        if (rooms[i].loaded)
-        {
-          ESGE_SceneMngr::CloseScene(rooms[i].sceneFile);
-          rooms[i].loaded = false;
-        }
-      }
-    }
+    ObjRoomMngr::LoadRooms();
   }
+  /*
   ESGE_Display::WorldDrawRect(focus, 0, 255, 0, 255);
+  */
 }
 
 

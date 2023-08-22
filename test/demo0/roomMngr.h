@@ -18,6 +18,8 @@ class ObjRoomMngr: public ESGE_ObjScene
   Room *rooms;
   size_t nRooms;
 
+  inline void LoadRooms(void);
+
 public:
   ObjRoomMngr(void);
   virtual ~ObjRoomMngr(void) override;

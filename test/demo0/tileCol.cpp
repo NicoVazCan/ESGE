@@ -52,6 +52,7 @@ public:
 
   ObjTileCol(void)
   {
+    layer = 2;
     ESGE_ObjStatic::SetColW(1);
     ESGE_ObjStatic::SetRowH(1);
   }
@@ -67,11 +68,13 @@ public:
 #ifdef ESGE_EDITOR
   virtual void OnEditorInit(void)
   {
+    ESGE_ObjScene::OnEnable();
     EnableDraw();
   }
 
   virtual void OnEditorQuit(void)
   {
+    ESGE_ObjScene::OnDisable();
     DisableDraw();
   }
 #endif

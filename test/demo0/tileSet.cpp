@@ -7,7 +7,7 @@
 #include "ESGE_objDrawSprite.h"
 
 
-#define TILE_SET_SS "tiles.sprite.bin"
+#define TILE_SET_SS "sprites/tiles.sprite.bin"
 
 
 class ObjTileSet:
@@ -80,7 +80,7 @@ public:
 
   ObjTileSet(void)
   {
-    layer = 1;
+    layer = 2;
     spritesheet = ESGE_FileMngr<ESGE_Spritesheet>::Watch(TILE_SET_SS);
     spritesheet->GetSprite(&sprite, spriteCol, spriteRow);
   }
