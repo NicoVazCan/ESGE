@@ -9,6 +9,7 @@ ESGE_AnimPlayer::Start(const ESGE_Anim *anim)
   frm        = 0;
   ticks      = 0;
   rep        = anim->rep;
+  done       = false;
 }
 
 void
@@ -31,20 +32,8 @@ ESGE_AnimPlayer::Update(Uint32 deltaTm)
         else          rep--;
       }
     }
-    if (speed != 0)
-    {
-      Uint32 deltaTicks;
-
-      deltaTicks = speed * deltaTm;
-
-      if (
-        deltaTm > SDL_MAX_UINT32 / speed ||
-        ticks > SDL_MAX_UINT32 - deltaTicks
-      )
-        ticks = SDL_MAX_UINT32;
-      else
-        ticks += deltaTicks;
-    }
+    
+    ticks += speed * deltaTm;
   }
 }
 

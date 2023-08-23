@@ -244,6 +244,7 @@ ESGE_Scene::AddObj(const char *typeName)
 #else
   obj->OnInit();
   obj->OnStart();
+  obj->OnEnable();
 #endif
 
   return obj;
@@ -272,6 +273,7 @@ ESGE_Scene::DelObj(const char *instName)
 #ifdef ESGE_EDITOR
     (*node)->OnEditorQuit();
 #else
+    (*node)->OnDisable();
     (*node)->OnQuit();
 #endif
 
@@ -432,16 +434,34 @@ ESGE_SceneMngr::Init(int maxDisabled)
 void
 ESGE_SceneMngr::Quit(void)
 {
+  ESGE_Scene *s, *n;
+
 #ifndef ESGE_EDITOR
-  for (ESGE_Scene *s = enabledList; s; s = s->next)
+  s = enabledList;
+  while (s)
+  {
+    n = s->next;
     s->Disable();
+    s = n;
+  }
 #endif
-
-  for (ESGE_Scene *s = enabledList; s; s = s->next)
+  s = enabledList;
+  while (s)
+  {
+    n = s->next;
     delete s;
-
-  for (ESGE_Scene *s = lastDisabled; s; s = s->next)
+    s = n;
+  }
+  s = lastDisabled;
+  while (s)
+  {
+    n = s->next;
     delete s;
+    s = n;
+  }
+
+  enabledList = NULL;
+  lastDisabled = NULL;
 }
 
 
@@ -509,6 +529,31 @@ ESGE_SceneMngr::ChangeScene(const char *sceneFile)
   EnableScene(active);
 }
 
+void
+ESGE_SceneMngr::StashScene(const char *sceneFile)
+{
+  ESGE_Scene **node;
+  Uint64 sceneID;
+
+  sceneID = ESGE_Hash(sceneFile);
+
+  for (
+    node = &enabledList;
+    *node && (*node)->id != sceneID;
+    node = &(*node)->next
+  );
+
+  if (*node && (*node)->id == sceneID)
+  {
+    ESGE_Scene *scene = *node;
+
+    *node = (*node)->next;
+
+    if (scene == active) active = *node;
+
+    DisableScene(scene);
+  }
+}
 
 void
 ESGE_SceneMngr::CloseScene(const char *sceneFile)
@@ -531,8 +576,21 @@ ESGE_SceneMngr::CloseScene(const char *sceneFile)
     *node = (*node)->next;
 
     if (scene == active) active = *node;
+#ifndef ESGE_EDITOR
+    scene->Disable();
+#endif
+    delete scene;
+  }
+  else
+  {
+    for (
+      node = &lastDisabled;
+      *node && (*node)->id != sceneID;
+      node = &(*node)->next
+    );
 
-    DisableScene(scene);
+    if (*node && (*node)->id == sceneID)
+      delete *node;
   }
 }
 

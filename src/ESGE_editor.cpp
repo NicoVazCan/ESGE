@@ -183,7 +183,7 @@ CmdList(ESGE_Scene *scene)
 		obj = obj->next
 	)
 	{
-		puts(obj->instName);
+		printf("\"%s\"\n", obj->instName);
 	}
 }
 
@@ -379,7 +379,7 @@ extern "C"
 int
 main(int argc, char *argv[])
 {
-	const char *title = "editor";
+	const char *title = "editor", *scene = "scene.bin";
 	int w = 256, h = 144;
 	SDL_Thread *shell;
 	Uint32 ticks;
@@ -414,8 +414,14 @@ main(int argc, char *argv[])
 				return 0;
 			}
 		}
-		else ESGE_SceneMngr::AddScene(argv[i]);
+		else
+		{
+			ESGE_SceneMngr::AddScene(argv[i]);
+			scene = NULL;
+		}
 	}
+
+	if (scene) ESGE_SceneMngr::AddScene(scene);
 
 	shell = SDL_CreateThread(RunShell, "shell", NULL);
 	ticks = SDL_GetTicks();

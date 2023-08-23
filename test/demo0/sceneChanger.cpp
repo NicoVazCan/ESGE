@@ -1,7 +1,6 @@
 #include "ESGE_scene.h"
 
 #include "ESGE_objEvent.h"
-#include "ESGE_objSerial.h"
 
 #define SCENE_FILE_LEN 128
 
@@ -33,13 +32,6 @@ public:
   {
     ((ObjSceneChanger*)obj)->key = value;
   }
-
-
-  ObjSceneChanger(void)
-  {}
-  virtual ~ObjSceneChanger(void) override
-  {}
-
 
   virtual void OnEnable(void) override
   {

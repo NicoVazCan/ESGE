@@ -1,40 +1,44 @@
-#ifndef FLY_ENEMY_H_
-# define FLY_ENEMY_H_
+#ifndef SPAWNER_ENEMY_H_
+# define SPAWNER_ENEMY_H_
 
-#include <SDL2/SDL.h>
 #include "ESGE_scene.h"
 #include "ESGE_objUpdate.h"
 #include "ESGE_anim.h"
 
+#include "ESGE_objCell.h"
 #include "ESGE_objDrawSprite.h"
 #include "alive.h"
 
 class ObjPlayer;
 
-class ObjFlyEnemy:
+class ObjSpawnerEnemy:
   public ESGE_ObjScene,
+  public ESGE_ObjCell,
   public ESGE_ObjUpdate,
   public ObjAlive,
   public ESGE_ObjDrawSprite
 {
-  SDL_Point fAcc = {0, 0};
-  SDL_Point fVel = {0, 0};
-  SDL_Point fPos;
-
   ESGE_Spritesheet *spritesheet;
   ESGE_AnimPlayer animPlayer;
+
+  Uint32 spawnDeltaTm = 2000;
+  Uint32 maxSpawnDeltaTm = 2000;
+  int maxFlyEnemy = 8;
 
   ObjPlayer *player;
 
 public:
-  static int GetPosX(void *obj);
-  static void SetPosX(void *obj, int value);
+  static int GetCol(void *obj);
+  static void SetCol(void *obj, int value);
 
-  static int GetPosY(void *obj);
-  static void SetPosY(void *obj, int value);
+  static int GetRow(void *obj);
+  static void SetRow(void *obj, int value);
 
-  ObjFlyEnemy(void);
-  virtual ~ObjFlyEnemy(void) override;
+  static int GetMaxFlyEnemy(void *obj);
+  static void SetMaxFlyEnemy(void *obj, int value);
+
+  ObjSpawnerEnemy(void);
+  virtual ~ObjSpawnerEnemy(void);
 
   virtual void OnStart(void) override;
 

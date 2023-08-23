@@ -116,7 +116,7 @@ ESGE_GetObj(const char *sceneFile, const char *instName)
       sharedObj->sceneID == sceneID &&
       sharedObj->instID == instID
     ) ?
-    sharedObj :
+    (C*)sharedObj :
     NULL
   );
 }
@@ -204,6 +204,7 @@ public:
   static void AddScene(const char *sceneFile);
   static void ChangeScene(const char *sceneFile);
 
+  static void StashScene(const char *sceneFile);
   static void CloseScene(const char *sceneFile);
 
   static ESGE_Scene *GetActiveScene(void);

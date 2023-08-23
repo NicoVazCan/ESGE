@@ -9,6 +9,8 @@
 #include "ESGE_objDrawSprite.h"
 #include "alive.h"
 
+#define PLAYER_LAYER 10
+
 class ESGE_Spritesheet;
 class ESGE_Sound;
 
@@ -36,8 +38,6 @@ public:
 
   ObjPlayer(void);
   virtual ~ObjPlayer(void) override;
-
-  virtual void OnInit(void) override;
 
   virtual void OnStart(void) override;
 

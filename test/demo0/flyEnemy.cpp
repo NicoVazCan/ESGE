@@ -1,6 +1,9 @@
 #include "flyEnemy.h"
 
 #include "ESGE_time.h"
+#include "ESGE_file.h"
+
+#include "player.h"
 
 ESGE_TYPE_FIELDS(
   ObjFlyEnemy,
@@ -20,12 +23,12 @@ ESGE_TYPE_FIELDS(
 )
 
 static const ESGE_Frm _frms[] = {
-  {0, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*2},
-  {1, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*2},
-  {2, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*2},
-  {3, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*2},
-  {2, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*2},
-  {1, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*2}
+  {0, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*4},
+  {1, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*4},
+  {2, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*4},
+  {3, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*4},
+  {2, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*4},
+  {1, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*4}
 };
 
 static const ESGE_Anim _anim = {
@@ -35,11 +38,7 @@ static const ESGE_Anim _anim = {
 };
 
 
-#define SS "sprites/fly.sprite.bin"
 #define POS_SCALE 8
-#define ROUND(T, S, N) ( \
-  ((N + (1<<(S-1)) + (N>>(sizeof(T)*8-1))) & (~((1<<S)-1))) >> S \
-)
 
 int
 ObjFlyEnemy::GetPosX(void *obj)
@@ -51,6 +50,7 @@ ObjFlyEnemy::SetPosX(void *obj, int value)
 {
   ((ObjFlyEnemy*)obj)->pos.x = value;
   ((ObjFlyEnemy*)obj)->prevPos.x = value;
+  ((ObjFlyEnemy*)obj)->fPos.x = value << POS_SCALE;
 }
 
 int
@@ -63,14 +63,21 @@ ObjFlyEnemy::SetPosY(void *obj, int value)
 {
   ((ObjFlyEnemy*)obj)->pos.y = value;
   ((ObjFlyEnemy*)obj)->prevPos.y = value;
+  ((ObjFlyEnemy*)obj)->fPos.y = value << POS_SCALE;
 }
 
+#define SS "sprites/fly.sprite.bin"
 
 ObjFlyEnemy::ObjFlyEnemy(void)
 {
-  layer = 1;
+  layer = PLAYER_LAYER+1;
 
   isTrigger = true;
+
+  offsetSize.x = 0;
+  offsetSize.y = 0;
+  offsetSize.w = 16;
+  offsetSize.h = 8;
 
   spritesheet = ESGE_FileMngr<ESGE_Spritesheet>::Watch(SS);
 
@@ -85,17 +92,125 @@ ObjFlyEnemy::~ObjFlyEnemy(void)
 }
 
 void
-ObjFlyEnemy::OnInit(void)
+ObjFlyEnemy::OnStart(void)
 {
-  fPos.x = pos.x << POS_SCALE;
-  fPos.y = pos.y << POS_SCALE;
+  player = ESGE_GetObj<ObjPlayer>("scene0.bin", "ObjPlayer");
 }
+
+#define FOCUS_RANGE 128
+#define ACC ( \
+  ((int)(ESGE_deltaTm * ESGE_deltaTm)) * 0x0004 / 256 \
+)
+#define VEL (((int)ESGE_deltaTm) * 0x0080 / 16)
+#define ROUND(T, S, N) ( \
+  ((N + (1<<(S-1)) + (N>>(sizeof(T)*8-1))) & (~((1<<S)-1))) >> S \
+)
 
 void
 ObjFlyEnemy::OnUpdate(void)
 {
-  pos.x = ROUND(int, POS_SCALE, fPos.x);
-  pos.y = ROUND(int, POS_SCALE, fPos.y);
+  if (player)
+  {
+    if (
+      SDL_abs(player->pos.x - pos.x) <= FOCUS_RANGE &&
+      SDL_abs(player->pos.y - pos.y) <= FOCUS_RANGE
+    )
+    {
+      if (player->pos.x > pos.x)
+      {
+        if (fVel.x + ACC >= VEL)
+        {
+          fAcc.x = 0;
+          fVel.x = VEL;
+        }
+        else fAcc.x = ACC;
+      }
+      else if (player->pos.x < pos.x)
+      {
+        if (fVel.x - ACC <= -VEL)
+        {
+          fAcc.x = 0;
+          fVel.x = -VEL;
+        }
+        else fAcc.x = -ACC;
+      }
+
+      if (player->pos.y > pos.y)
+      {
+        if (fVel.y + ACC >= VEL)
+        {
+          fAcc.y = 0;
+          fVel.y = VEL;
+        }
+        else fAcc.y = ACC;
+      }
+      else if (player->pos.y < pos.y)
+      {
+        if (fVel.y - ACC <= -VEL)
+        {
+          fAcc.y = 0;
+          fVel.y = -VEL;
+        }
+        else fAcc.y = -ACC;
+      }
+    }
+    else
+    {
+      if (fVel.x > 0)
+      {
+        if (fVel.x - ACC <= 0)
+        {
+          fAcc.x = 0;
+          fVel.x = 0;
+        }
+        else fAcc.x = -ACC;
+      }
+      else if (fVel.x < 0)
+      {
+        if (fVel.x + ACC >= 0)
+        {
+          fAcc.x = 0;
+          fVel.x = 0;
+        }
+        else fAcc.x = ACC;
+      }
+      else
+      {
+        fAcc.x = 0;
+        fVel.x = 0;
+      }
+
+      if (fVel.y > 0)
+      {
+        if (fVel.y - ACC <= 0)
+        {
+          fAcc.y = 0;
+          fVel.y = 0;
+        }
+        else fAcc.y = -ACC;
+      }
+      else if (fVel.y < 0)
+      {
+        if (fVel.y + ACC >= 0)
+        {
+          fAcc.y = 0;
+          fVel.y = 0;
+        }
+        else fAcc.y = ACC;
+      }
+      else
+      {
+        fAcc.y = 0;
+        fVel.y = 0;
+      }
+    }
+    
+    fPos.x += fVel.x += fAcc.x;
+    fPos.y += fVel.y += fAcc.y;
+
+    pos.x = ROUND(int, POS_SCALE, fPos.x);
+    pos.y = ROUND(int, POS_SCALE, fPos.y);
+  }
 
   animPlayer.Update(ESGE_deltaTm);
   animPlayer.GetSprite(&sprite);
@@ -108,6 +223,8 @@ ObjFlyEnemy::OnEnable(void)
   EnableUpdate();
   EnableDynamic();
   EnableDraw();
+
+  ESGE_ShareObj<ObjFlyEnemy>(this);
 }
 void
 ObjFlyEnemy::OnDisable(void)
@@ -116,6 +233,8 @@ ObjFlyEnemy::OnDisable(void)
   DisableUpdate();
   DisableDynamic();
   DisableDraw();
+
+  ESGE_UnshareObj<ObjFlyEnemy>(this);
 }
 #ifdef ESGE_EDITOR
 void

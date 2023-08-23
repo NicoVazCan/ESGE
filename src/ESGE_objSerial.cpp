@@ -195,7 +195,7 @@ ESGE_ObjSerial::Load(SDL_RWops *io)
 
       ESGE_ReadStr(io, str, ESGE_MAX_STR);
       if (fMatch)
-        f->valueS.set(this, ESGE_ReadStr(io, str, ESGE_MAX_STR));
+        f->valueS.set(this, str);
       break;
     default:
       SDL_assert(!"unrecognised type");

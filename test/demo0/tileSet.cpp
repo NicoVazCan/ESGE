@@ -6,6 +6,8 @@
 #include "ESGE_objCell.h"
 #include "ESGE_objDrawSprite.h"
 
+#include "player.h"
+
 
 #define TILE_SET_SS "sprites/tiles.sprite.bin"
 
@@ -80,7 +82,7 @@ public:
 
   ObjTileSet(void)
   {
-    layer = 2;
+    layer = PLAYER_LAYER+10;
     spritesheet = ESGE_FileMngr<ESGE_Spritesheet>::Watch(TILE_SET_SS);
     spritesheet->GetSprite(&sprite, spriteCol, spriteRow);
   }

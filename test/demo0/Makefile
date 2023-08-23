@@ -62,14 +62,11 @@ CXXFLAGS += -std=c++11 -nostdinc++ -fno-exceptions -fno-rtti $(CFLAGS)
 vpath %.h ../../include
 vpath %.a ../../build
 
-OBJS_GAME = \
-	player.o tileCol.o tileSet.o roomMngr.o camMngr.o sceneChanger.o \
-	musicPlayer.o bgnd.o parlxBgnd.o alive.o flyEnemy.o
-	
-OBJS_EDIT = \
-	player_edit.o tileCol_edit.o tileSet_edit.o roomMngr_edit.o \
-	camMngr_edit.o sceneChanger_edit.o musicPlayer_edit.o \
-	bgnd_edit.o parlxBgnd_edit.o alive_edit.o flyEnemy_edit.o
+SRCS = $(wildcard *.cpp)
+
+OBJS_GAME = $(SRCS:.cpp=.o)
+
+OBJS_EDIT = $(SRCS:.cpp=_edit.o)
 
 all: game editor
 

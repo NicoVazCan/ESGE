@@ -1,5 +1,5 @@
-#ifndef FLY_ENEMY_H_
-# define FLY_ENEMY_H_
+#ifndef BEAM_H_
+# define BEAM_H_
 
 #include <SDL2/SDL.h>
 #include "ESGE_scene.h"
@@ -7,24 +7,21 @@
 #include "ESGE_anim.h"
 
 #include "ESGE_objDrawSprite.h"
-#include "alive.h"
+#include "ESGE_objDynamic.h"
 
-class ObjPlayer;
-
-class ObjFlyEnemy:
+class ObjBeam:
   public ESGE_ObjScene,
   public ESGE_ObjUpdate,
-  public ObjAlive,
+  public ESGE_ObjDynamic,
   public ESGE_ObjDrawSprite
 {
+  enum {R, L, D, U} dir = R;
   SDL_Point fAcc = {0, 0};
   SDL_Point fVel = {0, 0};
   SDL_Point fPos;
 
   ESGE_Spritesheet *spritesheet;
   ESGE_AnimPlayer animPlayer;
-
-  ObjPlayer *player;
 
 public:
   static int GetPosX(void *obj);
@@ -33,12 +30,15 @@ public:
   static int GetPosY(void *obj);
   static void SetPosY(void *obj, int value);
 
-  ObjFlyEnemy(void);
-  virtual ~ObjFlyEnemy(void) override;
+  static int GetDir(void *obj);
+  static void SetDir(void *obj, int value);
 
-  virtual void OnStart(void) override;
+  ObjBeam(void);
+  virtual ~ObjBeam(void) override;
 
   virtual void OnUpdate(void) override;
+
+  virtual void OnTrigger(ESGE_ObjCollider *other) override;
 
   virtual void OnEnable(void) override;
   virtual void OnDisable(void) override;

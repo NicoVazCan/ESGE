@@ -42,29 +42,29 @@ static const ESGE_Frm frmsStandUL[] = {
 
 
 static const ESGE_Frm frmsRunR[] = {
-  {0, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
-  {1, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
-  {2, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
-  {3, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
-  {4, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
-  {5, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
-  {6, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
-  {7, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
-  {8, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
-  {9, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8}
+  {0, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
+  {1, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
+  {2, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
+  {3, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
+  {4, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
+  {5, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
+  {6, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
+  {7, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
+  {8, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
+  {9, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6}
 };
 
 static const ESGE_Frm frmsRunL[] = {
-  {0, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
-  {1, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
-  {2, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
-  {3, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
-  {4, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
-  {5, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
-  {6, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
-  {7, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
-  {8, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
-  {9, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8}
+  {0, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
+  {1, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
+  {2, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
+  {3, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
+  {4, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
+  {5, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
+  {6, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
+  {7, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
+  {8, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
+  {9, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6}
 };
 
 
@@ -204,20 +204,6 @@ enum PlayerAnim: size_t
 
 
 #define POS_SCALE 8
-#define ACC ( \
-  ((int)(ESGE_deltaTm * ESGE_deltaTm)) * 0x0010 / 256 \
-)
-#define VEL (((int)ESGE_deltaTm) * 0x0100 / 16)
-#define GRA ( \
-  ((int)(ESGE_deltaTm * ESGE_deltaTm)) * 0x000A / 256 \
-)
-#define JMP (((int)ESGE_deltaTm) * 0x0200 / 16)
-#define JMP_SND "sounds/jump.wav"
-#define SS "sprites/player.sprite.bin"
-
-#define ROUND(T, S, N) ( \
-  ((N + (1<<(S-1)) + (N>>(sizeof(T)*8-1))) & (~((1<<S)-1))) >> S \
-)
 
 int
 ObjPlayer::GetPosX(void *obj)
@@ -229,6 +215,7 @@ ObjPlayer::SetPosX(void *obj, int value)
 {
   ((ObjPlayer*)obj)->pos.x = value;
   ((ObjPlayer*)obj)->prevPos.x = value;
+  ((ObjPlayer*)obj)->fPos.x = value << POS_SCALE;
 }
 
 int
@@ -241,12 +228,15 @@ ObjPlayer::SetPosY(void *obj, int value)
 {
   ((ObjPlayer*)obj)->pos.y = value;
   ((ObjPlayer*)obj)->prevPos.y = value;
+  ((ObjPlayer*)obj)->fPos.y = value << POS_SCALE;
 }
 
+#define JMP_SND "sounds/jump.wav"
+#define SS "sprites/player.sprite.bin"
 
 ObjPlayer::ObjPlayer(void)
 {
-  layer = 1;
+  layer = PLAYER_LAYER;
   
   offsetSize.x = 0;
   offsetSize.y = 0;
@@ -271,14 +261,6 @@ ObjPlayer::~ObjPlayer(void)
   ESGE_FileMngr<ESGE_Sound>::Leave(jmpSnd);
 }
 
-
-void
-ObjPlayer::OnInit(void)
-{
-  fPos.x = pos.x << POS_SCALE;
-  fPos.y = pos.y << POS_SCALE;
-}
-
 void
 ObjPlayer::OnStart(void)
 {
@@ -291,6 +273,18 @@ ObjPlayer::OnStart(void)
   if ((camMngr = ESGE_GetObj<ObjCamMngr>(sceneID, "ObjCamMngr")))
     camMngr->SetCamCenter(pos.x + 8, pos.y + 16);
 }
+
+#define ACC ( \
+  ((int)(ESGE_deltaTm * ESGE_deltaTm)) * 0x0020 / 256 \
+)
+#define VEL (((int)ESGE_deltaTm) * 0x0140 / 16)
+#define GRA ( \
+  ((int)(ESGE_deltaTm * ESGE_deltaTm)) * 0x0010 / 256 \
+)
+#define JMP (((int)ESGE_deltaTm) * 0x0280 / 16)
+#define ROUND(T, S, N) ( \
+  ((N + (1<<(S-1)) + (N>>(sizeof(T)*8-1))) & (~((1<<S)-1))) >> S \
+)
 
 void
 ObjPlayer::OnUpdate(void)
@@ -332,7 +326,7 @@ ObjPlayer::OnUpdate(void)
   {
     if (fVel.x > 0)
     {
-      if (fVel.x + fAcc.x <= 0)
+      if (fVel.x - ACC <= 0)
       {
         fAcc.x = 0;
         fVel.x = 0;
@@ -341,7 +335,7 @@ ObjPlayer::OnUpdate(void)
     }
     else if ((fVel.x < 0))
     {
-      if (fVel.x + fAcc.x >= 0)
+      if (fVel.x + ACC >= 0)
       {
         fAcc.x = 0;
         fVel.x = 0;
@@ -392,6 +386,9 @@ ObjPlayer::OnUpdate(void)
   fPos.x += fVel.x += fAcc.x;
   fPos.y += fVel.y += fAcc.y;
 
+  pos.x = ROUND(int, POS_SCALE, fPos.x);
+  pos.y = ROUND(int, POS_SCALE, fPos.y);
+
   if (facingR)
   {
     if (fVel.x == 0)
@@ -418,9 +415,6 @@ ObjPlayer::OnUpdate(void)
         animPlayer.Start(anims + RUN_L);
     }
   }
-
-  pos.x = ROUND(int, POS_SCALE, fPos.x);
-  pos.y = ROUND(int, POS_SCALE, fPos.y);
 
   animPlayer.Update(ESGE_deltaTm);
   animPlayer.GetSprite(&sprite);
@@ -483,6 +477,8 @@ ObjPlayer::OnEnable(void)
   EnableUpdate();
   EnableDynamic();
   EnableDraw();
+
+  ESGE_ShareObj<ObjPlayer>(this);
 }
 void
 ObjPlayer::OnDisable(void)
@@ -491,6 +487,8 @@ ObjPlayer::OnDisable(void)
   DisableUpdate();
   DisableDynamic();
   DisableDraw();
+
+  ESGE_UnshareObj<ObjPlayer>(this);
 }
 
 #ifdef ESGE_EDITOR
