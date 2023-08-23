@@ -4,8 +4,10 @@
 #include "ESGE_time.h"
 #include "ESGE_audio.h"
 #include "ESGE_file.h"
+#include "ESGE_hash.h"
+
 #include "ESGE_objStatic.h"
-#include "ESGE_objDynamic.h"
+
 
 #include "roomMngr.h"
 #include "camMngr.h"
@@ -238,10 +240,15 @@ ObjPlayer::ObjPlayer(void)
 {
   layer = PLAYER_LAYER;
   
-  offsetSize.x = 0;
-  offsetSize.y = 0;
-  offsetSize.w = 16;
-  offsetSize.h = 32;
+  ESGE_ObjDynamic::offsetSize.x = 0;
+  ESGE_ObjDynamic::offsetSize.y = 0;
+  ESGE_ObjDynamic::offsetSize.w = 16;
+  ESGE_ObjDynamic::offsetSize.h = 32;
+
+  ObjAlive::offsetSize.x = 0;
+  ObjAlive::offsetSize.y = 0;
+  ObjAlive::offsetSize.w = 16;
+  ObjAlive::offsetSize.h = 32;
 
   spritesheet = ESGE_FileMngr<ESGE_Spritesheet>::Watch(SS);
 
@@ -475,7 +482,7 @@ ObjPlayer::OnEnable(void)
 {
   ESGE_ObjScene::OnEnable();
   EnableUpdate();
-  EnableDynamic();
+  EnablePhysic();
   EnableDraw();
 
   ESGE_ShareObj<ObjPlayer>(this);
@@ -485,7 +492,7 @@ ObjPlayer::OnDisable(void)
 {
   ESGE_ObjScene::OnDisable();
   DisableUpdate();
-  DisableDynamic();
+  DisablePhysic();
   DisableDraw();
 
   ESGE_UnshareObj<ObjPlayer>(this);

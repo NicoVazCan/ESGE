@@ -7,15 +7,15 @@
 #include "ESGE_anim.h"
 
 #include "ESGE_objDrawSprite.h"
-#include "alive.h"
+#include "enemy.h"
 
 class ObjPlayer;
 
 class ObjFlyEnemy:
   public ESGE_ObjScene,
   public ESGE_ObjUpdate,
-  public ObjAlive,
-  public ESGE_ObjDrawSprite
+  public ESGE_ObjDrawSprite,
+  public ObjEnemy
 {
   SDL_Point fAcc = {0, 0};
   SDL_Point fVel = {0, 0};

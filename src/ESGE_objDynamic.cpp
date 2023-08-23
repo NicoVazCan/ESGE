@@ -1,10 +1,6 @@
 #include "ESGE_objDynamic.h"
 
-#define SGLIB_ASSERT SDL_assert
-#include "sglib.h"
 #include "ESGE_objStatic.h"
-
-ESGE_ObjDynamic *ESGE_ObjDynamic::list = NULL;
 
 
 ESGE_ObjDynamic::ESGE_ObjDynamic(void)
@@ -12,39 +8,6 @@ ESGE_ObjDynamic::ESGE_ObjDynamic(void)
 
 ESGE_ObjDynamic::~ESGE_ObjDynamic(void)
 {}
-
-
-void
-ESGE_ObjDynamic::EnableDynamic(void)
-{
-  enabledDynamic = true;
-  EnablePhysic();
-  SGLIB_LIST_ADD(
-    ESGE_ObjDynamic,
-    list,
-    this,
-    next
-  );
-}
-
-void
-ESGE_ObjDynamic::DisableDynamic(void)
-{
-  enabledDynamic = false;
-  DisablePhysic();
-  SGLIB_LIST_DELETE(
-    ESGE_ObjDynamic,
-    list,
-    this,
-    next
-  );
-}
-
-bool
-ESGE_ObjDynamic::IsEnabledDynamic(void)
-{
-  return enabledDynamic;
-}
 
 
 void
@@ -196,69 +159,20 @@ ESGE_ObjDynamic::OnPhysic(void)
       }
     }
 
-    
-
-    if (
-      !isTrigger &&
-      (
-        (otherH && !otherH->isTrigger) ||
-        (otherV && !otherV->isTrigger)
-      )
-    )
-      SetColBox(thisColBox);
+    SetColBox(thisColBox);
+      
 
     if (otherH)
     {
-      if (isTrigger || otherH->isTrigger)
-      {
-        OnTrigger(otherH);
-        otherH->OnTrigger(this);
-      }
-      else
-      {
-        OnCollide(otherH);
-        otherH->OnCollide(this);
-      }
+      OnCollide(otherH);
+      otherH->OnCollide(this);
     }
     if (otherV)
     {
-      if (isTrigger || otherV->isTrigger)
-      {
-        OnTrigger(otherV);
-        otherV->OnTrigger(this);
-      }
-      else
-      {
-        OnCollide(otherV);
-        otherV->OnCollide(this);
-      }
+      OnCollide(otherV);
+      otherV->OnCollide(this);
     }
 
     prevPos = pos;
-  }
-
-  for (
-    ESGE_ObjDynamic *other = this->next;
-    other != NULL;
-    other = other->next
-  )
-  {
-    SDL_Rect otherColBox;
-
-    otherColBox = other->GetColBox();
-
-    if (SDL_HasIntersection(&thisColBox, &otherColBox))
-    {
-      if (isTrigger || other->isTrigger)
-      {
-        OnTrigger(other);
-        other->OnTrigger(this);
-      }
-      else
-      {
-        OnCollide(other);
-        other->OnCollide(this);
-      }
-    }
   }
 }

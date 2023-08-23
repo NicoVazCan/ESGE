@@ -2,6 +2,7 @@
 
 #include "ESGE_time.h"
 #include "ESGE_file.h"
+#include "ESGE_hash.h"
 
 #include "player.h"
 
@@ -49,7 +50,6 @@ void
 ObjFlyEnemy::SetPosX(void *obj, int value)
 {
   ((ObjFlyEnemy*)obj)->pos.x = value;
-  ((ObjFlyEnemy*)obj)->prevPos.x = value;
   ((ObjFlyEnemy*)obj)->fPos.x = value << POS_SCALE;
 }
 
@@ -62,7 +62,6 @@ void
 ObjFlyEnemy::SetPosY(void *obj, int value)
 {
   ((ObjFlyEnemy*)obj)->pos.y = value;
-  ((ObjFlyEnemy*)obj)->prevPos.y = value;
   ((ObjFlyEnemy*)obj)->fPos.y = value << POS_SCALE;
 }
 
@@ -71,8 +70,6 @@ ObjFlyEnemy::SetPosY(void *obj, int value)
 ObjFlyEnemy::ObjFlyEnemy(void)
 {
   layer = PLAYER_LAYER+1;
-
-  isTrigger = true;
 
   offsetSize.x = 0;
   offsetSize.y = 0;
@@ -221,8 +218,8 @@ ObjFlyEnemy::OnEnable(void)
 {
   ESGE_ObjScene::OnEnable();
   EnableUpdate();
-  EnableDynamic();
   EnableDraw();
+  EnableEnemy();
 
   ESGE_ShareObj<ObjFlyEnemy>(this);
 }
@@ -231,8 +228,8 @@ ObjFlyEnemy::OnDisable(void)
 {
   ESGE_ObjScene::OnDisable();
   DisableUpdate();
-  DisableDynamic();
   DisableDraw();
+  DisableEnemy();
 
   ESGE_UnshareObj<ObjFlyEnemy>(this);
 }

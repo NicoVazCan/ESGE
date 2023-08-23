@@ -3,6 +3,7 @@
 #include <SDL2/SDL.h>
 #include "ESGE_time.h"
 #include "ESGE_file.h"
+#include "ESGE_hash.h"
 
 #include "flyEnemy.h"
 #include "player.h"
@@ -77,12 +78,11 @@ ObjSpawnerEnemy::SetMaxFlyEnemy(void *obj, int value)
 
 
 #define SS "sprites/spawner.sprite.bin"
+#define MAX_LIFE 4
 
 ObjSpawnerEnemy::ObjSpawnerEnemy(void)
 {
   layer = PLAYER_LAYER-1;
-
-  isTrigger = true;
 
   offsetSize.x = 0;
   offsetSize.y = 0;
@@ -95,6 +95,8 @@ ObjSpawnerEnemy::ObjSpawnerEnemy(void)
   animPlayer.speed = 100;
   animPlayer.Start(&_anim);
   animPlayer.GetSprite(&sprite);
+
+  life = MAX_LIFE;
 }
 ObjSpawnerEnemy::~ObjSpawnerEnemy(void)
 {
@@ -116,6 +118,9 @@ ObjSpawnerEnemy::OnUpdate(void)
 {
   if (spawnDeltaTm < maxSpawnDeltaTm)
     spawnDeltaTm += ESGE_deltaTm;
+
+  if (dmgDeltaTm < maxDmgDeltaTm)
+    dmgDeltaTm += ESGE_deltaTm;
 
   if (player)
   {
@@ -162,7 +167,6 @@ ObjSpawnerEnemy::OnEnable(void)
 {
   ESGE_ObjScene::OnEnable();
   EnableUpdate();
-  EnableDynamic();
   EnableDraw();
 }
 void
@@ -170,7 +174,6 @@ ObjSpawnerEnemy::OnDisable(void)
 {
   ESGE_ObjScene::OnDisable();
   DisableUpdate();
-  DisableDynamic();
   DisableDraw();
 }
 #ifdef ESGE_EDITOR
@@ -185,3 +188,15 @@ ObjSpawnerEnemy::OnEditorQuit(void)
   DisableDraw();
 }
 #endif
+
+void
+ObjSpawnerEnemy::OnAttack(int dmg)
+{
+  if (dmgDeltaTm >= maxDmgDeltaTm)
+  {
+    dmgDeltaTm = 0;
+
+    life -= dmg;
+    SDL_Log("hit %d dmg, %d life", life, dmg);
+  }
+}

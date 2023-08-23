@@ -3,8 +3,10 @@
 
 #include <SDL2/SDL.h>
 #include "ESGE_scene.h"
-#include "ESGE_objUpdate.h"
 #include "ESGE_anim.h"
+
+#include "ESGE_objUpdate.h"
+#include "ESGE_objDynamic.h"
 
 #include "ESGE_objDrawSprite.h"
 #include "alive.h"
@@ -17,8 +19,9 @@ class ESGE_Sound;
 class ObjPlayer:
   public ESGE_ObjScene,
   public ESGE_ObjUpdate,
-  public ObjAlive,
-  public ESGE_ObjDrawSprite
+  public ESGE_ObjDynamic,
+  public ESGE_ObjDrawSprite,
+  public ObjAlive
 {
   SDL_Point fAcc = {0, 0};
   SDL_Point fVel = {0, 0};

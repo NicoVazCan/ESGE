@@ -7,20 +7,11 @@
 
 class ESGE_ObjDynamic: public ESGE_ObjPhysic, public ESGE_ObjCollider
 {
-  static ESGE_ObjDynamic *list;
-
-  ESGE_ObjDynamic *next;
-  bool enabledDynamic = false;
-
 public:
   SDL_Point prevPos = {0, 0};
   
   ESGE_ObjDynamic(void);
   virtual ~ESGE_ObjDynamic(void) = 0;
-
-  void EnableDynamic(void);
-  void DisableDynamic(void);
-  bool IsEnabledDynamic(void);
 
   virtual void OnPhysic(void) override;
 };

@@ -7,7 +7,7 @@
 
 #include "ESGE_objCell.h"
 #include "ESGE_objDrawSprite.h"
-#include "alive.h"
+#include "enemy.h"
 
 class ObjPlayer;
 
@@ -15,8 +15,8 @@ class ObjSpawnerEnemy:
   public ESGE_ObjScene,
   public ESGE_ObjCell,
   public ESGE_ObjUpdate,
-  public ObjAlive,
-  public ESGE_ObjDrawSprite
+  public ESGE_ObjDrawSprite,
+  public ObjEnemy
 {
   ESGE_Spritesheet *spritesheet;
   ESGE_AnimPlayer animPlayer;
@@ -24,6 +24,9 @@ class ObjSpawnerEnemy:
   Uint32 spawnDeltaTm = 2000;
   Uint32 maxSpawnDeltaTm = 2000;
   int maxFlyEnemy = 8;
+
+  Uint32 dmgDeltaTm = 1000;
+  Uint32 maxDmgDeltaTm = 1000;
 
   ObjPlayer *player;
 
@@ -50,6 +53,8 @@ public:
   virtual void OnEditorInit(void) override;
   virtual void OnEditorQuit(void) override;
 #endif
+
+  virtual void OnAttack(int dmg) override;
 };
 
 #endif

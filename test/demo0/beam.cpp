@@ -5,6 +5,8 @@
 #include "ESGE_hash.h"
 
 #include "player.h"
+#include "spawnerEnemy.h"
+#include "alive.h"
 
 ESGE_TYPE_FIELDS(
   ObjBeam,
@@ -52,7 +54,6 @@ void
 ObjBeam::SetPosX(void *obj, int value)
 {
   ((ObjBeam*)obj)->pos.x = value;
-  ((ObjBeam*)obj)->prevPos.x = value;
   ((ObjBeam*)obj)->fPos.x = value << POS_SCALE;
 }
 
@@ -65,7 +66,6 @@ void
 ObjBeam::SetPosY(void *obj, int value)
 {
   ((ObjBeam*)obj)->pos.y = value;
-  ((ObjBeam*)obj)->prevPos.y = value;
   ((ObjBeam*)obj)->fPos.y = value << POS_SCALE;
 }
 
@@ -87,11 +87,6 @@ ObjBeam::SetDir(void *obj, int value)
 
     ((ObjBeam*)obj)->fVel.x = VEL;
     ((ObjBeam*)obj)->fVel.y = 0;
-
-    ((ObjBeam*)obj)->offsetSize.x = -8;
-    ((ObjBeam*)obj)->offsetSize.y = -4;
-    ((ObjBeam*)obj)->offsetSize.w = 16;
-    ((ObjBeam*)obj)->offsetSize.h = 8;
     break;
   case L:
     ((ObjBeam*)obj)->dir = L;
@@ -99,11 +94,6 @@ ObjBeam::SetDir(void *obj, int value)
 
     ((ObjBeam*)obj)->fVel.x = -VEL;
     ((ObjBeam*)obj)->fVel.y = 0;
-
-    ((ObjBeam*)obj)->offsetSize.x = -8;
-    ((ObjBeam*)obj)->offsetSize.y = -4;
-    ((ObjBeam*)obj)->offsetSize.w = 16;
-    ((ObjBeam*)obj)->offsetSize.h = 8;
     break;
   case D:
     ((ObjBeam*)obj)->dir = D;
@@ -111,11 +101,6 @@ ObjBeam::SetDir(void *obj, int value)
 
     ((ObjBeam*)obj)->fVel.x = 0;
     ((ObjBeam*)obj)->fVel.y = VEL;
-
-    ((ObjBeam*)obj)->offsetSize.x = -4;
-    ((ObjBeam*)obj)->offsetSize.y = -8;
-    ((ObjBeam*)obj)->offsetSize.w = 8;
-    ((ObjBeam*)obj)->offsetSize.h = 16;
     break;
   case U:
     ((ObjBeam*)obj)->dir = U;
@@ -123,11 +108,6 @@ ObjBeam::SetDir(void *obj, int value)
 
     ((ObjBeam*)obj)->fVel.x = 0;
     ((ObjBeam*)obj)->fVel.y = -VEL;
-
-    ((ObjBeam*)obj)->offsetSize.x = -4;
-    ((ObjBeam*)obj)->offsetSize.y = -8;
-    ((ObjBeam*)obj)->offsetSize.w = 8;
-    ((ObjBeam*)obj)->offsetSize.h = 16;
     break;
   default:
     ((ObjBeam*)obj)->dir = R;
@@ -135,11 +115,6 @@ ObjBeam::SetDir(void *obj, int value)
 
     ((ObjBeam*)obj)->fVel.x = VEL;
     ((ObjBeam*)obj)->fVel.y = 0;
-
-    ((ObjBeam*)obj)->offsetSize.x = -8;
-    ((ObjBeam*)obj)->offsetSize.y = -4;
-    ((ObjBeam*)obj)->offsetSize.w = 16;
-    ((ObjBeam*)obj)->offsetSize.h = 8;
   }
 }
 
@@ -150,13 +125,6 @@ ObjBeam::ObjBeam(void)
   layer = PLAYER_LAYER-1;
 
   fVel.x = VEL;
-
-  offsetSize.x = -8;
-  offsetSize.y = -4;
-  offsetSize.w = 16;
-  offsetSize.h = 8;
-
-  isTrigger = true;
 
   spritesheet = ESGE_FileMngr<ESGE_Spritesheet>::Watch(SS);
 
@@ -187,19 +155,11 @@ ObjBeam::OnUpdate(void)
   animPlayer.GetSprite(&sprite);
 }
 
-void 
-ObjBeam::OnTrigger(ESGE_ObjCollider *other)
-{
-  if (((ESGE_ObjScene*)other)->typeID == ESGE_Hash("ObjSpawnerEnemy"))
-    SDL_Log("hit");
-}
-
 void
 ObjBeam::OnEnable(void)
 {
   ESGE_ObjScene::OnEnable();
   EnableUpdate();
-  EnableDynamic();
   EnableDraw();
 }
 void
@@ -207,7 +167,6 @@ ObjBeam::OnDisable(void)
 {
   ESGE_ObjScene::OnDisable();
   DisableUpdate();
-  DisableDynamic();
   DisableDraw();
 }
 #ifdef ESGE_EDITOR

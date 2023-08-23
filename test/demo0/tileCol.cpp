@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 #include "ESGE_scene.h"
 #include "ESGE_display.h"
+#include "ESGE_hash.h"
 
 #include "ESGE_objStatic.h"
 #include "ESGE_objDraw.h"
