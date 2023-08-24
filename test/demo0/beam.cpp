@@ -5,8 +5,7 @@
 #include "ESGE_hash.h"
 
 #include "player.h"
-#include "spawnerEnemy.h"
-#include "alive.h"
+#include "enemy.h"
 
 ESGE_TYPE_FIELDS(
   ObjBeam,
@@ -54,6 +53,7 @@ void
 ObjBeam::SetPosX(void *obj, int value)
 {
   ((ObjBeam*)obj)->pos.x = value;
+  ((ObjBeam*)obj)->prevPos.x = value;
   ((ObjBeam*)obj)->fPos.x = value << POS_SCALE;
 }
 
@@ -66,6 +66,7 @@ void
 ObjBeam::SetPosY(void *obj, int value)
 {
   ((ObjBeam*)obj)->pos.y = value;
+  ((ObjBeam*)obj)->prevPos.y = value;
   ((ObjBeam*)obj)->fPos.y = value << POS_SCALE;
 }
 
@@ -142,17 +143,65 @@ ObjBeam::~ObjBeam(void)
   ((N + (1<<(S-1)) + (N>>(sizeof(T)*8-1))) & (~((1<<S)-1))) >> S \
 )
 
+#define DMG 1
+
 void
 ObjBeam::OnUpdate(void)
 {
+  SDL_Rect atkBox;
+
   fPos.x += fVel.x += fAcc.x;
   fPos.y += fVel.y += fAcc.y;
 
   pos.x = ROUND(int, POS_SCALE, fPos.x);
   pos.y = ROUND(int, POS_SCALE, fPos.y);
 
+  switch (dir)
+  {
+  case R:
+  case L:
+    atkBox.x = pos.x - 8;
+    atkBox.y = pos.y - 4;
+    atkBox.w = 16;
+    atkBox.h = 8;
+    break;
+  case D:
+  case U:
+    atkBox.x = pos.x - 4;
+    atkBox.y = pos.y - 8;
+    atkBox.w = 8;
+    atkBox.h = 16;
+    break;
+  default:
+    SDL_assert(0);
+  }
+
+  ObjEnemy::Attack(atkBox, DMG);
+
   animPlayer.Update(ESGE_deltaTm);
   animPlayer.GetSprite(&sprite);
+}
+
+void
+ObjBeam::OnCollide(SDL_UNUSED ESGE_ObjCollider *other)
+{
+  ESGE_Scene *scene;
+
+  scene = ESGE_SceneMngr::GetActiveScene();
+
+  if (scene->id == sceneID)
+    scene->DelObj(instName);
+  else
+  {
+    ESGE_Scene *prevScene = scene;
+
+    ESGE_SceneMngr::SetActiveScene(sceneID);
+
+    scene = ESGE_SceneMngr::GetActiveScene();
+    scene->DelObj(instName);
+
+    ESGE_SceneMngr::SetActiveScene(prevScene->id);
+  }
 }
 
 void
@@ -160,6 +209,7 @@ ObjBeam::OnEnable(void)
 {
   ESGE_ObjScene::OnEnable();
   EnableUpdate();
+  EnablePhysic();
   EnableDraw();
 }
 void
@@ -167,6 +217,7 @@ ObjBeam::OnDisable(void)
 {
   ESGE_ObjScene::OnDisable();
   DisableUpdate();
+  DisablePhysic();
   DisableDraw();
 }
 #ifdef ESGE_EDITOR

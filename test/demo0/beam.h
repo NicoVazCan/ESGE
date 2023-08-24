@@ -3,14 +3,16 @@
 
 #include <SDL2/SDL.h>
 #include "ESGE_scene.h"
-#include "ESGE_objUpdate.h"
 #include "ESGE_anim.h"
 
+#include "ESGE_objUpdate.h"
+#include "ESGE_objDynamic.h"
 #include "ESGE_objDrawSprite.h"
 
 class ObjBeam:
   public ESGE_ObjScene,
   public ESGE_ObjUpdate,
+  public ESGE_ObjDynamic,
   public ESGE_ObjDrawSprite
 {
   enum {R, L, D, U} dir = R;
@@ -35,6 +37,8 @@ public:
   virtual ~ObjBeam(void) override;
 
   virtual void OnUpdate(void) override;
+
+  virtual void OnCollide(ESGE_ObjCollider *other) override;
 
   virtual void OnEnable(void) override;
   virtual void OnDisable(void) override;

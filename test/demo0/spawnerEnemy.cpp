@@ -168,6 +168,7 @@ ObjSpawnerEnemy::OnEnable(void)
   ESGE_ObjScene::OnEnable();
   EnableUpdate();
   EnableDraw();
+  EnableEnemy();
 }
 void
 ObjSpawnerEnemy::OnDisable(void)
@@ -175,6 +176,7 @@ ObjSpawnerEnemy::OnDisable(void)
   ESGE_ObjScene::OnDisable();
   DisableUpdate();
   DisableDraw();
+  DisableEnemy();
 }
 #ifdef ESGE_EDITOR
 void
@@ -197,6 +199,6 @@ ObjSpawnerEnemy::OnAttack(int dmg)
     dmgDeltaTm = 0;
 
     life -= dmg;
-    SDL_Log("hit %d dmg, %d life", life, dmg);
+    SDL_Log("hit %d dmg, %d life", dmg, life);
   }
 }
