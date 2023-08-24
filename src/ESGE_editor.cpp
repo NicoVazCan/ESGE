@@ -423,6 +423,7 @@ main(int argc, char *argv[])
 
 	if (scene) ESGE_SceneMngr::AddScene(scene);
 
+	ESGE_SceneMngr::Update();
 	shell = SDL_CreateThread(RunShell, "shell", NULL);
 	ticks = SDL_GetTicks();
 
