@@ -9,13 +9,15 @@
 #include "ESGE_objDynamic.h"
 #include "ESGE_objDrawSprite.h"
 
+enum BeamDir {BEAM_R, BEAM_L, BEAM_D, BEAM_U};
+
 class ObjBeam:
   public ESGE_ObjScene,
   public ESGE_ObjUpdate,
   public ESGE_ObjDynamic,
   public ESGE_ObjDrawSprite
 {
-  enum {R, L, D, U} dir = R;
+  BeamDir dir = BEAM_R;
   SDL_Point fAcc = {0, 0};
   SDL_Point fVel = {0, 0};
   SDL_Point fPos;

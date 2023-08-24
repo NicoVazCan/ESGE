@@ -66,10 +66,13 @@ ObjFlyEnemy::SetPosY(void *obj, int value)
 }
 
 #define SS "sprites/fly.sprite.bin"
+#define MAX_LIFE 2
 
 ObjFlyEnemy::ObjFlyEnemy(void)
 {
   layer = PLAYER_LAYER+1;
+
+  life = MAX_LIFE;
 
   offsetSize.x = 0;
   offsetSize.y = 0;
@@ -102,115 +105,170 @@ ObjFlyEnemy::OnStart(void)
 #define ROUND(T, S, N) ( \
   ((N + (1<<(S-1)) + (N>>(sizeof(T)*8-1))) & (~((1<<S)-1))) >> S \
 )
+#define DMG 10
 
 void
 ObjFlyEnemy::OnUpdate(void)
 {
-  if (player)
+  if (dmgDeltaTm < maxDmgDeltaTm)
+    dmgDeltaTm += ESGE_deltaTm;
+  else
   {
-    if (
-      SDL_abs(player->pos.x - pos.x) <= FOCUS_RANGE &&
-      SDL_abs(player->pos.y - pos.y) <= FOCUS_RANGE
-    )
+    if (player)
     {
-      if (player->pos.x > pos.x)
+      SDL_Rect playerHitBox, atkBox;
+
+      playerHitBox = player->GetHitBox();
+      atkBox = GetHitBox();
+
+      if (SDL_HasIntersection(&playerHitBox, &atkBox))
       {
-        if (fVel.x + ACC >= VEL)
-        {
-          fAcc.x = 0;
-          fVel.x = VEL;
-        }
-        else fAcc.x = ACC;
-      }
-      else if (player->pos.x < pos.x)
-      {
-        if (fVel.x - ACC <= -VEL)
-        {
-          fAcc.x = 0;
-          fVel.x = -VEL;
-        }
-        else fAcc.x = -ACC;
+        player->OnAttack(DMG);
       }
 
-      if (player->pos.y > pos.y)
+      if (
+        SDL_abs(player->pos.x - pos.x) <= FOCUS_RANGE &&
+        SDL_abs(player->pos.y - pos.y) <= FOCUS_RANGE
+      )
       {
-        if (fVel.y + ACC >= VEL)
+        if (player->pos.x > pos.x)
         {
-          fAcc.y = 0;
-          fVel.y = VEL;
+          if (fVel.x + ACC >= VEL)
+          {
+            fAcc.x = 0;
+            fVel.x = VEL;
+          }
+          else fAcc.x = ACC;
         }
-        else fAcc.y = ACC;
-      }
-      else if (player->pos.y < pos.y)
-      {
-        if (fVel.y - ACC <= -VEL)
+        else if (player->pos.x < pos.x)
         {
-          fAcc.y = 0;
-          fVel.y = -VEL;
+          if (fVel.x - ACC <= -VEL)
+          {
+            fAcc.x = 0;
+            fVel.x = -VEL;
+          }
+          else fAcc.x = -ACC;
         }
-        else fAcc.y = -ACC;
+
+        if (player->pos.y > pos.y)
+        {
+          if (fVel.y + ACC >= VEL)
+          {
+            fAcc.y = 0;
+            fVel.y = VEL;
+          }
+          else fAcc.y = ACC;
+        }
+        else if (player->pos.y < pos.y)
+        {
+          if (fVel.y - ACC <= -VEL)
+          {
+            fAcc.y = 0;
+            fVel.y = -VEL;
+          }
+          else fAcc.y = -ACC;
+        }
       }
-    }
-    else
-    {
-      if (fVel.x > 0)
+      else
       {
-        if (fVel.x - ACC <= 0)
+        if (fVel.x > 0)
+        {
+          if (fVel.x - ACC <= 0)
+          {
+            fAcc.x = 0;
+            fVel.x = 0;
+          }
+          else fAcc.x = -ACC;
+        }
+        else if (fVel.x < 0)
+        {
+          if (fVel.x + ACC >= 0)
+          {
+            fAcc.x = 0;
+            fVel.x = 0;
+          }
+          else fAcc.x = ACC;
+        }
+        else
         {
           fAcc.x = 0;
           fVel.x = 0;
         }
-        else fAcc.x = -ACC;
-      }
-      else if (fVel.x < 0)
-      {
-        if (fVel.x + ACC >= 0)
-        {
-          fAcc.x = 0;
-          fVel.x = 0;
-        }
-        else fAcc.x = ACC;
-      }
-      else
-      {
-        fAcc.x = 0;
-        fVel.x = 0;
-      }
 
-      if (fVel.y > 0)
-      {
-        if (fVel.y - ACC <= 0)
+        if (fVel.y > 0)
+        {
+          if (fVel.y - ACC <= 0)
+          {
+            fAcc.y = 0;
+            fVel.y = 0;
+          }
+          else fAcc.y = -ACC;
+        }
+        else if (fVel.y < 0)
+        {
+          if (fVel.y + ACC >= 0)
+          {
+            fAcc.y = 0;
+            fVel.y = 0;
+          }
+          else fAcc.y = ACC;
+        }
+        else
         {
           fAcc.y = 0;
           fVel.y = 0;
         }
-        else fAcc.y = -ACC;
       }
-      else if (fVel.y < 0)
-      {
-        if (fVel.y + ACC >= 0)
-        {
-          fAcc.y = 0;
-          fVel.y = 0;
-        }
-        else fAcc.y = ACC;
-      }
-      else
-      {
-        fAcc.y = 0;
-        fVel.y = 0;
-      }
+      
+      fPos.x += fVel.x += fAcc.x;
+      fPos.y += fVel.y += fAcc.y;
+
+      pos.x = ROUND(int, POS_SCALE, fPos.x);
+      pos.y = ROUND(int, POS_SCALE, fPos.y);
     }
-    
-    fPos.x += fVel.x += fAcc.x;
-    fPos.y += fVel.y += fAcc.y;
-
-    pos.x = ROUND(int, POS_SCALE, fPos.x);
-    pos.y = ROUND(int, POS_SCALE, fPos.y);
   }
 
   animPlayer.Update(ESGE_deltaTm);
   animPlayer.GetSprite(&sprite);
+
+  if (life == 0 && dmgDeltaTm >= maxDmgDeltaTm)
+  {
+    ESGE_Scene *scene;
+
+    scene = ESGE_SceneMngr::GetActiveScene();
+
+    if (scene->id == sceneID)
+      scene->DelObj(instName);
+    else
+    {
+      ESGE_Scene *prevScene = scene;
+
+      ESGE_SceneMngr::SetActiveScene(sceneID);
+
+      scene = ESGE_SceneMngr::GetActiveScene();
+      scene->DelObj(instName);
+
+      ESGE_SceneMngr::SetActiveScene(prevScene->id);
+    }
+  }
+}
+
+#define BLINK_T 16*4
+
+void
+ObjFlyEnemy::OnDraw(void)
+{
+  if (dmgDeltaTm >= maxDmgDeltaTm)
+  {
+    ESGE_ObjDrawSprite::OnDraw();
+  }
+  else
+  {
+    if (dmgDeltaTm % (BLINK_T*2) >= BLINK_T)
+    {
+      ESGE_ObjDrawSprite::OnDraw();
+    }
+  }
 }
 
 void
@@ -245,3 +303,13 @@ ObjFlyEnemy::OnEditorQuit(void)
   DisableDraw();
 }
 #endif
+
+void
+ObjFlyEnemy::OnAttack(int dmg)
+{
+  if (dmgDeltaTm >= maxDmgDeltaTm)
+  {
+    dmgDeltaTm = 0;
+    life -= dmg;
+  }
+}

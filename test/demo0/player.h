@@ -7,7 +7,7 @@
 
 #include "ESGE_objUpdate.h"
 #include "ESGE_objDynamic.h"
-
+#include "ESGE_objEvent.h"
 #include "ESGE_objDrawSprite.h"
 #include "alive.h"
 
@@ -18,6 +18,7 @@ class ESGE_Sound;
 
 class ObjPlayer:
   public ESGE_ObjScene,
+  public ESGE_ObjKeyEvent,
   public ESGE_ObjUpdate,
   public ESGE_ObjDynamic,
   public ESGE_ObjDrawSprite,
@@ -29,9 +30,30 @@ class ObjPlayer:
 
   ESGE_Spritesheet *spritesheet;
   ESGE_AnimPlayer animPlayer;
-  ESGE_Sound *jmpSnd;
+  ESGE_Sound *jmpSnd, *shotSnd;
 
-  bool facingR;
+  Uint32 dmgDeltaTm = 4000;
+  Uint32 maxDmgDeltaTm = 4000;
+
+  bool facingR, inGround, aimingUp;
+  enum {STAND, RIGHT, LEFT} going;
+
+  void Jump(void);
+  void StopJump(void);
+
+  void GoRight(void);
+  void StopGoRight(void);
+
+  void GoLeft(void);
+  void StopGoLeft(void);
+
+  void AimUp(void);
+  void StopAimUp(void);
+
+  void Shot(void);
+
+  bool IsInGround(void);
+
 public:
   static int GetPosX(void *obj);
   static void SetPosX(void *obj, int value);
@@ -44,11 +66,16 @@ public:
 
   virtual void OnStart(void) override;
 
+  virtual void OnKeyDown(SDL_Keycode key, SDL_Keymod mod);
+  virtual void OnKeyUp(SDL_Keycode key, SDL_Keymod mod);
+
   virtual void OnUpdate(void) override;
 
   virtual void OnPhysic(void) override;
 
   virtual void OnCollide(ESGE_ObjCollider *other) override;
+
+  virtual void OnDraw(void) override;
 
   virtual void OnEnable(void) override;
   virtual void OnDisable(void) override;
@@ -56,6 +83,8 @@ public:
   virtual void OnEditorInit(void) override;
   virtual void OnEditorQuit(void) override;
 #endif
+
+  virtual void OnAttack(int dmg) override;
 };
 
 #endif

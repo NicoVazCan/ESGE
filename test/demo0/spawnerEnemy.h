@@ -47,6 +47,8 @@ public:
 
   virtual void OnUpdate(void) override;
 
+  virtual void OnDraw(void) override;
+
   virtual void OnEnable(void) override;
   virtual void OnDisable(void) override;
 #ifdef ESGE_EDITOR

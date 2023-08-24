@@ -11,6 +11,25 @@
 
 #include "roomMngr.h"
 #include "camMngr.h"
+#include "beam.h"
+
+
+ESGE_TYPE_FIELDS(
+  ObjPlayer,
+  ESGE_FIELD(
+    I,
+    pos.x,
+    ObjPlayer::GetPosX,
+    ObjPlayer::SetPosX,
+    ESGE_FIELD(
+      I,
+      pos.y,
+      ObjPlayer::GetPosY,
+      ObjPlayer::SetPosY,
+      ESGE_END_FIELD
+    )
+  )
+)
 
 
 static const ESGE_Frm frmsStandR[] = {
@@ -162,7 +181,7 @@ static const ESGE_Anim anims[] = {
   {frmsStandL, SDL_arraysize(frmsStandL), -1},
 
   {frmsStandUR, SDL_arraysize(frmsStandUR), -1},
-  {frmsStandUR, SDL_arraysize(frmsStandUR), -1},
+  {frmsStandUL, SDL_arraysize(frmsStandUL), -1},
 
   {frmsRunR, SDL_arraysize(frmsRunR), -1},
   {frmsRunL, SDL_arraysize(frmsRunL), -1},
@@ -233,12 +252,159 @@ ObjPlayer::SetPosY(void *obj, int value)
   ((ObjPlayer*)obj)->fPos.y = value << POS_SCALE;
 }
 
+
+#define JMP (((int)ESGE_deltaTm) * 0x0280 / 16)
+
+void
+ObjPlayer::Jump(void)
+{
+  
+  if (inGround)
+  {
+    fVel.y = -JMP;
+    jmpSnd->Play();
+  }
+}
+void
+ObjPlayer::StopJump(void)
+{
+  if (fVel.y < 0)
+  {
+    fVel.y = 0;
+  }
+}
+
+void
+ObjPlayer::GoRight(void)
+{
+  going = RIGHT;
+}
+void
+ObjPlayer::StopGoRight(void)
+{
+  going = STAND;
+}
+
+void
+ObjPlayer::GoLeft(void)
+{
+  going = LEFT;
+}
+void
+ObjPlayer::StopGoLeft(void)
+{
+  going = STAND;
+}
+
+void
+ObjPlayer::AimUp(void)
+{
+  aimingUp = true;
+}
+void
+ObjPlayer::StopAimUp(void)
+{
+  aimingUp = false;
+}
+
+#define SHOT_OFFSET_H_R   (-12 + 36)
+#define SHOT_OFFSET_V_R   (-12 + 16)
+
+#define SHOT_OFFSET_H_U_R (-12 + 23)
+#define SHOT_OFFSET_V_U_R (-12)
+
+#define SHOT_OFFSET_H_L   (-12 + (40 - 36))
+#define SHOT_OFFSET_V_L   (-12 + 16)
+
+#define SHOT_OFFSET_H_U_L (-12 + (40 - 23))
+#define SHOT_OFFSET_V_U_L (-12)
+
+void
+ObjPlayer::Shot(void)
+{
+  ObjBeam *beam;
+
+  shotSnd->Play();
+  if (
+    (
+      beam = (
+        (ObjBeam*)ESGE_SceneMngr::GetActiveScene()->AddObj("ObjBeam")
+      )
+    )
+  )
+  {
+    if (facingR)
+    {
+      if (aimingUp)
+      {
+        ObjBeam::SetPosX(beam, pos.x + SHOT_OFFSET_H_U_R);
+        ObjBeam::SetPosY(beam, pos.y + SHOT_OFFSET_V_U_R);
+        ObjBeam::SetDir(beam, BEAM_U);
+      }
+      else
+      {
+        ObjBeam::SetPosX(beam, pos.x + SHOT_OFFSET_H_R);
+        ObjBeam::SetPosY(beam, pos.y + SHOT_OFFSET_V_R);
+        ObjBeam::SetDir(beam, BEAM_R);
+      }
+    }
+    else
+    {
+      if (aimingUp)
+      {
+        ObjBeam::SetPosX(beam, pos.x + SHOT_OFFSET_H_U_L);
+        ObjBeam::SetPosY(beam, pos.y + SHOT_OFFSET_V_U_L);
+        ObjBeam::SetDir(beam, BEAM_U);
+      }
+      else
+      {
+        ObjBeam::SetPosX(beam, pos.x + SHOT_OFFSET_H_L);
+        ObjBeam::SetPosY(beam, pos.y + SHOT_OFFSET_V_L);
+        ObjBeam::SetDir(beam, BEAM_L);
+      }
+    }
+  }
+  else
+  {
+    SDL_Log("Failed to add ObjBeam: %s", SDL_GetError());
+  }
+}
+
+bool
+ObjPlayer::IsInGround(void)
+{
+  bool inGround = false;
+  SDL_Point test;
+  SDL_Rect thisColBox;
+
+  thisColBox = GetColBox();
+  test.x = thisColBox.x;
+  test.y = thisColBox.y + thisColBox.h;
+
+  while (test.x < thisColBox.x + thisColBox.w && !inGround)
+  {
+    inGround = ESGE_ObjStatic::GetObjAt(test) != NULL;
+    test.x += ESGE_ObjStatic::cellW;
+  }
+  if (!inGround)
+  {
+    test.x = thisColBox.x + thisColBox.w - 1;
+    inGround = ESGE_ObjStatic::GetObjAt(test) != NULL;
+  }
+
+  return inGround;
+}
+
 #define JMP_SND "sounds/jump.wav"
+#define SHOT_SND "sounds/shot.wav"
 #define SS "sprites/player.sprite.bin"
+#define MAX_LIFE 99
 
 ObjPlayer::ObjPlayer(void)
 {
   layer = PLAYER_LAYER;
+
+  life = MAX_LIFE;
   
   ESGE_ObjDynamic::offsetSize.x = 0;
   ESGE_ObjDynamic::offsetSize.y = 0;
@@ -256,16 +422,22 @@ ObjPlayer::ObjPlayer(void)
   animPlayer.speed = 100;
 
   facingR = true;
+  inGround = true;
+  aimingUp = false;
   animPlayer.Start(anims + STAND_R);
   animPlayer.GetSprite(&sprite);
 
+  going = STAND;
+
   jmpSnd = ESGE_FileMngr<ESGE_Sound>::Watch(JMP_SND);
+  shotSnd = ESGE_FileMngr<ESGE_Sound>::Watch(SHOT_SND);
 }
 
 ObjPlayer::~ObjPlayer(void)
 {
   ESGE_FileMngr<ESGE_Spritesheet>::Leave(spritesheet);
   ESGE_FileMngr<ESGE_Sound>::Leave(jmpSnd);
+  ESGE_FileMngr<ESGE_Sound>::Leave(shotSnd);
 }
 
 void
@@ -288,15 +460,68 @@ ObjPlayer::OnStart(void)
 #define GRA ( \
   ((int)(ESGE_deltaTm * ESGE_deltaTm)) * 0x0010 / 256 \
 )
-#define JMP (((int)ESGE_deltaTm) * 0x0280 / 16)
 #define ROUND(T, S, N) ( \
   ((N + (1<<(S-1)) + (N>>(sizeof(T)*8-1))) & (~((1<<S)-1))) >> S \
 )
 
 void
+ObjPlayer::OnKeyDown(SDL_Keycode key, SDL_UNUSED SDL_Keymod mod)
+{
+  switch (key)
+  {
+  case SDLK_SPACE:
+    Jump();
+    break;
+
+  case SDLK_RIGHT:
+    GoRight();
+    break;
+
+  case SDLK_LEFT:
+    GoLeft();
+    break;
+
+  case SDLK_UP:
+    AimUp();
+    break;
+
+  case SDLK_LCTRL:
+    Shot();
+
+  default:
+    break;
+  }
+}
+void
+ObjPlayer::OnKeyUp(SDL_Keycode key, SDL_UNUSED SDL_Keymod mod)
+{
+  switch (key)
+  {
+  case SDLK_SPACE:
+    StopJump();
+    break;
+
+  case SDLK_RIGHT:
+    StopGoRight();
+    break;
+
+  case SDLK_LEFT:
+    StopGoLeft();
+    break;
+
+  case SDLK_UP:
+    StopAimUp();
+    break;
+
+  default:
+    break;
+  }
+}
+
+void
 ObjPlayer::OnUpdate(void)
 {
-  const Uint8 *keys;
+  inGround = IsInGround();
 
   if (fVel.y + fAcc.y >= JMP)
   {
@@ -305,32 +530,15 @@ ObjPlayer::OnUpdate(void)
   }
   else fAcc.y = GRA;
 
-  keys = SDL_GetKeyboardState(NULL);
-    
-  if (keys[SDL_SCANCODE_LEFT] && !keys[SDL_SCANCODE_RIGHT])
-  {
-    if (fVel.x - ACC < -VEL)
-    {
-      fAcc.x = 0;
-      fVel.x = -VEL;
-    }
-    else fAcc.x = -ACC;
 
-    facingR = false;
-  }
-  else if (!keys[SDL_SCANCODE_LEFT] && keys[SDL_SCANCODE_RIGHT])
+  if (dmgDeltaTm < maxDmgDeltaTm)
   {
-    if (fVel.x + ACC > VEL)
-    {
-      fAcc.x = 0;
-      fVel.x = VEL;
-    }
-    else fAcc.x = ACC;
+    dmgDeltaTm += ESGE_deltaTm;
+  }
 
-    facingR = true;
-  }
-  else
+  switch (going)
   {
+  case STAND:
     if (fVel.x > 0)
     {
       if (fVel.x - ACC <= 0)
@@ -354,40 +562,30 @@ ObjPlayer::OnUpdate(void)
       fAcc.x = 0;
       fVel.x = 0;
     }
-  }
+    break;
 
-  if (keys[SDL_SCANCODE_SPACE])
-  {
-    if (fVel.y >> POS_SCALE == 0)
+  case RIGHT:
+    if (fVel.x + ACC > VEL)
     {
-      SDL_Point test;
-      SDL_Rect thisColBox;
-      bool onAir = true;
-
-      thisColBox = GetColBox();
-      test.x = thisColBox.x;
-      test.y = thisColBox.y + thisColBox.h;
-
-      while (test.x < thisColBox.x + thisColBox.w && onAir)
-      {
-        onAir = ESGE_ObjStatic::GetObjAt(test) == NULL;
-        test.x += ESGE_ObjStatic::cellW;
-      }
-      if (onAir)
-      {
-        test.x = thisColBox.x + thisColBox.w - 1;
-        onAir = ESGE_ObjStatic::GetObjAt(test) == NULL;
-      }
-      if (!onAir)
-      {
-        fVel.y = -JMP;
-        jmpSnd->Play();
-      }
+      fAcc.x = 0;
+      fVel.x = VEL;
     }
-  }
-  else if (fVel.y < 0)
-  {
-    fVel.y = 0;
+    else fAcc.x = ACC;
+    facingR = true;
+    break;
+
+  case LEFT:
+    if (fVel.x - ACC < -VEL)
+    {
+      fAcc.x = 0;
+      fVel.x = -VEL;
+    }
+    else fAcc.x = -ACC;
+    facingR = false;
+    break;
+
+  default:
+    SDL_assert(0);
   }
 
   fPos.x += fVel.x += fAcc.x;
@@ -396,30 +594,111 @@ ObjPlayer::OnUpdate(void)
   pos.x = ROUND(int, POS_SCALE, fPos.x);
   pos.y = ROUND(int, POS_SCALE, fPos.y);
 
+
   if (facingR)
   {
-    if (fVel.x == 0)
+    if (inGround)
     {
-      if (animPlayer.anim != anims + STAND_R)
-        animPlayer.Start(anims + STAND_R);
+      if (fVel.x == 0)
+      {
+        if (aimingUp)
+        {
+          if (animPlayer.anim != anims + STAND_U_R)
+            animPlayer.Start(anims + STAND_U_R);
+        }
+        else
+        {
+          if (animPlayer.anim != anims + STAND_R)
+            animPlayer.Start(anims + STAND_R);
+        }
+      }
+      else
+      {
+        if (animPlayer.anim != anims + RUN_R)
+          animPlayer.Start(anims + RUN_R);
+      }
     }
     else
     {
-      if (animPlayer.anim != anims + RUN_R)
-        animPlayer.Start(anims + RUN_R);
+      if (fVel.y <= 0)
+      {
+        if (aimingUp)
+        {
+          if (animPlayer.anim != anims + JMP_U_R)
+            animPlayer.Start(anims + JMP_U_R);
+        }
+        else
+        {
+          if (animPlayer.anim != anims + JMP_R)
+            animPlayer.Start(anims + JMP_R);
+        }
+      }
+      else
+      {
+        if (aimingUp)
+        {
+          if (animPlayer.anim != anims + FALL_U_R)
+            animPlayer.Start(anims + FALL_U_R);
+        }
+        else
+        {
+          if (animPlayer.anim != anims + FALL_R)
+            animPlayer.Start(anims + FALL_R);
+        }
+      }
     }
   }
   else
   {
-    if (fVel.x == 0)
+    if (inGround)
     {
-      if (animPlayer.anim != anims + STAND_L)
-        animPlayer.Start(anims + STAND_L);
+      if (fVel.x == 0)
+      {
+        if (aimingUp)
+        {
+          if (animPlayer.anim != anims + STAND_U_L)
+            animPlayer.Start(anims + STAND_U_L);
+        }
+        else
+        {
+          if (animPlayer.anim != anims + STAND_L)
+            animPlayer.Start(anims + STAND_L);
+        }
+      }
+      else
+      {
+        if (animPlayer.anim != anims + RUN_L)
+          animPlayer.Start(anims + RUN_L);
+      }
     }
     else
     {
-      if (animPlayer.anim != anims + RUN_L)
-        animPlayer.Start(anims + RUN_L);
+      if (fVel.y <= 0)
+      {
+        if (aimingUp)
+        {
+          if (animPlayer.anim != anims + JMP_U_L)
+            animPlayer.Start(anims + JMP_U_L);
+        }
+        else
+        {
+          if (animPlayer.anim != anims + JMP_L)
+            animPlayer.Start(anims + JMP_L);
+        }
+      }
+      else
+      {
+        if (aimingUp)
+        {
+          if (animPlayer.anim != anims + FALL_U_L)
+            animPlayer.Start(anims + FALL_U_L);
+        }
+        else
+        {
+          if (animPlayer.anim != anims + FALL_L)
+            animPlayer.Start(anims + FALL_L);
+        }
+      }
     }
   }
 
@@ -477,10 +756,29 @@ ObjPlayer::OnCollide(ESGE_ObjCollider *other)
   }
 }
 
+#define BLINK_T 16*4
+
+void
+ObjPlayer::OnDraw(void)
+{
+  if (dmgDeltaTm >= maxDmgDeltaTm)
+  {
+    ESGE_ObjDrawSprite::OnDraw();
+  }
+  else
+  {
+    if (dmgDeltaTm % (BLINK_T*2) >= BLINK_T)
+    {
+      ESGE_ObjDrawSprite::OnDraw();
+    }
+  }
+}
+
 void
 ObjPlayer::OnEnable(void)
 {
   ESGE_ObjScene::OnEnable();
+  EnableKeyEvent();
   EnableUpdate();
   EnablePhysic();
   EnableDraw();
@@ -491,6 +789,7 @@ void
 ObjPlayer::OnDisable(void)
 {
   ESGE_ObjScene::OnDisable();
+  DisableKeyEvent();
   DisableUpdate();
   DisablePhysic();
   DisableDraw();
@@ -511,19 +810,13 @@ ObjPlayer::OnEditorQuit(void)
 }
 #endif
 
-ESGE_TYPE_FIELDS(
-  ObjPlayer,
-  ESGE_FIELD(
-    I,
-    pos.x,
-    ObjPlayer::GetPosX,
-    ObjPlayer::SetPosX,
-    ESGE_FIELD(
-      I,
-      pos.y,
-      ObjPlayer::GetPosY,
-      ObjPlayer::SetPosY,
-      ESGE_END_FIELD
-    )
-  )
-)
+void
+ObjPlayer::OnAttack(int dmg)
+{
+  if (dmgDeltaTm >= maxDmgDeltaTm)
+  {
+    dmgDeltaTm = 0;
+    life -= dmg;
+    SDL_Log("Hit");
+  }
+}

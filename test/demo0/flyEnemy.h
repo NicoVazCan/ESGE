@@ -26,6 +26,9 @@ class ObjFlyEnemy:
 
   ObjPlayer *player;
 
+  Uint32 dmgDeltaTm = 1000;
+  Uint32 maxDmgDeltaTm = 1000;
+
 public:
   static int GetPosX(void *obj);
   static void SetPosX(void *obj, int value);
@@ -40,12 +43,16 @@ public:
 
   virtual void OnUpdate(void) override;
 
+  virtual void OnDraw(void) override;
+
   virtual void OnEnable(void) override;
   virtual void OnDisable(void) override;
 #ifdef ESGE_EDITOR
   virtual void OnEditorInit(void) override;
   virtual void OnEditorQuit(void) override;
 #endif
+
+  virtual void OnAttack(int dmg) override;
 };
 
 #endif

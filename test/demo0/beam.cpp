@@ -30,15 +30,31 @@ ESGE_TYPE_FIELDS(
   )
 )
 
-static const ESGE_Frm _frms[] = {
+static const ESGE_Frm _frmsR[] = {
   {0, 0, 1., 0., {8, 4}, SDL_FLIP_NONE, 16*8},
   {1, 0, 1., 0., {8, 4}, SDL_FLIP_NONE, 16*8}
 };
 
-static const ESGE_Anim _anim = {
-  _frms,
-  SDL_arraysize(_frms),
-  -1
+static const ESGE_Frm _frmsL[] = {
+  {0, 0, 1., 180., {8, 4}, SDL_FLIP_NONE, 16*8},
+  {1, 0, 1., 180., {8, 4}, SDL_FLIP_NONE, 16*8}
+};
+
+static const ESGE_Frm _frmsD[] = {
+  {0, 0, 1., 90., {8, 4}, SDL_FLIP_NONE, 16*8},
+  {1, 0, 1., 90., {8, 4}, SDL_FLIP_NONE, 16*8}
+};
+
+static const ESGE_Frm _frmsU[] = {
+  {0, 0, 1., 270., {8, 4}, SDL_FLIP_NONE, 16*8},
+  {1, 0, 1., 270., {8, 4}, SDL_FLIP_NONE, 16*8}
+};
+
+static const ESGE_Anim _anims[] = {
+  {_frmsR, SDL_arraysize(_frmsR), -1},
+  {_frmsL, SDL_arraysize(_frmsL), -1},
+  {_frmsD, SDL_arraysize(_frmsD), -1},
+  {_frmsU, SDL_arraysize(_frmsU), -1}
 };
 
 
@@ -70,7 +86,7 @@ ObjBeam::SetPosY(void *obj, int value)
   ((ObjBeam*)obj)->fPos.y = value << POS_SCALE;
 }
 
-#define VEL (((int)ESGE_deltaTm) * 0x0140 / 16)
+#define VEL (((int)ESGE_deltaTm) * 0x0200 / 16)
 
 int
 ObjBeam::GetDir(void *obj)
@@ -82,41 +98,35 @@ ObjBeam::SetDir(void *obj, int value)
 {
   switch (value)
   {
-  case R:
-    ((ObjBeam*)obj)->dir = R;
-    ((ObjBeam*)obj)->sprite.angle = 0.;
+  case BEAM_R:
+    ((ObjBeam*)obj)->dir = BEAM_R;
 
     ((ObjBeam*)obj)->fVel.x = VEL;
     ((ObjBeam*)obj)->fVel.y = 0;
     break;
-  case L:
-    ((ObjBeam*)obj)->dir = L;
-    ((ObjBeam*)obj)->sprite.angle = 180.;
+  case BEAM_L:
+    ((ObjBeam*)obj)->dir = BEAM_L;
 
     ((ObjBeam*)obj)->fVel.x = -VEL;
     ((ObjBeam*)obj)->fVel.y = 0;
     break;
-  case D:
-    ((ObjBeam*)obj)->dir = D;
-    ((ObjBeam*)obj)->sprite.angle = 270.;
+  case BEAM_D:
+    ((ObjBeam*)obj)->dir = BEAM_D;
 
     ((ObjBeam*)obj)->fVel.x = 0;
     ((ObjBeam*)obj)->fVel.y = VEL;
     break;
-  case U:
-    ((ObjBeam*)obj)->dir = U;
-    ((ObjBeam*)obj)->sprite.angle = 90.;
+  case BEAM_U:
+    ((ObjBeam*)obj)->dir = BEAM_U;
 
     ((ObjBeam*)obj)->fVel.x = 0;
     ((ObjBeam*)obj)->fVel.y = -VEL;
     break;
   default:
-    ((ObjBeam*)obj)->dir = R;
-    ((ObjBeam*)obj)->sprite.angle = 0.;
-
-    ((ObjBeam*)obj)->fVel.x = VEL;
-    ((ObjBeam*)obj)->fVel.y = 0;
+    SDL_assert(0);
   }
+  ((ObjBeam*)obj)->animPlayer.Start(_anims + value);
+  ((ObjBeam*)obj)->animPlayer.GetSprite(&((ObjBeam*)obj)->sprite);
 }
 
 #define SS "sprites/beam.sprite.bin"
@@ -131,7 +141,7 @@ ObjBeam::ObjBeam(void)
 
   animPlayer.sprts = spritesheet;
   animPlayer.speed = 100;
-  animPlayer.Start(&_anim);
+  animPlayer.Start(_anims + BEAM_R);
   animPlayer.GetSprite(&sprite);
 }
 ObjBeam::~ObjBeam(void)
@@ -158,15 +168,15 @@ ObjBeam::OnUpdate(void)
 
   switch (dir)
   {
-  case R:
-  case L:
+  case BEAM_R:
+  case BEAM_L:
     atkBox.x = pos.x - 8;
     atkBox.y = pos.y - 4;
     atkBox.w = 16;
     atkBox.h = 8;
     break;
-  case D:
-  case U:
+  case BEAM_D:
+  case BEAM_U:
     atkBox.x = pos.x - 4;
     atkBox.y = pos.y - 8;
     atkBox.w = 8;

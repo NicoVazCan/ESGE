@@ -4,6 +4,7 @@
 #include "ESGE_time.h"
 #include "ESGE_file.h"
 #include "ESGE_hash.h"
+#include "ESGE_error.h"
 
 #include "flyEnemy.h"
 #include "player.h"
@@ -78,11 +79,11 @@ ObjSpawnerEnemy::SetMaxFlyEnemy(void *obj, int value)
 
 
 #define SS "sprites/spawner.sprite.bin"
-#define MAX_LIFE 4
+#define MAX_LIFE 8
 
 ObjSpawnerEnemy::ObjSpawnerEnemy(void)
 {
-  layer = PLAYER_LAYER-1;
+  layer = PLAYER_LAYER-2;
 
   offsetSize.x = 0;
   offsetSize.y = 0;
@@ -112,6 +113,7 @@ ObjSpawnerEnemy::OnStart(void)
 #define SPAWN_OFFSET_H 16
 #define SPAWN_OFFSET_V 32
 #define FOCUS_RANGE 64
+#define DMG 10
 
 void
 ObjSpawnerEnemy::OnUpdate(void)
@@ -124,6 +126,16 @@ ObjSpawnerEnemy::OnUpdate(void)
 
   if (player)
   {
+    SDL_Rect playerHitBox, atkBox;
+
+    playerHitBox = player->GetHitBox();
+    atkBox = GetHitBox();
+
+    if (SDL_HasIntersection(&playerHitBox, &atkBox))
+    {
+      player->OnAttack(DMG);
+    }
+
     if (
       SDL_abs(player->pos.x - pos.x) <= FOCUS_RANGE &&
       SDL_abs(player->pos.y - pos.y) <= FOCUS_RANGE
@@ -144,15 +156,18 @@ ObjSpawnerEnemy::OnUpdate(void)
         if (nFly < maxFlyEnemy)
         {
           spawnDeltaTm = 0;
-          SDL_assert(
+          if (
             (
               fly = (ObjFlyEnemy*)ESGE_SceneMngr::GetActiveScene(
               )->AddObj("ObjFlyEnemy")
             )
-          );
-
-          ObjFlyEnemy::SetPosX(fly, pos.x + SPAWN_OFFSET_H);
-          ObjFlyEnemy::SetPosY(fly, pos.y + SPAWN_OFFSET_V);
+          )
+          {
+            ObjFlyEnemy::SetPosX(fly, pos.x + SPAWN_OFFSET_H);
+            ObjFlyEnemy::SetPosY(fly, pos.y + SPAWN_OFFSET_V);
+          }
+          else
+            SDL_Log("Failed to add ObjFlyEnemy: %s", SDL_GetError());
         }
       }
     }
@@ -160,6 +175,45 @@ ObjSpawnerEnemy::OnUpdate(void)
 
   animPlayer.Update(ESGE_deltaTm);
   animPlayer.GetSprite(&sprite);
+
+  if (life == 0 && dmgDeltaTm >= maxDmgDeltaTm)
+  {
+    ESGE_Scene *scene;
+
+    scene = ESGE_SceneMngr::GetActiveScene();
+
+    if (scene->id == sceneID)
+      scene->DelObj(instName);
+    else
+    {
+      ESGE_Scene *prevScene = scene;
+
+      ESGE_SceneMngr::SetActiveScene(sceneID);
+
+      scene = ESGE_SceneMngr::GetActiveScene();
+      scene->DelObj(instName);
+
+      ESGE_SceneMngr::SetActiveScene(prevScene->id);
+    }
+  }
+}
+
+#define BLINK_T 16*4
+
+void
+ObjSpawnerEnemy::OnDraw(void)
+{
+  if (dmgDeltaTm >= maxDmgDeltaTm)
+  {
+    ESGE_ObjDrawSprite::OnDraw();
+  }
+  else
+  {
+    if (dmgDeltaTm % (BLINK_T*2) >= BLINK_T)
+    {
+      ESGE_ObjDrawSprite::OnDraw();
+    }
+  }
 }
 
 void
@@ -197,8 +251,6 @@ ObjSpawnerEnemy::OnAttack(int dmg)
   if (dmgDeltaTm >= maxDmgDeltaTm)
   {
     dmgDeltaTm = 0;
-
     life -= dmg;
-    SDL_Log("hit %d dmg, %d life", dmg, life);
   }
 }

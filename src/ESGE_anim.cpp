@@ -27,9 +27,16 @@ ESGE_AnimPlayer::Update(Uint32 deltaTm)
 
       if (frm == anim->nFrms)
       {
-        frm = 0;
-        if (rep == 0) done = true;
-        else          rep--;
+        if (rep == 0)
+        {
+          frm--;
+          done = true;
+        }
+        else
+        {
+          frm = 0;
+          if (rep > 0) rep--;
+        }
       }
     }
     
