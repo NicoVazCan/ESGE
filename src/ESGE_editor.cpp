@@ -430,6 +430,7 @@ main(int argc, char *argv[])
 	{
 		SDL_PumpEvents();
 		UpdateEditor();
+		ESGE_SceneMngr::Update();
 		ESGE_ObjDraw::Draw();
 		ESGE_Display::Update();
 

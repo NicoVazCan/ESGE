@@ -71,6 +71,7 @@ main(int argc, const char *argv[])
 		if (ESGE_quit) break;
 
 		ESGE_ObjUpdate::Update();
+		ESGE_SceneMngr::Update();
 		ESGE_ObjPhysic::Physic();
 		ESGE_ObjDraw::Draw();
 

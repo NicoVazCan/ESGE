@@ -14,6 +14,7 @@ class ESGE_ObjScene:
   public virtual ESGE_ObjActive
 {
 public:
+  enum {OK, ADD, DEL} state;
   Uint64 sceneID;
   char instName[ESGE_INST_NAME_LEN];
   Uint64 instID;
@@ -156,6 +157,7 @@ ESGE_GetObj(Uint64 sceneID, const char *instName)
 class ESGE_Scene
 {
 public:
+  enum {OK, EN, DIS, CLO} state;
   const char *sceneFile;
   const Uint64 id;
   ESGE_ObjScene *objList = NULL;
@@ -171,6 +173,8 @@ public:
 
   ESGE_ObjScene *AddObj(const char *typeName);
   void DelObj(const char *instName);
+  void Update(void);
+
   ESGE_ObjScene *GetObj(const char *instName);
 # ifdef ESGE_EDITOR
   int RenameObj(
@@ -201,6 +205,8 @@ public:
   static void Init(int maxDisabled);
   static void Quit(void);
 
+  static void Update(void);
+
   static void AddScene(const char *sceneFile);
   static void ChangeScene(const char *sceneFile);
 
@@ -209,6 +215,7 @@ public:
 
   static ESGE_Scene *GetActiveScene(void);
   static int SetActiveScene(const char *sceneFile);
+  static int SetActiveScene(Uint64 id);
 };
 
 #endif

@@ -38,6 +38,7 @@ ESGE_ObjScene::OnStart(void)
 {}
 
 
+
 ESGE_Scene::ESGE_Scene(const char *sceneFile):
   id(ESGE_Hash(sceneFile))
 {
@@ -81,6 +82,7 @@ ESGE_Scene::ESGE_Scene(const char *sceneFile):
       }
       obj = (ESGE_ObjScene*)type->New();
 
+      obj->state = ESGE_ObjScene::OK;
       obj->sceneID = id;
       obj->typeID  = typeID;
       ESGE_ReadStr(io, obj->instName, ESGE_INST_NAME_LEN);
@@ -154,9 +156,6 @@ ESGE_Scene::Disable(void)
 {
   for (ESGE_ObjScene *obj = objList; obj != NULL; obj = obj->next)
     obj->OnDisable();
-
-  for (ESGE_ObjScene *obj = objList; obj != NULL; obj = obj->next)
-    obj->OnStart();
 }
 
 int
@@ -239,13 +238,7 @@ ESGE_Scene::AddObj(const char *typeName)
   obj->next = *node;
   *node = obj;
 
-#ifdef ESGE_EDITOR
-  obj->OnEditorInit();
-#else
-  obj->OnInit();
-  obj->OnStart();
-  obj->OnEnable();
-#endif
+  obj->state = ESGE_ObjScene::ADD;
 
   return obj;
 }
@@ -253,7 +246,7 @@ ESGE_Scene::AddObj(const char *typeName)
 void
 ESGE_Scene::DelObj(const char *instName)
 {
-  ESGE_ObjScene **node;
+  ESGE_ObjScene *obj;
   Uint64 instID;
 
   SDL_assert(instName != NULL);
@@ -261,26 +254,62 @@ ESGE_Scene::DelObj(const char *instName)
   instID = ESGE_Hash(instName);
 
   for (
-    node = &objList;
-    *node != NULL && (*node)->instID < instID;
-    node = &(*node)->next
+    obj = objList;
+    obj && obj->instID < instID;
+    obj = obj->next
   );
 
-  if (*node != NULL && (*node)->instID == instID)
+  if (obj && obj->instID == instID)
+    obj->state = ESGE_ObjScene::DEL;
+}
+
+void
+ESGE_Scene::Update(void)
+{
+  ESGE_ObjScene **node;
+
+  node = &objList;
+  while (*node)
   {
-    ESGE_ObjScene *next = (*node)->next;
+    switch ((*node)->state)
+    {
+    case ESGE_ObjScene::OK:
+      node = &(*node)->next;
+      break;
 
+    case ESGE_ObjScene::ADD:
+      (*node)->state = ESGE_ObjScene::OK;
 #ifdef ESGE_EDITOR
-    (*node)->OnEditorQuit();
+      (*node)->OnEditorInit();
 #else
-    (*node)->OnDisable();
-    (*node)->OnQuit();
+      (*node)->OnInit();
+      (*node)->OnStart();
+      (*node)->OnEnable();
 #endif
+      node = &(*node)->next;
+      break;
 
-    delete *node;
-    *node = next;
+    case ESGE_ObjScene::DEL:
+      ESGE_ObjScene *next;
+
+      (*node)->state = ESGE_ObjScene::OK;
+#ifdef ESGE_EDITOR
+      (*node)->OnEditorQuit();
+#else
+      (*node)->OnDisable();
+      (*node)->OnQuit();
+#endif
+      next = (*node)->next;
+      delete *node;
+      *node = next;
+      break;
+
+    default:
+      SDL_assert(0);
+    }
   }
 }
+
 
 ESGE_ObjScene*
 ESGE_Scene::GetObj(const char *instName)
@@ -382,6 +411,7 @@ ESGE_SceneMngr::EnableScene(ESGE_Scene *scene)
 {
   scene->next = enabledList;
   enabledList = scene;
+  nDisabled--;
 #ifndef ESGE_EDITOR
   scene->Enable();
 #endif
@@ -464,145 +494,133 @@ ESGE_SceneMngr::Quit(void)
   lastDisabled = NULL;
 }
 
+void
+ESGE_SceneMngr::Update(void)
+{
+  ESGE_Scene **node;
+
+  for (
+    ESGE_Scene *scene = enabledList;
+    scene;
+    scene = scene->next
+  )
+    scene->Update();
+
+  node = &lastDisabled;
+  while (*node)
+  {
+    switch ((*node)->state)
+    {
+    case ESGE_Scene::OK:
+      node = &(*node)->next;
+      break;
+    case ESGE_Scene::EN:
+      active = *node;
+      *node = active->next;
+
+      active->state = ESGE_Scene::OK;
+      EnableScene(active);
+      break;
+    default:
+      SDL_assert(0);
+    }
+  }
+
+  node = &enabledList;
+  while (*node)
+  {
+    switch ((*node)->state)
+    {
+      ESGE_Scene *scene;
+
+    case ESGE_Scene::OK:
+      node = &(*node)->next;
+      break;
+    case ESGE_Scene::DIS:
+      scene = *node;
+      *node = scene->next;
+
+      if (active == scene) active = *node;
+      
+      scene->state = ESGE_Scene::OK;
+      DisableScene(scene);
+      break;
+    case ESGE_Scene::CLO:
+      scene = *node;
+      *node = scene->next;
+
+      if (active == scene) active = *node;
+
+      scene->Disable();
+      delete scene;
+      break;
+    default:
+      SDL_assert(0);
+    }
+  }
+}
+
 
 void
 ESGE_SceneMngr::AddScene(const char *sceneFile)
 {
-  ESGE_Scene **node;
+  ESGE_Scene *disabled;
   Uint64 sceneID;
 
   sceneID = ESGE_Hash(sceneFile);
 
   for (
-    node = &lastDisabled;
-    *node && (*node)->id != sceneID;
-    node = &(*node)->next
+    disabled = lastDisabled;
+    disabled && disabled->id != sceneID;
+    disabled = disabled->next
   );
 
-  if (*node)
+  if (!disabled)
   {
-    active = *node;
+    disabled = new ESGE_Scene(sceneFile);
 
-    *node = active->next;
-    nDisabled--;
+    disabled->next = lastDisabled;
+    lastDisabled = disabled;
+
+    nDisabled++;
   }
-  else active = new ESGE_Scene(sceneFile);
 
-  EnableScene(active);
+  disabled->state = ESGE_Scene::EN;
 }
 
 void
 ESGE_SceneMngr::ChangeScene(const char *sceneFile)
 {
-  ESGE_Scene **node, *enabled;
-  Uint64 sceneID;
-
-  sceneID = ESGE_Hash(sceneFile);
+  ESGE_SceneMngr::AddScene(sceneFile);
 
   for (
-    node = &lastDisabled;
-    *node && (*node)->id != sceneID;
-    node = &(*node)->next
-  );
-
-  if (*node)
-  {
-    active = *node;
-    
-    *node = active->next;
-    nDisabled--;
-  }
-  else active = new ESGE_Scene(sceneFile);
-
-  enabled = enabledList;
-
-  while (enabled)
-  {
-    ESGE_Scene *next = enabled->next;
-
-    DisableScene(enabled);
-
-    enabled = next;
-  }
-
-  enabledList = NULL;
-  EnableScene(active);
+    ESGE_Scene *enabled = enabledList;
+    enabled;
+    enabled = enabled->next
+  )
+    enabled->state = ESGE_Scene::DIS;
 }
 
 void
 ESGE_SceneMngr::StashScene(const char *sceneFile)
 {
-  ESGE_Scene **node;
+  ESGE_Scene *enabled;
   Uint64 sceneID;
 
   sceneID = ESGE_Hash(sceneFile);
 
   for (
-    node = &enabledList;
-    *node && (*node)->id != sceneID;
-    node = &(*node)->next
+    enabled = enabledList;
+    enabled && enabled->id != sceneID;
+    enabled = enabled->next
   );
 
-  if (*node && (*node)->id == sceneID)
-  {
-    ESGE_Scene *scene = *node;
-
-    *node = (*node)->next;
-
-    if (scene == active) active = *node;
-
-    DisableScene(scene);
-  }
+  if (enabled && enabled->id == sceneID)
+    enabled->state = ESGE_Scene::DIS;
 }
 
 void
 ESGE_SceneMngr::CloseScene(const char *sceneFile)
-{
-  ESGE_Scene **node;
-  Uint64 sceneID;
-
-  sceneID = ESGE_Hash(sceneFile);
-
-  for (
-    node = &enabledList;
-    *node && (*node)->id != sceneID;
-    node = &(*node)->next
-  );
-
-  if (*node && (*node)->id == sceneID)
-  {
-    ESGE_Scene *scene = *node;
-
-    *node = (*node)->next;
-
-    if (scene == active) active = *node;
-#ifndef ESGE_EDITOR
-    scene->Disable();
-#endif
-    delete scene;
-  }
-  else
-  {
-    for (
-      node = &lastDisabled;
-      *node && (*node)->id != sceneID;
-      node = &(*node)->next
-    );
-
-    if (*node && (*node)->id == sceneID)
-      delete *node;
-  }
-}
-
-
-ESGE_Scene*
-ESGE_SceneMngr::GetActiveScene(void)
-{
-  return active;
-}
-
-int
-ESGE_SceneMngr::SetActiveScene(const char *sceneFile)
 {
   ESGE_Scene *scene;
   Uint64 sceneID;
@@ -615,10 +633,52 @@ ESGE_SceneMngr::SetActiveScene(const char *sceneFile)
     scene = scene->next
   );
 
-  if (scene && scene->id == sceneID)
+  if (!scene)
+  {
+    for (
+      scene = lastDisabled;
+      scene && scene->id != sceneID;
+      scene = scene->next
+    );
+  }
+  if (scene)
+    scene->state = ESGE_Scene::CLO;
+}
+
+
+ESGE_Scene*
+ESGE_SceneMngr::GetActiveScene(void)
+{
+  return active;
+}
+
+int
+ESGE_SceneMngr::SetActiveScene(const char *sceneFile)
+{
+  return (
+    SetActiveScene(ESGE_Hash(sceneFile)) ?
+    SDL_SetError("Scene \"%s\" not loaded", sceneFile) :
+    0
+  );
+}
+
+int
+ESGE_SceneMngr::SetActiveScene(Uint64 id)
+{
+  ESGE_Scene *scene;
+
+  for (
+    scene = enabledList;
+    scene && scene->id != id;
+    scene = scene->next
+  );
+
+  if (scene && scene->id == id)
   {
     active = scene;
     return 0;
   }
-  return SDL_SetError("Scene \"%s\" not loaded", sceneFile);
+  return SDL_SetError(
+    "Scene with id=\"%" SDL_PRIu64 "\" not loaded", id
+  );
 }
