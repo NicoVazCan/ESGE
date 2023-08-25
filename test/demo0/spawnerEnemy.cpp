@@ -221,12 +221,12 @@ ObjSpawnerEnemy::OnDisable(void)
 }
 #ifdef ESGE_EDITOR
 void
-ObjSpawnerEnemy::OnEditorInit(void)
+ObjSpawnerEnemy::OnEditorEnable(void)
 {
   EnableDraw();
 }
 void
-ObjSpawnerEnemy::OnEditorQuit(void)
+ObjSpawnerEnemy::OnEditorDisable(void)
 {
   DisableDraw();
 }
@@ -235,7 +235,7 @@ ObjSpawnerEnemy::OnEditorQuit(void)
 void
 ObjSpawnerEnemy::OnAttack(int dmg)
 {
-  if (dmgDeltaTm >= maxDmgDeltaTm)
+  if (life > 0 && dmgDeltaTm >= maxDmgDeltaTm)
   {
     dmgDeltaTm = 0;
     life -= dmg;

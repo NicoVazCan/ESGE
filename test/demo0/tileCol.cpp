@@ -67,13 +67,13 @@ public:
 
 
 #ifdef ESGE_EDITOR
-  virtual void OnEditorInit(void)
+  virtual void OnEditorEnable(void)
   {
     ESGE_ObjScene::OnEnable();
     EnableDraw();
   }
 
-  virtual void OnEditorQuit(void)
+  virtual void OnEditorDisable(void)
   {
     ESGE_ObjScene::OnDisable();
     DisableDraw();

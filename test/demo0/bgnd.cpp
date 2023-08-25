@@ -32,13 +32,13 @@ public:
   }
 
 #ifdef ESGE_EDITOR
-  virtual void OnEditorInit(void) override
+  virtual void OnEditorEnable(void) override
   {
     spritesheet = ESGE_FileMngr<ESGE_Spritesheet>::Watch(BGRND_SS);
     spritesheet->GetSprite(&sprite, 0, 0);
     EnableDraw();
   }
-  virtual void OnEditorQuit(void) override
+  virtual void OnEditorDisable(void) override
   {
     ESGE_FileMngr<ESGE_Spritesheet>::Leave(spritesheet);
     DisableDraw();

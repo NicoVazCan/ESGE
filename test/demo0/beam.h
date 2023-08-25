@@ -45,8 +45,8 @@ public:
   virtual void OnEnable(void) override;
   virtual void OnDisable(void) override;
 #ifdef ESGE_EDITOR
-  virtual void OnEditorInit(void) override;
-  virtual void OnEditorQuit(void) override;
+  virtual void OnEditorEnable(void) override;
+  virtual void OnEditorDisable(void) override;
 #endif
 };
 

@@ -232,12 +232,12 @@ ObjBeam::OnDisable(void)
 }
 #ifdef ESGE_EDITOR
 void
-ObjBeam::OnEditorInit(void)
+ObjBeam::OnEditorEnable(void)
 {
   EnableDraw();
 }
 void
-ObjBeam::OnEditorQuit(void)
+ObjBeam::OnEditorDisable(void)
 {
   DisableDraw();
 }

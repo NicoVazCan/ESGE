@@ -28,8 +28,8 @@ public:
   void Destroy(void);
 
 # ifdef ESGE_EDITOR
-  virtual void OnEditorInit(void);
-  virtual void OnEditorQuit(void);
+  virtual void OnEditorEnable(void);
+  virtual void OnEditorDisable(void);
 # endif
 
   virtual void OnInit(void);

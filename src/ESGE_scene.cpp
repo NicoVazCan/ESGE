@@ -67,10 +67,10 @@ ESGE_ObjScene::Destroy(void)
 
 #ifdef ESGE_EDITOR
 void
-ESGE_ObjScene::OnEditorInit(void)
+ESGE_ObjScene::OnEditorEnable(void)
 {}
 void
-ESGE_ObjScene::OnEditorQuit(void)
+ESGE_ObjScene::OnEditorDisable(void)
 {}
 #endif
 
@@ -155,13 +155,7 @@ ESGE_Scene::ESGE_Scene(const char *sceneFile):
 
 
     for (ESGE_ObjScene *obj = objList; obj != NULL; obj = obj->next)
-    {
-#ifdef ESGE_EDITOR
-      obj->OnEditorInit();
-#else
       obj->OnInit();
-#endif
-    }
   }
   else SDL_ClearError();
 }
@@ -169,13 +163,8 @@ ESGE_Scene::ESGE_Scene(const char *sceneFile):
 ESGE_Scene::~ESGE_Scene(void)
 {
   for (ESGE_ObjScene *obj = objList; obj != NULL; obj = obj->next)
-  {
-#ifdef ESGE_EDITOR
-    obj->OnEditorQuit();
-#else
     obj->OnQuit();
-#endif
-  }
+
   SGLIB_SORTED_LIST_MAP_ON_ELEMENTS(
     ESGE_ObjScene,
     objList,
@@ -192,18 +181,28 @@ ESGE_Scene::~ESGE_Scene(void)
 void
 ESGE_Scene::Enable(void)
 {
+#ifdef ESGE_EDITOR
+  for (ESGE_ObjScene *obj = objList; obj != NULL; obj = obj->next)
+    obj->OnEditorEnable();
+#else
   for (ESGE_ObjScene *obj = objList; obj != NULL; obj = obj->next)
     obj->OnEnable();
 
   for (ESGE_ObjScene *obj = objList; obj != NULL; obj = obj->next)
     obj->OnStart();
+#endif
 }
 
 void
 ESGE_Scene::Disable(void)
 {
+#ifdef ESGE_EDITOR
+  for (ESGE_ObjScene *obj = objList; obj != NULL; obj = obj->next)
+    obj->OnEditorDisable();
+#else
   for (ESGE_ObjScene *obj = objList; obj != NULL; obj = obj->next)
     obj->OnDisable();
+#endif
 }
 
 int
@@ -327,10 +326,12 @@ ESGE_Scene::Update(void)
 
     case ESGE_ObjScene::ADD:
       (*node)->state = ESGE_ObjScene::OK;
-#ifdef ESGE_EDITOR
-      (*node)->OnEditorInit();
-#else
+
       (*node)->OnInit();
+
+#ifdef ESGE_EDITOR
+      (*node)->OnEditorEnable();
+#else
       (*node)->OnStart();
       (*node)->OnEnable();
 #endif
@@ -341,12 +342,15 @@ ESGE_Scene::Update(void)
       ESGE_ObjScene *next;
 
       (*node)->state = ESGE_ObjScene::OK;
+
 #ifdef ESGE_EDITOR
-      (*node)->OnEditorQuit();
+      (*node)->OnEditorDisable();
 #else
       (*node)->OnDisable();
-      (*node)->OnQuit();
 #endif
+
+      (*node)->OnQuit();
+
       next = (*node)->next;
       delete *node;
       *node = next;
@@ -535,9 +539,7 @@ ESGE_SceneMngr::Update(void)
       scene->next = lastDisabled;
       lastDisabled = scene;
 
-#ifndef ESGE_EDITOR
       scene->Disable();
-#endif
 
       scene->state = ESGE_Scene::OK;
       break;
@@ -547,9 +549,7 @@ ESGE_SceneMngr::Update(void)
 
       if (active == scene) active = *node;
 
-#ifndef ESGE_EDITOR
       scene->Disable();
-#endif
       
       delete scene;
       break;
@@ -577,9 +577,7 @@ ESGE_SceneMngr::Update(void)
 
       active = scene;
 
-#ifndef ESGE_EDITOR
       scene->Enable();
-#endif
 
       active->state = ESGE_Scene::OK;
       break;
@@ -612,7 +610,7 @@ ESGE_SceneMngr::Update(void)
         delete scene;
         scene = next;
       }
-      
+
       break;
     }
     else nDisabled++;

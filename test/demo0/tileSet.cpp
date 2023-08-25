@@ -93,12 +93,12 @@ public:
 
 
   #ifdef ESGE_EDITOR
-  virtual void OnEditorInit(void) override
+  virtual void OnEditorEnable(void) override
   {
     EnableDraw();
   }
 
-  virtual void OnEditorQuit(void) override
+  virtual void OnEditorDisable(void) override
   {
     DisableDraw();
   }

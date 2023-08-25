@@ -848,12 +848,12 @@ ObjPlayer::OnDisable(void)
 
 #ifdef ESGE_EDITOR
 void
-ObjPlayer::OnEditorInit(void)
+ObjPlayer::OnEditorEnable(void)
 {
   EnableDraw();
 }
 void
-ObjPlayer::OnEditorQuit(void)
+ObjPlayer::OnEditorDisable(void)
 {
   DisableDraw();
 }
@@ -864,7 +864,7 @@ ObjPlayer::OnEditorQuit(void)
 void
 ObjPlayer::OnAttack(int dmg)
 {
-  if (dmgDeltaTm >= maxDmgDeltaTm)
+  if (life > 0 && dmgDeltaTm >= maxDmgDeltaTm)
   {
     dmgDeltaTm = 0;
     life -= dmg;

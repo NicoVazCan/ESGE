@@ -288,12 +288,12 @@ ObjFlyEnemy::OnDisable(void)
 }
 #ifdef ESGE_EDITOR
 void
-ObjFlyEnemy::OnEditorInit(void)
+ObjFlyEnemy::OnEditorEnable(void)
 {
   EnableDraw();
 }
 void
-ObjFlyEnemy::OnEditorQuit(void)
+ObjFlyEnemy::OnEditorDisable(void)
 {
   DisableDraw();
 }
@@ -302,7 +302,7 @@ ObjFlyEnemy::OnEditorQuit(void)
 void
 ObjFlyEnemy::OnAttack(int dmg)
 {
-  if (dmgDeltaTm >= maxDmgDeltaTm)
+  if (life > 0 && dmgDeltaTm >= maxDmgDeltaTm)
   {
     dmgDeltaTm = 0;
     life -= dmg;
