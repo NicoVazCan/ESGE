@@ -10,6 +10,8 @@
 #include "enemy.h"
 
 class ObjPlayer;
+class ESGE_Spritesheet;
+class ESGE_Sound;
 
 class ObjSpawnerEnemy:
   public ESGE_ObjScene,
@@ -24,6 +26,8 @@ class ObjSpawnerEnemy:
   Uint32 spawnDeltaTm = 2000;
   Uint32 maxSpawnDeltaTm = 2000;
   int maxFlyEnemy = 8;
+
+  ESGE_Sound *dmgSnd, *deathSnd;
 
   Uint32 dmgDeltaTm = 1000;
   Uint32 maxDmgDeltaTm = 1000;

@@ -15,6 +15,8 @@
 
 class ESGE_Spritesheet;
 class ESGE_Sound;
+class ObjRoomMngr;
+class ObjCamMngr;
 
 class ObjPlayer:
   public ESGE_ObjScene,
@@ -28,9 +30,12 @@ class ObjPlayer:
   SDL_Point fVel = {0, 0};
   SDL_Point fPos;
 
+  ObjRoomMngr *roomMngr;
+  ObjCamMngr *camMngr;
+
   ESGE_Spritesheet *spritesheet;
   ESGE_AnimPlayer animPlayer;
-  ESGE_Sound *jmpSnd, *shotSnd;
+  ESGE_Sound *jmpSnd, *shotSnd, *dmgSnd;
 
   Uint32 dmgDeltaTm = 4000;
   Uint32 maxDmgDeltaTm = 4000;

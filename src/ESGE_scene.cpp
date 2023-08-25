@@ -6,32 +6,80 @@
 #include "ESGE_error.h"
 #include "ESGE_io.h"
 
+ESGE_ObjScene*
+ESGE_ObjScene::Create(const char *typeName)
+{
+  ESGE_Scene *active;
+  ESGE_ObjScene *newObj;
+
+  if (!(active = ESGE_SceneMngr::GetActiveScene()))
+  {
+    ESGE_Error(
+      "Failed to create an object of type \"%s\": No scene loaded",
+      typeName
+    );
+  }
+  else if ((newObj = active->AddObj(typeName)))
+  {
+    return newObj;
+  }
+  else
+  {
+    ESGE_Error(
+      "Failed to create an object of type \"%s\": %s",
+      typeName,
+      SDL_GetError()
+    );
+  }
+}
 
 ESGE_ObjScene::ESGE_ObjScene(void)
 {}
-
 ESGE_ObjScene::~ESGE_ObjScene(void)
 {}
+
+void
+ESGE_ObjScene::Destroy(void)
+{
+  ESGE_Scene *scene;
+
+  if (!(scene = ESGE_SceneMngr::GetActiveScene()))
+  {
+    ESGE_Error(
+      "Failed to destroy \"%s\" object: No scene loaded",
+      instName
+    );
+  }
+  else if (scene->id == sceneID)
+    scene->DelObj(instName);
+  else
+  {
+    ESGE_Scene *prevScene = scene;
+
+    ESGE_SceneMngr::SetActiveScene(sceneID);
+
+    scene = ESGE_SceneMngr::GetActiveScene();
+    scene->DelObj(instName);
+
+    ESGE_SceneMngr::SetActiveScene(prevScene->id);
+  }
+}
 
 #ifdef ESGE_EDITOR
 void
 ESGE_ObjScene::OnEditorInit(void)
 {}
-
 void
 ESGE_ObjScene::OnEditorQuit(void)
 {}
 #endif
 
-
 void
 ESGE_ObjScene::OnInit(void)
 {}
-
 void
 ESGE_ObjScene::OnQuit(void)
 {}
-
 
 void
 ESGE_ObjScene::OnStart(void)
@@ -509,6 +557,8 @@ ESGE_SceneMngr::Update(void)
   node = &lastDisabled;
   while (*node)
   {
+    ESGE_Scene *scene;
+
     switch ((*node)->state)
     {
     case ESGE_Scene::OK:
@@ -521,6 +571,13 @@ ESGE_SceneMngr::Update(void)
       active->state = ESGE_Scene::OK;
       EnableScene(active);
       break;
+    case ESGE_Scene::CLO:
+      scene = *node;
+      *node = scene->next;
+
+      nDisabled--;
+      delete scene;
+      break;
     default:
       SDL_assert(0);
     }
@@ -529,10 +586,10 @@ ESGE_SceneMngr::Update(void)
   node = &enabledList;
   while (*node)
   {
+    ESGE_Scene *scene;
+
     switch ((*node)->state)
     {
-      ESGE_Scene *scene;
-
     case ESGE_Scene::OK:
       node = &(*node)->next;
       break;
@@ -552,6 +609,7 @@ ESGE_SceneMngr::Update(void)
       if (active == scene) active = *node;
 
       scene->Disable();
+      
       delete scene;
       break;
     default:
@@ -588,6 +646,7 @@ ESGE_SceneMngr::AddScene(const char *sceneFile)
   disabled->state = ESGE_Scene::EN;
 }
 
+
 void
 ESGE_SceneMngr::ChangeScene(const char *sceneFile)
 {
@@ -601,35 +660,43 @@ ESGE_SceneMngr::ChangeScene(const char *sceneFile)
     enabled->state = ESGE_Scene::DIS;
 }
 
+
 void
 ESGE_SceneMngr::StashScene(const char *sceneFile)
 {
-  ESGE_Scene *enabled;
-  Uint64 sceneID;
+  StashScene(ESGE_Hash(sceneFile));
+}
 
-  sceneID = ESGE_Hash(sceneFile);
+void
+ESGE_SceneMngr::StashScene(Uint64 id)
+{
+  ESGE_Scene *enabled;
 
   for (
     enabled = enabledList;
-    enabled && enabled->id != sceneID;
+    enabled && enabled->id != id;
     enabled = enabled->next
   );
 
-  if (enabled && enabled->id == sceneID)
+  if (enabled && enabled->id == id)
     enabled->state = ESGE_Scene::DIS;
 }
+
 
 void
 ESGE_SceneMngr::CloseScene(const char *sceneFile)
 {
-  ESGE_Scene *scene;
-  Uint64 sceneID;
+  CloseScene(ESGE_Hash(sceneFile));
+}
 
-  sceneID = ESGE_Hash(sceneFile);
+void
+ESGE_SceneMngr::CloseScene(Uint64 id)
+{
+  ESGE_Scene *scene;
 
   for (
     scene = enabledList;
-    scene && scene->id != sceneID;
+    scene && scene->id != id;
     scene = scene->next
   );
 
@@ -637,7 +704,7 @@ ESGE_SceneMngr::CloseScene(const char *sceneFile)
   {
     for (
       scene = lastDisabled;
-      scene && scene->id != sceneID;
+      scene && scene->id != id;
       scene = scene->next
     );
   }

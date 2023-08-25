@@ -4,7 +4,7 @@
 #include "ESGE_time.h"
 #include "ESGE_audio.h"
 #include "ESGE_file.h"
-#include "ESGE_hash.h"
+#include "ESGE_error.h"
 
 #include "ESGE_objStatic.h"
 
@@ -138,13 +138,13 @@ static const ESGE_Frm frmsFallUL[] = {
 
 
 static const ESGE_Frm frmsDmgR[] = {
-  {0, 14, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*50},
-  {1, 14, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*50},
+  {0, 14, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*20},
+  {1, 14, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*40},
 };
 
 static const ESGE_Frm frmsDmgL[] = {
-  {0, 15, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*50},
-  {1, 15, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*50},
+  {0, 15, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*20},
+  {1, 15, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*40},
 };
 
 
@@ -258,8 +258,11 @@ ObjPlayer::SetPosY(void *obj, int value)
 void
 ObjPlayer::Jump(void)
 {
-  
-  if (inGround)
+  if (
+    inGround &&
+    animPlayer.anim != anims + DMG_R &&
+    animPlayer.anim != anims + DMG_L
+  )
   {
     fVel.y = -JMP;
     jmpSnd->Play();
@@ -322,17 +325,16 @@ ObjPlayer::StopAimUp(void)
 void
 ObjPlayer::Shot(void)
 {
-  ObjBeam *beam;
+  ESGE_ObjScene *beam;
 
-  shotSnd->Play();
   if (
-    (
-      beam = (
-        (ObjBeam*)ESGE_SceneMngr::GetActiveScene()->AddObj("ObjBeam")
-      )
-    )
+    animPlayer.anim != anims + DMG_R &&
+    animPlayer.anim != anims + DMG_L
   )
   {
+    shotSnd->Play();
+    beam = Create("ObjBeam");
+
     if (facingR)
     {
       if (aimingUp)
@@ -364,10 +366,6 @@ ObjPlayer::Shot(void)
       }
     }
   }
-  else
-  {
-    SDL_Log("Failed to add ObjBeam: %s", SDL_GetError());
-  }
 }
 
 bool
@@ -397,6 +395,7 @@ ObjPlayer::IsInGround(void)
 
 #define JMP_SND "sounds/jump.wav"
 #define SHOT_SND "sounds/shot.wav"
+#define DMG_SND "sounds/dmg.wav"
 #define SS "sprites/player.sprite.bin"
 #define MAX_LIFE 99
 
@@ -431,6 +430,7 @@ ObjPlayer::ObjPlayer(void)
 
   jmpSnd = ESGE_FileMngr<ESGE_Sound>::Watch(JMP_SND);
   shotSnd = ESGE_FileMngr<ESGE_Sound>::Watch(SHOT_SND);
+  dmgSnd = ESGE_FileMngr<ESGE_Sound>::Watch(DMG_SND);
 }
 
 ObjPlayer::~ObjPlayer(void)
@@ -438,31 +438,27 @@ ObjPlayer::~ObjPlayer(void)
   ESGE_FileMngr<ESGE_Spritesheet>::Leave(spritesheet);
   ESGE_FileMngr<ESGE_Sound>::Leave(jmpSnd);
   ESGE_FileMngr<ESGE_Sound>::Leave(shotSnd);
+  ESGE_FileMngr<ESGE_Sound>::Leave(dmgSnd);
 }
 
 void
 ObjPlayer::OnStart(void)
 {
-  ObjRoomMngr *roomMngr;
-  ObjCamMngr *camMngr;
-
-  if ((roomMngr = ESGE_GetObj<ObjRoomMngr>(sceneID, "ObjRoomMngr")))
-    roomMngr->SetFocusCenter(pos.x + 8, pos.y + 16);
-
-  if ((camMngr = ESGE_GetObj<ObjCamMngr>(sceneID, "ObjCamMngr")))
-    camMngr->SetCamCenter(pos.x + 8, pos.y + 16);
+  if (!(roomMngr = ESGE_GetObj<ObjRoomMngr>(sceneID, "ObjRoomMngr")))
+  {
+    ESGE_Error(
+      "ObjRoomMngr not found in scene with id=%" SDL_PRIu64,
+      sceneID
+    );
+  }
+  if (!(camMngr = ESGE_GetObj<ObjCamMngr>(sceneID, "ObjCamMngr")))
+  {
+    ESGE_Error(
+      "ObjRoomMngr not found in scene with id=%" SDL_PRIu64,
+      sceneID
+    );
+  }
 }
-
-#define ACC ( \
-  ((int)(ESGE_deltaTm * ESGE_deltaTm)) * 0x0020 / 256 \
-)
-#define VEL (((int)ESGE_deltaTm) * 0x0140 / 16)
-#define GRA ( \
-  ((int)(ESGE_deltaTm * ESGE_deltaTm)) * 0x0010 / 256 \
-)
-#define ROUND(T, S, N) ( \
-  ((N + (1<<(S-1)) + (N>>(sizeof(T)*8-1))) & (~((1<<S)-1))) >> S \
-)
 
 void
 ObjPlayer::OnKeyDown(SDL_Keycode key, SDL_UNUSED SDL_Keymod mod)
@@ -518,6 +514,18 @@ ObjPlayer::OnKeyUp(SDL_Keycode key, SDL_UNUSED SDL_Keymod mod)
   }
 }
 
+#define ACC ( \
+  ((int)(ESGE_deltaTm * ESGE_deltaTm)) * 0x0020 / 256 \
+)
+#define VEL (((int)ESGE_deltaTm) * 0x0140 / 16)
+#define GRA ( \
+  ((int)(ESGE_deltaTm * ESGE_deltaTm)) * 0x0010 / 256 \
+)
+#define ROUND(T, S, N) ( \
+  ((N + (1<<(S-1)) + (N>>(sizeof(T)*8-1))) & (~((1<<S)-1))) >> S \
+)
+#define DEATH_SCENE "scene.bin"
+
 void
 ObjPlayer::OnUpdate(void)
 {
@@ -536,9 +544,11 @@ ObjPlayer::OnUpdate(void)
     dmgDeltaTm += ESGE_deltaTm;
   }
 
-  switch (going)
+  if (
+    animPlayer.anim == anims + DMG_R ||
+    animPlayer.anim == anims + DMG_L
+  )
   {
-  case STAND:
     if (fVel.x > 0)
     {
       if (fVel.x - ACC <= 0)
@@ -562,30 +572,69 @@ ObjPlayer::OnUpdate(void)
       fAcc.x = 0;
       fVel.x = 0;
     }
-    break;
-
-  case RIGHT:
-    if (fVel.x + ACC > VEL)
+  }
+  else
+  {
+    if (life <= 0)
     {
-      fAcc.x = 0;
-      fVel.x = VEL;
+      roomMngr->CloseRooms();
+      ESGE_SceneMngr::CloseScene(sceneID);
+      ESGE_SceneMngr::AddScene(DEATH_SCENE);
     }
-    else fAcc.x = ACC;
-    facingR = true;
-    break;
-
-  case LEFT:
-    if (fVel.x - ACC < -VEL)
+    else
     {
-      fAcc.x = 0;
-      fVel.x = -VEL;
-    }
-    else fAcc.x = -ACC;
-    facingR = false;
-    break;
+      switch (going)
+      {
+      case STAND:
+        if (fVel.x > 0)
+        {
+          if (fVel.x - ACC <= 0)
+          {
+            fAcc.x = 0;
+            fVel.x = 0;
+          }
+          else fAcc.x = -ACC;
+        }
+        else if ((fVel.x < 0))
+        {
+          if (fVel.x + ACC >= 0)
+          {
+            fAcc.x = 0;
+            fVel.x = 0;
+          }
+          else fAcc.x = ACC;
+        }
+        else
+        {
+          fAcc.x = 0;
+          fVel.x = 0;
+        }
+        break;
 
-  default:
-    SDL_assert(0);
+      case RIGHT:
+        if (fVel.x + ACC > VEL)
+        {
+          fAcc.x = 0;
+          fVel.x = VEL;
+        }
+        else fAcc.x = ACC;
+        facingR = true;
+        break;
+
+      case LEFT:
+        if (fVel.x - ACC < -VEL)
+        {
+          fAcc.x = 0;
+          fVel.x = -VEL;
+        }
+        else fAcc.x = -ACC;
+        facingR = false;
+        break;
+
+      default:
+        SDL_assert(0);
+      }
+    }
   }
 
   fPos.x += fVel.x += fAcc.x;
@@ -597,106 +646,112 @@ ObjPlayer::OnUpdate(void)
 
   if (facingR)
   {
-    if (inGround)
+    if (animPlayer.anim != anims + DMG_R || animPlayer.done)
     {
-      if (fVel.x == 0)
+      if (inGround)
       {
-        if (aimingUp)
+        if (fVel.x == 0)
         {
-          if (animPlayer.anim != anims + STAND_U_R)
-            animPlayer.Start(anims + STAND_U_R);
+          if (aimingUp)
+          {
+            if (animPlayer.anim != anims + STAND_U_R)
+              animPlayer.Start(anims + STAND_U_R);
+          }
+          else
+          {
+            if (animPlayer.anim != anims + STAND_R)
+              animPlayer.Start(anims + STAND_R);
+          }
         }
         else
         {
-          if (animPlayer.anim != anims + STAND_R)
-            animPlayer.Start(anims + STAND_R);
+          if (animPlayer.anim != anims + RUN_R)
+            animPlayer.Start(anims + RUN_R);
         }
       }
       else
       {
-        if (animPlayer.anim != anims + RUN_R)
-          animPlayer.Start(anims + RUN_R);
-      }
-    }
-    else
-    {
-      if (fVel.y <= 0)
-      {
-        if (aimingUp)
+        if (fVel.y <= 0)
         {
-          if (animPlayer.anim != anims + JMP_U_R)
-            animPlayer.Start(anims + JMP_U_R);
+          if (aimingUp)
+          {
+            if (animPlayer.anim != anims + JMP_U_R)
+              animPlayer.Start(anims + JMP_U_R);
+          }
+          else
+          {
+            if (animPlayer.anim != anims + JMP_R)
+              animPlayer.Start(anims + JMP_R);
+          }
         }
         else
         {
-          if (animPlayer.anim != anims + JMP_R)
-            animPlayer.Start(anims + JMP_R);
-        }
-      }
-      else
-      {
-        if (aimingUp)
-        {
-          if (animPlayer.anim != anims + FALL_U_R)
-            animPlayer.Start(anims + FALL_U_R);
-        }
-        else
-        {
-          if (animPlayer.anim != anims + FALL_R)
-            animPlayer.Start(anims + FALL_R);
+          if (aimingUp)
+          {
+            if (animPlayer.anim != anims + FALL_U_R)
+              animPlayer.Start(anims + FALL_U_R);
+          }
+          else
+          {
+            if (animPlayer.anim != anims + FALL_R)
+              animPlayer.Start(anims + FALL_R);
+          }
         }
       }
     }
   }
   else
   {
-    if (inGround)
+    if (animPlayer.anim != anims + DMG_L || animPlayer.done)
     {
-      if (fVel.x == 0)
+      if (inGround)
       {
-        if (aimingUp)
+        if (fVel.x == 0)
         {
-          if (animPlayer.anim != anims + STAND_U_L)
-            animPlayer.Start(anims + STAND_U_L);
+          if (aimingUp)
+          {
+            if (animPlayer.anim != anims + STAND_U_L)
+              animPlayer.Start(anims + STAND_U_L);
+          }
+          else
+          {
+            if (animPlayer.anim != anims + STAND_L)
+              animPlayer.Start(anims + STAND_L);
+          }
         }
         else
         {
-          if (animPlayer.anim != anims + STAND_L)
-            animPlayer.Start(anims + STAND_L);
+          if (animPlayer.anim != anims + RUN_L)
+            animPlayer.Start(anims + RUN_L);
         }
       }
       else
       {
-        if (animPlayer.anim != anims + RUN_L)
-          animPlayer.Start(anims + RUN_L);
-      }
-    }
-    else
-    {
-      if (fVel.y <= 0)
-      {
-        if (aimingUp)
+        if (fVel.y <= 0)
         {
-          if (animPlayer.anim != anims + JMP_U_L)
-            animPlayer.Start(anims + JMP_U_L);
+          if (aimingUp)
+          {
+            if (animPlayer.anim != anims + JMP_U_L)
+              animPlayer.Start(anims + JMP_U_L);
+          }
+          else
+          {
+            if (animPlayer.anim != anims + JMP_L)
+              animPlayer.Start(anims + JMP_L);
+          }
         }
         else
         {
-          if (animPlayer.anim != anims + JMP_L)
-            animPlayer.Start(anims + JMP_L);
-        }
-      }
-      else
-      {
-        if (aimingUp)
-        {
-          if (animPlayer.anim != anims + FALL_U_L)
-            animPlayer.Start(anims + FALL_U_L);
-        }
-        else
-        {
-          if (animPlayer.anim != anims + FALL_L)
-            animPlayer.Start(anims + FALL_L);
+          if (aimingUp)
+          {
+            if (animPlayer.anim != anims + FALL_U_L)
+              animPlayer.Start(anims + FALL_U_L);
+          }
+          else
+          {
+            if (animPlayer.anim != anims + FALL_L)
+              animPlayer.Start(anims + FALL_L);
+          }
         }
       }
     }
@@ -709,16 +764,10 @@ ObjPlayer::OnUpdate(void)
 void
 ObjPlayer::OnPhysic(void)
 {
-  ObjRoomMngr *roomMngr;
-  ObjCamMngr *camMngr;
-
   ESGE_ObjDynamic::OnPhysic();
 
-  if ((roomMngr = ESGE_GetObj<ObjRoomMngr>(sceneID, "ObjRoomMngr")))
-    roomMngr->SetFocusCenter(pos.x + 8, pos.y + 16);
-
-  if ((camMngr = ESGE_GetObj<ObjCamMngr>(sceneID, "ObjCamMngr")))
-    camMngr->SetCamCenter(pos.x + 8, pos.y + 16);
+  roomMngr->SetFocusCenter(pos.x + 8, pos.y + 16);
+  camMngr->SetCamCenter(pos.x + 8, pos.y + 16);
 }
 
 void
@@ -810,6 +859,8 @@ ObjPlayer::OnEditorQuit(void)
 }
 #endif
 
+#define KNOCKBACK (((int)ESGE_deltaTm) * 0x0200 / 16)
+
 void
 ObjPlayer::OnAttack(int dmg)
 {
@@ -817,6 +868,19 @@ ObjPlayer::OnAttack(int dmg)
   {
     dmgDeltaTm = 0;
     life -= dmg;
-    SDL_Log("Hit");
+    dmgSnd->Play();
+
+    if (facingR)
+    {
+      fVel.x = -KNOCKBACK;
+      animPlayer.Start(anims + DMG_R);
+    }
+    else
+    {
+      fVel.x = KNOCKBACK;
+      animPlayer.Start(anims + DMG_L);
+    }
+
+    SDL_Log("%d dmg, %d life",dmg, life);
   }
 }

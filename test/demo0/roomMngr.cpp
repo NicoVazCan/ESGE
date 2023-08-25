@@ -86,5 +86,12 @@ ObjRoomMngr::SetFocusCenter(int x, int y)
   */
 }
 
+void
+ObjRoomMngr::CloseRooms(void)
+{
+  for (size_t i = 0; i < nRooms; ++i)
+    ESGE_SceneMngr::CloseScene(rooms[i].sceneFile);
+}
+
 
 ESGE_TYPE(ObjRoomMngr)

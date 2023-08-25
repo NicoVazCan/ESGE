@@ -10,6 +10,8 @@
 #include "enemy.h"
 
 class ObjPlayer;
+class ESGE_Spritesheet;
+class ESGE_Sound;
 
 class ObjFlyEnemy:
   public ESGE_ObjScene,
@@ -25,6 +27,8 @@ class ObjFlyEnemy:
   ESGE_AnimPlayer animPlayer;
 
   ObjPlayer *player;
+
+  ESGE_Sound *dmgSnd, *deathSnd;
 
   Uint32 dmgDeltaTm = 1000;
   Uint32 maxDmgDeltaTm = 1000;

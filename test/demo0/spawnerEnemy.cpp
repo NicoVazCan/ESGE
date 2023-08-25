@@ -4,7 +4,7 @@
 #include "ESGE_time.h"
 #include "ESGE_file.h"
 #include "ESGE_hash.h"
-#include "ESGE_error.h"
+#include "ESGE_audio.h"
 
 #include "flyEnemy.h"
 #include "player.h"
@@ -80,6 +80,8 @@ ObjSpawnerEnemy::SetMaxFlyEnemy(void *obj, int value)
 
 #define SS "sprites/spawner.sprite.bin"
 #define MAX_LIFE 8
+#define DMG_SND "sounds/enemy_dmg.wav"
+#define DEATH_SND "sounds/enemy_death.wav"
 
 ObjSpawnerEnemy::ObjSpawnerEnemy(void)
 {
@@ -92,6 +94,9 @@ ObjSpawnerEnemy::ObjSpawnerEnemy(void)
 
   spritesheet = ESGE_FileMngr<ESGE_Spritesheet>::Watch(SS);
 
+  dmgSnd = ESGE_FileMngr<ESGE_Sound>::Watch(DMG_SND);
+  deathSnd = ESGE_FileMngr<ESGE_Sound>::Watch(DEATH_SND);
+
   animPlayer.sprts = spritesheet;
   animPlayer.speed = 100;
   animPlayer.Start(&_anim);
@@ -102,6 +107,9 @@ ObjSpawnerEnemy::ObjSpawnerEnemy(void)
 ObjSpawnerEnemy::~ObjSpawnerEnemy(void)
 {
   ESGE_FileMngr<ESGE_Spritesheet>::Leave(spritesheet);
+
+  ESGE_FileMngr<ESGE_Sound>::Leave(dmgSnd);
+  ESGE_FileMngr<ESGE_Sound>::Leave(deathSnd);
 }
 
 void
@@ -123,51 +131,51 @@ ObjSpawnerEnemy::OnUpdate(void)
 
   if (dmgDeltaTm < maxDmgDeltaTm)
     dmgDeltaTm += ESGE_deltaTm;
-
-  if (player)
+  else
   {
-    SDL_Rect playerHitBox, atkBox;
-
-    playerHitBox = player->GetHitBox();
-    atkBox = GetHitBox();
-
-    if (SDL_HasIntersection(&playerHitBox, &atkBox))
+    if (life <= 0)
     {
-      player->OnAttack(DMG);
+      Destroy();
     }
-
-    if (
-      SDL_abs(player->pos.x - pos.x) <= FOCUS_RANGE &&
-      SDL_abs(player->pos.y - pos.y) <= FOCUS_RANGE
-    )
+    else
     {
-      if (spawnDeltaTm >= maxSpawnDeltaTm)
+      if (player)
       {
-        ObjFlyEnemy *fly;
-        int nFly = 0;
+        SDL_Rect playerHitBox, atkBox;
 
-        for (
-          ESGE_ObjScene *obj = ESGE_GetSharedList<ObjFlyEnemy>();
-          obj;
-          obj = obj->nextShared
-        )
-          nFly++;
+        playerHitBox = player->GetHitBox();
+        atkBox = GetHitBox();
 
-        if (nFly < maxFlyEnemy)
+        if (SDL_HasIntersection(&playerHitBox, &atkBox))
         {
-          spawnDeltaTm = 0;
-          if (
-            (
-              fly = (ObjFlyEnemy*)ESGE_SceneMngr::GetActiveScene(
-              )->AddObj("ObjFlyEnemy")
-            )
-          )
+          player->OnAttack(DMG);
+        }
+
+        if (
+          SDL_abs(player->pos.x - pos.x) <= FOCUS_RANGE &&
+          SDL_abs(player->pos.y - pos.y) <= FOCUS_RANGE
+        )
+        {
+          if (spawnDeltaTm >= maxSpawnDeltaTm)
           {
-            ObjFlyEnemy::SetPosX(fly, pos.x + SPAWN_OFFSET_H);
-            ObjFlyEnemy::SetPosY(fly, pos.y + SPAWN_OFFSET_V);
+            ESGE_ObjScene *fly;
+            int nFly = 0;
+
+            for (
+              ESGE_ObjScene *obj = ESGE_GetSharedList<ObjFlyEnemy>();
+              obj;
+              obj = obj->nextShared
+            )
+              nFly++;
+
+            if (nFly < maxFlyEnemy)
+            {
+              spawnDeltaTm = 0;
+              fly = Create("ObjFlyEnemy");
+              ObjFlyEnemy::SetPosX(fly, pos.x + SPAWN_OFFSET_H);
+              ObjFlyEnemy::SetPosY(fly, pos.y + SPAWN_OFFSET_V);
+            }
           }
-          else
-            SDL_Log("Failed to add ObjFlyEnemy: %s", SDL_GetError());
         }
       }
     }
@@ -175,27 +183,6 @@ ObjSpawnerEnemy::OnUpdate(void)
 
   animPlayer.Update(ESGE_deltaTm);
   animPlayer.GetSprite(&sprite);
-
-  if (life == 0 && dmgDeltaTm >= maxDmgDeltaTm)
-  {
-    ESGE_Scene *scene;
-
-    scene = ESGE_SceneMngr::GetActiveScene();
-
-    if (scene->id == sceneID)
-      scene->DelObj(instName);
-    else
-    {
-      ESGE_Scene *prevScene = scene;
-
-      ESGE_SceneMngr::SetActiveScene(sceneID);
-
-      scene = ESGE_SceneMngr::GetActiveScene();
-      scene->DelObj(instName);
-
-      ESGE_SceneMngr::SetActiveScene(prevScene->id);
-    }
-  }
 }
 
 #define BLINK_T 16*4
@@ -252,5 +239,10 @@ ObjSpawnerEnemy::OnAttack(int dmg)
   {
     dmgDeltaTm = 0;
     life -= dmg;
+
+    if (life > 0)
+      dmgSnd->Play();
+    else
+      deathSnd->Play();
   }
 }

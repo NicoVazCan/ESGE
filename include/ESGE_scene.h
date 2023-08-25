@@ -11,9 +11,11 @@
 
 class ESGE_ObjScene:
   public ESGE_ObjSerial,
-  public virtual ESGE_ObjActive
+  public ESGE_ObjActive
 {
 public:
+  static ESGE_ObjScene *Create(const char *typeName);
+
   enum {OK, ADD, DEL} state;
   Uint64 sceneID;
   char instName[ESGE_INST_NAME_LEN];
@@ -22,6 +24,8 @@ public:
 
   ESGE_ObjScene(void);
   virtual ~ESGE_ObjScene(void) = 0;
+
+  void Destroy(void);
 
 # ifdef ESGE_EDITOR
   virtual void OnEditorInit(void);
@@ -208,10 +212,14 @@ public:
   static void Update(void);
 
   static void AddScene(const char *sceneFile);
+
   static void ChangeScene(const char *sceneFile);
 
   static void StashScene(const char *sceneFile);
+  static void StashScene(Uint64 id);
+
   static void CloseScene(const char *sceneFile);
+  static void CloseScene(Uint64 id);
 
   static ESGE_Scene *GetActiveScene(void);
   static int SetActiveScene(const char *sceneFile);

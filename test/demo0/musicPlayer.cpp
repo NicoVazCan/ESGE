@@ -31,6 +31,7 @@ public:
   virtual void OnStart(void) override
   {
     music->Play();
+    ESGE_UnpauseAudio();
   }
 
   virtual void OnQuit(void) override

@@ -28,6 +28,7 @@ public:
   virtual void OnDisable(void) override;
   
   void SetFocusCenter(int x, int y);
+  void CloseRooms(void);
 };
 
 #endif
