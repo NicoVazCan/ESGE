@@ -31,7 +31,7 @@ public:
   void Play(void);
 };
 
-void ESGE_InitAudio(void);
+void ESGE_InitAudio(Uint8 soundVolume, Uint8 musicVolume);
 void ESGE_QuitAudio(void);
 
 void ESGE_PauseAudio(void);

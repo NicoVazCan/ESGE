@@ -20,6 +20,7 @@ main(int argc, const char *argv[])
 {
 	const char *title = "game", *sceneFile = "scene.bin";
 	int w = 256, h = 144, nDisabledScene = 4;
+	Uint8 soundVolume = 0x0F, musicVolume = 0x0F;
 	Uint32 ticks;
 
 	for (int i = 1; i < argc; ++i)
@@ -49,6 +50,12 @@ main(int argc, const char *argv[])
 			case 'd':
 				SDL_sscanf(argv[++i], "%d", &nDisabledScene);
 				break;
+			case 's':
+				SDL_sscanf(argv[++i], "%hhu", &soundVolume);
+				break;
+			case 'm':
+				SDL_sscanf(argv[++i], "%hhu", &musicVolume);
+				break;
 			default:
 				puts("help");
 				return 0;
@@ -59,7 +66,7 @@ main(int argc, const char *argv[])
 
 	SDL_Init(SDL_INIT_EVENTS | SDL_INIT_VIDEO | SDL_INIT_AUDIO);
 	ESGE_Display::Init(title, w, h);
-	ESGE_InitAudio();
+	ESGE_InitAudio(soundVolume, musicVolume);
 	ESGE_SceneMngr::Init(nDisabledScene);
 	ESGE_SceneMngr::AddScene(sceneFile);
 

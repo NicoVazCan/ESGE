@@ -4,7 +4,7 @@
 #include "ESGE_error.h"
 
 
-Uint8 ESGE_Sound::volume = 0x0F;
+Uint8 ESGE_Sound::volume;
 
 
 ESGE_Sound::ESGE_Sound(const char *fileName): ESGE_File(fileName)
@@ -27,7 +27,7 @@ ESGE_Sound::Play(void)
 
 
 
-Uint8 ESGE_Music::volume = 0x0F;
+Uint8 ESGE_Music::volume;
 
 
 ESGE_Music::ESGE_Music(const char *fileName): ESGE_File(fileName)
@@ -48,8 +48,11 @@ ESGE_Music::Play(void)
 }
 
 
-void ESGE_InitAudio(void)
+void ESGE_InitAudio(Uint8 soundVolume, Uint8 musicVolume)
 {
+  ESGE_Sound::volume = soundVolume;
+  ESGE_Music::volume = musicVolume;
+
   initAudio();
 }
 

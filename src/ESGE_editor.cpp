@@ -2,6 +2,7 @@
 #include "ESGE_file.h"
 #include "ESGE_scene.h"
 #include "ESGE_display.h"
+#include "ESGE_audio.h"
 #include <stdio.h>
 #include "ESGE_objDraw.h"
 
@@ -384,8 +385,9 @@ main(int argc, char *argv[])
 	SDL_Thread *shell;
 	Uint32 ticks;
 
-	SDL_Init(SDL_INIT_EVENTS | SDL_INIT_VIDEO);
+	SDL_Init(SDL_INIT_EVENTS | SDL_INIT_VIDEO | SDL_INIT_AUDIO);
 	ESGE_Display::Init(title, w, h);
+	ESGE_InitAudio(0, 0);
 	ESGE_SceneMngr::Init(0);
 
 	for (int i = 1; i < argc; ++i)
@@ -443,6 +445,7 @@ main(int argc, char *argv[])
 	SDL_WaitThread(shell, NULL);
 
 	ESGE_SceneMngr::Quit();
+	ESGE_QuitAudio();
 	ESGE_Display::Quit();
 	SDL_Quit();
 

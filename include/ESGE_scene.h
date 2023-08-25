@@ -195,13 +195,12 @@ class ESGE_SceneMngr
     *active,
     *enabledList,
     *lastDisabled;
+  static int maxDisabled;
 
   ESGE_SceneMngr(void);
   ~ESGE_SceneMngr(void);
 
 public:
-  static int maxDisabled;
-
   static void Init(int maxDisabled);
   static void Quit(void);
 

@@ -455,7 +455,7 @@ ESGE_Scene::RenameObj(const char *instName, const char *newInstName)
 ESGE_Scene *ESGE_SceneMngr::active = NULL;
 ESGE_Scene *ESGE_SceneMngr::enabledList = NULL;
 ESGE_Scene *ESGE_SceneMngr::lastDisabled = NULL;
-
+int ESGE_SceneMngr::maxDisabled;
 
 
 ESGE_SceneMngr::ESGE_SceneMngr(void)
@@ -464,8 +464,6 @@ ESGE_SceneMngr::ESGE_SceneMngr(void)
 ESGE_SceneMngr::~ESGE_SceneMngr(void)
 {}
 
-
-int ESGE_SceneMngr::maxDisabled;
 
 
 void
