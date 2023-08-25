@@ -47,6 +47,9 @@ typedef struct sound
     Uint8 fade;
     Uint8 free;
     Uint8 volume;
+    
+    SDL_bool byMem;
+    struct AudioState *state;
 
     SDL_AudioSpec audio;
 

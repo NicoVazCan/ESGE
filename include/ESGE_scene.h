@@ -195,10 +195,6 @@ class ESGE_SceneMngr
     *active,
     *enabledList,
     *lastDisabled;
-  static int nDisabled;
-
-  static void EnableScene(ESGE_Scene *scene);
-  static void DisableScene(ESGE_Scene *scene);
 
   ESGE_SceneMngr(void);
   ~ESGE_SceneMngr(void);

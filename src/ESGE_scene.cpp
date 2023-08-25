@@ -451,46 +451,7 @@ ESGE_Scene::RenameObj(const char *instName, const char *newInstName)
 ESGE_Scene *ESGE_SceneMngr::active = NULL;
 ESGE_Scene *ESGE_SceneMngr::enabledList = NULL;
 ESGE_Scene *ESGE_SceneMngr::lastDisabled = NULL;
-int ESGE_SceneMngr::nDisabled = 0;
 
-
-void
-ESGE_SceneMngr::EnableScene(ESGE_Scene *scene)
-{
-  scene->next = enabledList;
-  enabledList = scene;
-  nDisabled--;
-#ifndef ESGE_EDITOR
-  scene->Enable();
-#endif
-}
-
-void
-ESGE_SceneMngr::DisableScene(ESGE_Scene *scene)
-{
-  scene->next = lastDisabled;
-  lastDisabled = scene;
-
-  if (nDisabled == maxDisabled)
-  {
-    ESGE_Scene **node;
-
-    SDL_assert(lastDisabled);
-
-    for (
-      node = &lastDisabled;
-      (*node)->next;
-      node = &(*node)->next
-    );
-
-    delete *node;
-    *node = NULL;
-  }
-  else nDisabled++;
-#ifndef ESGE_EDITOR
-  scene->Disable();
-#endif
-}
 
 
 ESGE_SceneMngr::ESGE_SceneMngr(void)
@@ -546,6 +507,7 @@ void
 ESGE_SceneMngr::Update(void)
 {
   ESGE_Scene **node;
+  int nDisabled = 0;
 
   for (
     ESGE_Scene *scene = enabledList;
@@ -553,35 +515,6 @@ ESGE_SceneMngr::Update(void)
     scene = scene->next
   )
     scene->Update();
-
-  node = &lastDisabled;
-  while (*node)
-  {
-    ESGE_Scene *scene;
-
-    switch ((*node)->state)
-    {
-    case ESGE_Scene::OK:
-      node = &(*node)->next;
-      break;
-    case ESGE_Scene::EN:
-      active = *node;
-      *node = active->next;
-
-      active->state = ESGE_Scene::OK;
-      EnableScene(active);
-      break;
-    case ESGE_Scene::CLO:
-      scene = *node;
-      *node = scene->next;
-
-      nDisabled--;
-      delete scene;
-      break;
-    default:
-      SDL_assert(0);
-    }
-  }
 
   node = &enabledList;
   while (*node)
@@ -598,9 +531,15 @@ ESGE_SceneMngr::Update(void)
       *node = scene->next;
 
       if (active == scene) active = *node;
-      
+
+      scene->next = lastDisabled;
+      lastDisabled = scene;
+
+#ifndef ESGE_EDITOR
+      scene->Disable();
+#endif
+
       scene->state = ESGE_Scene::OK;
-      DisableScene(scene);
       break;
     case ESGE_Scene::CLO:
       scene = *node;
@@ -608,13 +547,71 @@ ESGE_SceneMngr::Update(void)
 
       if (active == scene) active = *node;
 
+#ifndef ESGE_EDITOR
       scene->Disable();
+#endif
       
       delete scene;
       break;
     default:
       SDL_assert(0);
     }
+  }
+
+  node = &lastDisabled;
+  while (*node)
+  {
+    ESGE_Scene *scene;
+
+    switch ((*node)->state)
+    {
+    case ESGE_Scene::OK:
+      node = &(*node)->next;
+      break;
+    case ESGE_Scene::EN:
+      scene = *node;
+      *node = scene->next;
+
+      scene->next = enabledList;
+      enabledList = scene;
+
+      active = scene;
+
+#ifndef ESGE_EDITOR
+      scene->Enable();
+#endif
+
+      active->state = ESGE_Scene::OK;
+      break;
+    case ESGE_Scene::CLO:
+      scene = *node;
+      *node = scene->next;
+
+      delete scene;
+      break;
+    default:
+      SDL_assert(0);
+    }
+  }
+
+  for (ESGE_Scene *scene = lastDisabled; scene; scene = scene->next)
+  {
+    if (nDisabled == maxDisabled)
+    {
+      ESGE_Scene *firstDisabled = scene, *next;
+
+      scene = scene->next;
+
+      while (scene)
+      {
+        next = scene->next;
+        delete scene;
+        scene = next;
+      }
+
+      firstDisabled->next = NULL;
+    }
+    else nDisabled++;
   }
 }
 
@@ -639,8 +636,6 @@ ESGE_SceneMngr::AddScene(const char *sceneFile)
 
     disabled->next = lastDisabled;
     lastDisabled = disabled;
-
-    nDisabled++;
   }
 
   disabled->state = ESGE_Scene::EN;

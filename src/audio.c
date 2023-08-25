@@ -70,6 +70,12 @@ typedef struct privateAudioDevice
     Uint8 audioEnabled;
 } PrivateAudioDevice;
 
+typedef struct AudioState
+{
+    enum {AS_NO_PLAY, AS_PLAY, AS_DEL} id;
+    Audio *last;
+} AudioState;
+
 /* File scope variables to persist data */
 static PrivateAudioDevice * gDevice;
 static Uint32 gSoundCount;
@@ -191,9 +197,18 @@ void endAudio(void)
 {
     if(gDevice->audioEnabled)
     {
+        Audio *audio;
+
         pauseAudio();
 
-        freeAudio((Audio *) (gDevice->want).userdata);
+        audio = ((Audio*)(gDevice->want).userdata)->next;
+
+        while (audio != NULL)
+        {
+            Audio *next = audio->next;
+            freeAudio(audio);
+            audio = next;
+        }
 
         /* Close down audio */
         SDL_CloseAudioDevice(gDevice->device);
@@ -220,8 +235,52 @@ void unpauseAudio(void)
 
 void freeAudio(Audio * audio)
 {
-    Audio * temp;
+    SDL_LockAudioDevice(gDevice->device);
 
+    if (audio->byMem)
+    {
+        switch (audio->state->id)
+        {
+        case AS_NO_PLAY:
+            SDL_FreeWAV(audio->bufferTrue);
+            SDL_free(audio->state);
+            SDL_free(audio);
+            break;
+        case AS_PLAY:
+            audio->state->id = AS_DEL;
+            SDL_free(audio);
+            break;
+        default:
+            SDL_assert(0);
+        }
+    }
+    else
+    {
+        if (audio->state->last == audio)
+        {
+            switch (audio->state->id)
+            {
+            case AS_PLAY:
+                audio->state->id = AS_NO_PLAY;
+                SDL_free(audio);
+                break;
+            case AS_DEL:
+                SDL_FreeWAV(audio->bufferTrue);
+                SDL_free(audio->state);
+                SDL_free(audio);
+                break;
+            default:
+                SDL_assert(0);
+            }
+        }
+        else
+        {
+            SDL_free(audio);
+        }
+    }
+
+    SDL_UnlockAudioDevice(gDevice->device);
+/*
     while(audio != NULL)
     {
         if(audio->free == 1)
@@ -233,14 +292,15 @@ void freeAudio(Audio * audio)
         audio = audio->next;
 
         SDL_free(temp);
-    }
+    }*/
 }
 
 Audio * createAudio(const char * filename, Uint8 loop, int volume)
 {
     Audio * newAudio = (Audio *) SDL_malloc(sizeof(Audio));
+    AudioState *audioState = (AudioState *) SDL_malloc(sizeof(AudioState));;
 
-    if(newAudio == NULL)
+    if(newAudio == NULL || audioState == NULL)
     {
         SDL_LogError(SDL_LOG_CATEGORY_AUDIO, "[%s: %d]Error: Memory allocation error", SDL_FILE, SDL_LINE);
         return NULL;
@@ -257,6 +317,10 @@ Audio * createAudio(const char * filename, Uint8 loop, int volume)
     newAudio->fade = 0;
     newAudio->free = 1;
     newAudio->volume = volume;
+
+    newAudio->byMem = SDL_TRUE;
+    newAudio->state = audioState;
+    newAudio->state->id = AS_NO_PLAY;
 
     if(SDL_LoadWAV(filename, &(newAudio->audio), &(newAudio->bufferTrue), &(newAudio->lengthTrue)) == NULL)
     {
@@ -317,6 +381,10 @@ static inline void playAudio(const char * filename, Audio * audio, Uint8 loop, i
         newAudio->volume = volume;
         newAudio->loop = loop;
         newAudio->free = 0;
+
+        newAudio->byMem = SDL_FALSE;
+        newAudio->state->id = AS_PLAY;
+        newAudio->state->last = newAudio;
     }
     else
     {
