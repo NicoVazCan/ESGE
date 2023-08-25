@@ -594,22 +594,26 @@ ESGE_SceneMngr::Update(void)
     }
   }
 
-  for (ESGE_Scene *scene = lastDisabled; scene; scene = scene->next)
+  for (
+    ESGE_Scene **node = &lastDisabled;
+    *node;
+    node = &(*node)->next
+  )
   {
     if (nDisabled == maxDisabled)
     {
-      ESGE_Scene *firstDisabled = scene, *next;
+      ESGE_Scene *scene = *node;
 
-      scene = scene->next;
+      *node = NULL;
 
       while (scene)
       {
-        next = scene->next;
+        ESGE_Scene *next = scene->next;
         delete scene;
         scene = next;
       }
-
-      firstDisabled->next = NULL;
+      
+      break;
     }
     else nDisabled++;
   }
