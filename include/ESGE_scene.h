@@ -170,6 +170,9 @@ public:
   ESGE_Scene(const char *sceneFile);
   ~ESGE_Scene(void);
 
+  void Init(void);
+  void Quit(void);
+
   void Enable(void);
   void Disable(void);
 

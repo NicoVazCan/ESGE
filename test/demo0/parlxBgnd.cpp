@@ -7,8 +7,8 @@
 
 #define BGRND_SS "sprites/bgnd.sprite.bin"
 
-#define PARLX_F_H 2
-#define PARLX_F_V 2
+#define PARLX_F_H 4
+#define PARLX_F_V 4
 
 class ObjParlxBgnd: public ESGE_ObjScene, public ESGE_ObjDrawSprite
 {

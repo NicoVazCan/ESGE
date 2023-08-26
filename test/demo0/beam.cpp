@@ -71,6 +71,7 @@ ObjBeam::SetPosX(void *obj, int value)
   ((ObjBeam*)obj)->pos.x = value;
   ((ObjBeam*)obj)->prevPos.x = value;
   ((ObjBeam*)obj)->fPos.x = value << POS_SCALE;
+  ((ObjBeam*)obj)->iPos.x = value;
 }
 
 int
@@ -84,6 +85,7 @@ ObjBeam::SetPosY(void *obj, int value)
   ((ObjBeam*)obj)->pos.y = value;
   ((ObjBeam*)obj)->prevPos.y = value;
   ((ObjBeam*)obj)->fPos.y = value << POS_SCALE;
+  ((ObjBeam*)obj)->iPos.y = value;
 }
 
 #define VEL (((int)ESGE_deltaTm) * 0x0200 / 16)
@@ -154,6 +156,7 @@ ObjBeam::~ObjBeam(void)
 )
 
 #define DMG 1
+#define MAX_DIST 64
 
 void
 ObjBeam::OnUpdate(void)
@@ -190,28 +193,18 @@ ObjBeam::OnUpdate(void)
 
   animPlayer.Update(ESGE_deltaTm);
   animPlayer.GetSprite(&sprite);
+
+  if (
+    SDL_abs(pos.x - iPos.x) >= MAX_DIST ||
+    SDL_abs(pos.y - iPos.y) >= MAX_DIST
+  )
+    Destroy();
 }
 
 void
 ObjBeam::OnCollide(SDL_UNUSED ESGE_ObjCollider *other)
 {
-  ESGE_Scene *scene;
-
-  scene = ESGE_SceneMngr::GetActiveScene();
-
-  if (scene->id == sceneID)
-    scene->DelObj(instName);
-  else
-  {
-    ESGE_Scene *prevScene = scene;
-
-    ESGE_SceneMngr::SetActiveScene(sceneID);
-
-    scene = ESGE_SceneMngr::GetActiveScene();
-    scene->DelObj(instName);
-
-    ESGE_SceneMngr::SetActiveScene(prevScene->id);
-  }
+  Destroy();
 }
 
 void

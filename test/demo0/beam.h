@@ -21,6 +21,7 @@ class ObjBeam:
   SDL_Point fAcc = {0, 0};
   SDL_Point fVel = {0, 0};
   SDL_Point fPos;
+  SDL_Point iPos = {0, 0};
 
   ESGE_Spritesheet *spritesheet;
   ESGE_AnimPlayer animPlayer;

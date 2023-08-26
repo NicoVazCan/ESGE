@@ -12,6 +12,7 @@
 #include "roomMngr.h"
 #include "camMngr.h"
 #include "beam.h"
+#include "text.h"
 
 
 ESGE_TYPE_FIELDS(
@@ -393,14 +394,31 @@ ObjPlayer::IsInGround(void)
   return inGround;
 }
 
+#define UI_STR_LEN 16
+
+void
+ObjPlayer::UpdateLifeUI(void)
+{
+  char uiStr[UI_STR_LEN];
+
+  SDL_snprintf(uiStr, UI_STR_LEN, "life: %d", life);
+  
+  ObjText::SetStr(uiText, uiStr);
+}
+
 #define JMP_SND "sounds/jump.wav"
 #define SHOT_SND "sounds/shot.wav"
 #define DMG_SND "sounds/dmg.wav"
 #define SS "sprites/player.sprite.bin"
 #define MAX_LIFE 99
+#define UI_POS_X 4
+#define UI_POS_Y 4
+
 
 ObjPlayer::ObjPlayer(void)
 {
+  
+
   layer = PLAYER_LAYER;
 
   life = MAX_LIFE;
@@ -439,6 +457,21 @@ ObjPlayer::~ObjPlayer(void)
   ESGE_FileMngr<ESGE_Sound>::Leave(jmpSnd);
   ESGE_FileMngr<ESGE_Sound>::Leave(shotSnd);
   ESGE_FileMngr<ESGE_Sound>::Leave(dmgSnd);
+}
+
+void
+ObjPlayer::OnInit(void)
+{
+  uiText = Create("ObjText");
+
+  ObjText::SetPosX(uiText, UI_POS_X);
+  ObjText::SetPosY(uiText, UI_POS_Y);
+  UpdateLifeUI();
+}
+void
+ObjPlayer::OnQuit(void)
+{
+  uiText->Destroy();
 }
 
 void
@@ -869,6 +902,7 @@ ObjPlayer::OnAttack(int dmg)
     dmgDeltaTm = 0;
     life -= dmg;
     dmgSnd->Play();
+    UpdateLifeUI();
 
     if (facingR)
     {

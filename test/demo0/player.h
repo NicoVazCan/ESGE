@@ -17,6 +17,7 @@ class ESGE_Spritesheet;
 class ESGE_Sound;
 class ObjRoomMngr;
 class ObjCamMngr;
+class ObjText;
 
 class ObjPlayer:
   public ESGE_ObjScene,
@@ -32,6 +33,8 @@ class ObjPlayer:
 
   ObjRoomMngr *roomMngr;
   ObjCamMngr *camMngr;
+
+  ESGE_ObjScene *uiText;
 
   ESGE_Spritesheet *spritesheet;
   ESGE_AnimPlayer animPlayer;
@@ -59,6 +62,8 @@ class ObjPlayer:
 
   bool IsInGround(void);
 
+  void UpdateLifeUI(void);
+
 public:
   static int GetPosX(void *obj);
   static void SetPosX(void *obj, int value);
@@ -68,6 +73,9 @@ public:
 
   ObjPlayer(void);
   virtual ~ObjPlayer(void) override;
+
+  virtual void OnInit(void) override;
+  virtual void OnQuit(void) override;
 
   virtual void OnStart(void) override;
 

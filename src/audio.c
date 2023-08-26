@@ -318,9 +318,11 @@ Audio * createAudio(const char * filename, Uint8 loop, int volume)
     newAudio->free = 1;
     newAudio->volume = volume;
 
+    SDL_LockAudioDevice(gDevice->device);
     newAudio->byMem = SDL_TRUE;
     newAudio->state = audioState;
     newAudio->state->id = AS_NO_PLAY;
+    SDL_UnlockAudioDevice(gDevice->device);
 
     if(SDL_LoadWAV(filename, &(newAudio->audio), &(newAudio->bufferTrue), &(newAudio->lengthTrue)) == NULL)
     {
