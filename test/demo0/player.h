@@ -43,7 +43,7 @@ class ObjPlayer:
   Uint32 dmgDeltaTm = 4000;
   Uint32 maxDmgDeltaTm = 4000;
 
-  bool facingR, inGround, aimingUp;
+  bool facingR, inGround, aimingUp, lockedBall, ball;
   enum {STAND, RIGHT, LEFT} going;
 
   void Jump(void);
@@ -60,7 +60,13 @@ class ObjPlayer:
 
   void Shot(void);
 
+  void Ball(void);
+
+  void Load(void);
+  void Save(void);
+
   bool IsInGround(void);
+  bool IsCeilAbove(void);
 
   void UpdateLifeUI(void);
 
@@ -98,6 +104,9 @@ public:
 #endif
 
   virtual void OnAttack(int dmg) override;
+
+  void UnlockBall(void);
+  void Heal(int heal);
 };
 
 #endif

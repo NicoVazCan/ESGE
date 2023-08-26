@@ -5,6 +5,7 @@
 #include "ESGE_audio.h"
 #include "ESGE_file.h"
 #include "ESGE_error.h"
+#include "ESGE_io.h"
 
 #include "ESGE_objStatic.h"
 
@@ -224,6 +225,9 @@ enum PlayerAnim: size_t
   BALL_R, BALL_L
 };
 
+static SDL_Rect _offsetSize = {0,0,16,32};
+static SDL_Rect _ballOffsetSize = {0,16,16,16};
+
 
 #define POS_SCALE 8
 
@@ -304,6 +308,13 @@ void
 ObjPlayer::AimUp(void)
 {
   aimingUp = true;
+
+  if (!lockedBall && !IsCeilAbove())
+  {
+    ball = false;
+    ESGE_ObjDynamic::offsetSize = _offsetSize;
+    ObjAlive::offsetSize = _offsetSize;
+  }
 }
 void
 ObjPlayer::StopAimUp(void)
@@ -330,7 +341,8 @@ ObjPlayer::Shot(void)
 
   if (
     animPlayer.anim != anims + DMG_R &&
-    animPlayer.anim != anims + DMG_L
+    animPlayer.anim != anims + DMG_L &&
+    !ball
   )
   {
     shotSnd->Play();
@@ -369,6 +381,59 @@ ObjPlayer::Shot(void)
   }
 }
 
+void
+ObjPlayer::Ball(void)
+{
+  if (
+    !lockedBall &&
+    animPlayer.anim != anims + DMG_R &&
+    animPlayer.anim != anims + DMG_L
+  )
+  {
+    ball = true;
+    ESGE_ObjDynamic::offsetSize = _ballOffsetSize;
+    ObjAlive::offsetSize = _ballOffsetSize;
+  }
+}
+
+#define SAVE_FILE "player.save.bin"
+
+void
+ObjPlayer::Load(void)
+{
+  SDL_RWops *io;
+
+  if ((io = SDL_RWFromFile(SAVE_FILE, "rb")))
+  {
+    SetPosX(this, ESGE_ReadS16(io));
+    SetPosY(this, ESGE_ReadS16(io));
+
+    SDL_RWclose(io);
+  }
+  else SDL_ClearError();
+}
+void
+ObjPlayer::Save(void)
+{
+  SDL_RWops *io;
+
+  if ((io = SDL_RWFromFile(SAVE_FILE, "wb")))
+  {
+    ESGE_WriteS16(io, GetPosX(this));
+    ESGE_WriteS16(io, GetPosY(this));
+
+    SDL_RWclose(io);
+  }
+  else
+  {
+    ESGE_Error(
+      "Cannot write \"%s\" file: %s",
+      SAVE_FILE,
+      SDL_GetError()
+    );
+  }
+}
+
 bool
 ObjPlayer::IsInGround(void)
 {
@@ -394,6 +459,31 @@ ObjPlayer::IsInGround(void)
   return inGround;
 }
 
+bool 
+ObjPlayer::IsCeilAbove(void)
+{
+  bool ceilAbove = false;
+  SDL_Point test;
+  SDL_Rect thisColBox;
+
+  thisColBox = GetColBox();
+  test.x = thisColBox.x;
+  test.y = thisColBox.y - 16;
+
+  while (test.x < thisColBox.x + thisColBox.w && !ceilAbove)
+  {
+    ceilAbove = ESGE_ObjStatic::GetObjAt(test) != NULL;
+    test.x += ESGE_ObjStatic::cellW;
+  }
+  if (!ceilAbove)
+  {
+    test.x = thisColBox.x + thisColBox.w - 1;
+    ceilAbove = ESGE_ObjStatic::GetObjAt(test) != NULL;
+  }
+
+  return ceilAbove;
+}
+
 #define UI_STR_LEN 16
 
 void
@@ -417,21 +507,13 @@ ObjPlayer::UpdateLifeUI(void)
 
 ObjPlayer::ObjPlayer(void)
 {
-  
-
   layer = PLAYER_LAYER;
 
   life = MAX_LIFE;
   
-  ESGE_ObjDynamic::offsetSize.x = 0;
-  ESGE_ObjDynamic::offsetSize.y = 0;
-  ESGE_ObjDynamic::offsetSize.w = 16;
-  ESGE_ObjDynamic::offsetSize.h = 32;
+  ESGE_ObjDynamic::offsetSize = _offsetSize;
 
-  ObjAlive::offsetSize.x = 0;
-  ObjAlive::offsetSize.y = 0;
-  ObjAlive::offsetSize.w = 16;
-  ObjAlive::offsetSize.h = 32;
+  ObjAlive::offsetSize = _offsetSize;
 
   spritesheet = ESGE_FileMngr<ESGE_Spritesheet>::Watch(SS);
 
@@ -441,6 +523,9 @@ ObjPlayer::ObjPlayer(void)
   facingR = true;
   inGround = true;
   aimingUp = false;
+  lockedBall = true;
+  ball = false;
+
   animPlayer.Start(anims + STAND_R);
   animPlayer.GetSprite(&sprite);
 
@@ -516,6 +601,19 @@ ObjPlayer::OnKeyDown(SDL_Keycode key, SDL_UNUSED SDL_Keymod mod)
 
   case SDLK_LCTRL:
     Shot();
+    break;
+
+  case SDLK_DOWN:
+    Ball();
+    break;
+
+  case SDLK_l:
+    Load();
+    break;
+
+  case SDLK_s:
+    Save();
+    break;
 
   default:
     break;
@@ -679,7 +777,20 @@ ObjPlayer::OnUpdate(void)
 
   if (facingR)
   {
-    if (animPlayer.anim != anims + DMG_R || animPlayer.done)
+    if (ball)
+    {
+      if (fVel.x == 0)
+      {
+        if (animPlayer.anim != anims + BALL)
+          animPlayer.Start(anims + BALL);
+      }
+      else
+      {
+        if (animPlayer.anim != anims + BALL_R)
+          animPlayer.Start(anims + BALL_R);
+      }
+    }
+    else if (animPlayer.anim != anims + DMG_R || animPlayer.done)
     {
       if (inGround)
       {
@@ -735,7 +846,20 @@ ObjPlayer::OnUpdate(void)
   }
   else
   {
-    if (animPlayer.anim != anims + DMG_L || animPlayer.done)
+    if (ball)
+    {
+      if (fVel.x == 0)
+      {
+        if (animPlayer.anim != anims + BALL)
+          animPlayer.Start(anims + BALL);
+      }
+      else
+      {
+        if (animPlayer.anim != anims + BALL_L)
+          animPlayer.Start(anims + BALL_L);
+      }
+    }
+    else if (animPlayer.anim != anims + DMG_L || animPlayer.done)
     {
       if (inGround)
       {
@@ -907,14 +1031,31 @@ ObjPlayer::OnAttack(int dmg)
     if (facingR)
     {
       fVel.x = -KNOCKBACK;
-      animPlayer.Start(anims + DMG_R);
+      if (!ball)
+        animPlayer.Start(anims + DMG_R);
     }
     else
     {
       fVel.x = KNOCKBACK;
-      animPlayer.Start(anims + DMG_L);
+      if (!ball)
+        animPlayer.Start(anims + DMG_L);
     }
-
-    SDL_Log("%d dmg, %d life",dmg, life);
   }
+}
+
+void
+ObjPlayer::UnlockBall(void)
+{
+  lockedBall = false;
+}
+
+void
+ObjPlayer::Heal(int heal)
+{
+  life += heal;
+
+  if (life > MAX_LIFE)
+    life = MAX_LIFE;
+
+  UpdateLifeUI();
 }
