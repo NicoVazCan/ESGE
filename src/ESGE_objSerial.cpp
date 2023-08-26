@@ -58,6 +58,33 @@ ESGE_Field::GetValue(void *obj, char *value, size_t len) const
     SDL_assert(!"unrecognised type");
   }
 }
+void
+ESGE_Field::GetValue(void *obj, void *value, size_t len) const
+{
+  switch (type)
+  {
+  case ESGE_Field::C:
+    *(char*)value = valueC.get(obj);
+    break;
+  case ESGE_Field::I:
+    *(int*)value = valueI.get(obj);
+    break;
+  case ESGE_Field::L:
+    *(long*)value = valueL.get(obj);
+    break;
+  case ESGE_Field::LL:
+    *(long long*)value = valueLL.get(obj);
+    break;
+  case ESGE_Field::F:
+    *(float*)value = valueF.get(obj);
+    break;
+  case ESGE_Field::S:
+    valueS.get(obj, (char*)value, len);
+    break;
+  default:
+    SDL_assert(!"unrecognised type");
+  }
+}
 
 void
 ESGE_Field::SetValue(void *obj, const char *value) const
@@ -90,6 +117,37 @@ ESGE_Field::SetValue(void *obj, const char *value) const
     }
   }
 }
+void
+ESGE_Field::SetValue(void *obj, const void *value) const
+{
+
+  if (!SDL_strcmp(name, name))
+  {
+    switch (type)
+    {
+    case ESGE_Field::C:
+      valueC.set(obj, *(char*)value);
+      break;
+    case ESGE_Field::I:
+      valueI.set(obj, *(int*)value);
+      break;
+    case ESGE_Field::L:
+      valueL.set(obj, *(long*)value);
+      break;
+    case ESGE_Field::LL:
+      valueLL.set(obj, *(long long*)value);
+      break;
+    case ESGE_Field::F:
+      valueF.set(obj, *(float*)value);
+      break;
+    case ESGE_Field::S:
+      valueS.set(obj, (char*)value);
+      break;
+    default:
+      SDL_assert(!"unrecognised type");
+    }
+  }
+}
 
 
 
@@ -106,7 +164,11 @@ ESGE_Type::Get(Uint64 id)
 
   return NULL;
 }
-
+const ESGE_Type*
+ESGE_Type::Get(const char *typeName)
+{
+  return Get(ESGE_Hash(typeName));
+}
 
 ESGE_Type::ESGE_Type(
   Uint64 id,
@@ -125,7 +187,6 @@ ESGE_Type::ESGE_Type(
   next = *node;
   *node = this;
 }
-
 ESGE_Type::~ESGE_Type(void)
 {
   ESGE_Type **node;;
@@ -139,12 +200,27 @@ ESGE_Type::~ESGE_Type(void)
   *node = next;
 }
 
+const ESGE_Field*
+ESGE_Type::GetField(Uint64 fieldID) const
+{
+  for (size_t i = 0; i < nFields; ++i)
+  {
+    if (fields[i].id == fieldID)
+      return fields + i;
+  }
+  return NULL;
+}
+const ESGE_Field*
+ESGE_Type::GetField(const char *fieldName) const
+{
+  return GetField(ESGE_Hash(fieldName));
+}
 
 
-ESGE_ObjSerial::ESGE_ObjSerial(void) {}
-
-ESGE_ObjSerial::~ESGE_ObjSerial(void) {}
-
+ESGE_ObjSerial::ESGE_ObjSerial(void)
+{}
+ESGE_ObjSerial::~ESGE_ObjSerial(void)
+{}
 
 void
 ESGE_ObjSerial::Load(SDL_RWops *io)

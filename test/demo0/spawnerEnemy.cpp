@@ -9,6 +9,8 @@
 #include "flyEnemy.h"
 #include "player.h"
 
+#include <stdlib.h> //rand()
+
 ESGE_TYPE_FIELDS(
   ObjSpawnerEnemy,
   ESGE_FIELD(
@@ -82,6 +84,8 @@ ObjSpawnerEnemy::SetMaxFlyEnemy(void *obj, int value)
 #define MAX_LIFE 8
 #define DMG_SND "sounds/enemy_dmg.wav"
 #define DEATH_SND "sounds/enemy_death.wav"
+#define W 32
+#define H 64
 
 ObjSpawnerEnemy::ObjSpawnerEnemy(void)
 {
@@ -89,8 +93,8 @@ ObjSpawnerEnemy::ObjSpawnerEnemy(void)
 
   offsetSize.x = 0;
   offsetSize.y = 0;
-  offsetSize.w = 32;
-  offsetSize.h = 64;
+  offsetSize.w = W;
+  offsetSize.h = H;
 
   spritesheet = ESGE_FileMngr<ESGE_Spritesheet>::Watch(SS);
 
@@ -115,13 +119,14 @@ ObjSpawnerEnemy::~ObjSpawnerEnemy(void)
 void
 ObjSpawnerEnemy::OnStart(void)
 {
-  player = ESGE_GetObj<ObjPlayer>("scene0.bin", "ObjPlayer");
+  SDL_assert((player = ESGE_GetObj<ObjPlayer>("ObjPlayer")));
 }
 
 #define SPAWN_OFFSET_H 16
 #define SPAWN_OFFSET_V 32
 #define FOCUS_RANGE 64
 #define DMG 10
+#define HEAL_PROB 50
 
 void
 ObjSpawnerEnemy::OnUpdate(void)
@@ -135,46 +140,63 @@ ObjSpawnerEnemy::OnUpdate(void)
   {
     if (life <= 0)
     {
+      if (rand() % 100 > HEAL_PROB)
+      {
+        ESGE_ObjScene *obj;
+        const ESGE_Type *heal;
+        const ESGE_Field *posX, *posY;
+        SDL_Point center;
+
+        center.x = pos.x + W/2;
+        center.y = pos.y + H/2;
+
+        obj = Create("ObjHeal");
+
+        heal = ESGE_Type::Get(obj->typeID);
+
+        posX = heal->GetField("pos.x");
+        posY = heal->GetField("pos.y");
+
+        posX->SetValue(obj, (void*)&center.x);
+        posY->SetValue(obj, (void*)&center.y);
+      }
       Destroy();
     }
     else
     {
-      if (player)
+      SDL_Rect playerHitBox, atkBox;
+
+      playerHitBox = player->GetHitBox();
+      atkBox = GetHitBox();
+
+      if (SDL_HasIntersection(&playerHitBox, &atkBox))
       {
-        SDL_Rect playerHitBox, atkBox;
+        player->OnAttack(DMG);
+      }
 
-        playerHitBox = player->GetHitBox();
-        atkBox = GetHitBox();
-
-        if (SDL_HasIntersection(&playerHitBox, &atkBox))
+      if (
+        SDL_abs(player->pos.x - pos.x) <= FOCUS_RANGE &&
+        SDL_abs(player->pos.y - pos.y) <= FOCUS_RANGE
+      )
+      {
+        if (spawnDeltaTm >= maxSpawnDeltaTm)
         {
-          player->OnAttack(DMG);
-        }
+          ESGE_ObjScene *fly;
+          int nFly = 0;
 
-        if (
-          SDL_abs(player->pos.x - pos.x) <= FOCUS_RANGE &&
-          SDL_abs(player->pos.y - pos.y) <= FOCUS_RANGE
-        )
-        {
-          if (spawnDeltaTm >= maxSpawnDeltaTm)
+          for (
+            ESGE_ObjScene *obj = ESGE_GetSharedList<ObjFlyEnemy>();
+            obj;
+            obj = obj->nextShared
+          )
+            nFly++;
+
+          if (nFly < maxFlyEnemy)
           {
-            ESGE_ObjScene *fly;
-            int nFly = 0;
-
-            for (
-              ESGE_ObjScene *obj = ESGE_GetSharedList<ObjFlyEnemy>();
-              obj;
-              obj = obj->nextShared
-            )
-              nFly++;
-
-            if (nFly < maxFlyEnemy)
-            {
-              spawnDeltaTm = 0;
-              fly = Create("ObjFlyEnemy");
-              ObjFlyEnemy::SetPosX(fly, pos.x + SPAWN_OFFSET_H);
-              ObjFlyEnemy::SetPosY(fly, pos.y + SPAWN_OFFSET_V);
-            }
+            spawnDeltaTm = 0;
+            fly = Create("ObjFlyEnemy");
+            ObjFlyEnemy::SetPosX(fly, pos.x + SPAWN_OFFSET_H);
+            ObjFlyEnemy::SetPosY(fly, pos.y + SPAWN_OFFSET_V);
           }
         }
       }

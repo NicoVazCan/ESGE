@@ -67,25 +67,31 @@ struct ESGE_Field
   };
 
   void GetValue(void *obj, char *value, size_t len) const;
+  void GetValue(void *obj, void *value, size_t len) const;
+
   void SetValue(void *obj, const char *value) const;
+  void SetValue(void *obj, const void *value) const;
 };
 
 
 class ESGE_Type
 {
   static ESGE_Type *list;
-
   ESGE_Type *next;
 
 public:
+  static const ESGE_Type *Get(Uint64 id);
+  static const ESGE_Type *Get(const char *typeName);
+
   const Uint64 id;
   const ESGE_Field *const fields;
   const size_t nFields;
 
-  static const ESGE_Type *Get(Uint64 id);
-
   ESGE_Type(Uint64 id, const ESGE_Field *fields, size_t nFields);
   virtual ~ESGE_Type(void);
+
+  const ESGE_Field *GetField(Uint64 fieldId) const;
+  const ESGE_Field *GetField(const char *fieldName) const;
 
   virtual void *New(void) const = 0;
 };

@@ -38,7 +38,7 @@ class ObjPlayer:
 
   ESGE_Spritesheet *spritesheet;
   ESGE_AnimPlayer animPlayer;
-  ESGE_Sound *jmpSnd, *shotSnd, *dmgSnd;
+  ESGE_Sound *jmpSnd, *shotSnd, *dmgSnd, *healSnd, *puSnd;
 
   Uint32 dmgDeltaTm = 4000;
   Uint32 maxDmgDeltaTm = 4000;

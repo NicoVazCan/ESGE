@@ -157,6 +157,26 @@ ESGE_GetObj(Uint64 sceneID, const char *instName)
   );
 }
 
+template<class C>
+C*
+ESGE_GetObj(const char *instName)
+{
+  ESGE_ObjScene *sharedObj;
+  Uint64 instID;
+
+  instID = ESGE_Hash(instName);
+
+  for (
+    sharedObj = ESGE_GetSharedList<C>();
+    sharedObj && sharedObj->instID != instID;
+    sharedObj = sharedObj->nextShared
+  );
+
+  return (
+    sharedObj && sharedObj->instID == instID ? (C*)sharedObj : NULL
+  );
+}
+
 
 class ESGE_Scene
 {

@@ -499,6 +499,8 @@ ObjPlayer::UpdateLifeUI(void)
 #define JMP_SND "sounds/jump.wav"
 #define SHOT_SND "sounds/shot.wav"
 #define DMG_SND "sounds/dmg.wav"
+#define HEAL_SND "sounds/heal.wav"
+#define PU_SND "sounds/power_up.wav"
 #define SS "sprites/player.sprite.bin"
 #define MAX_LIFE 99
 #define UI_POS_X 4
@@ -534,6 +536,8 @@ ObjPlayer::ObjPlayer(void)
   jmpSnd = ESGE_FileMngr<ESGE_Sound>::Watch(JMP_SND);
   shotSnd = ESGE_FileMngr<ESGE_Sound>::Watch(SHOT_SND);
   dmgSnd = ESGE_FileMngr<ESGE_Sound>::Watch(DMG_SND);
+  healSnd = ESGE_FileMngr<ESGE_Sound>::Watch(HEAL_SND);
+  puSnd = ESGE_FileMngr<ESGE_Sound>::Watch(PU_SND);
 }
 
 ObjPlayer::~ObjPlayer(void)
@@ -542,6 +546,8 @@ ObjPlayer::~ObjPlayer(void)
   ESGE_FileMngr<ESGE_Sound>::Leave(jmpSnd);
   ESGE_FileMngr<ESGE_Sound>::Leave(shotSnd);
   ESGE_FileMngr<ESGE_Sound>::Leave(dmgSnd);
+  ESGE_FileMngr<ESGE_Sound>::Leave(healSnd);
+  ESGE_FileMngr<ESGE_Sound>::Leave(puSnd);
 }
 
 void
@@ -1047,6 +1053,7 @@ void
 ObjPlayer::UnlockBall(void)
 {
   lockedBall = false;
+  puSnd->Play();
 }
 
 void
@@ -1057,5 +1064,6 @@ ObjPlayer::Heal(int heal)
   if (life > MAX_LIFE)
     life = MAX_LIFE;
 
+  healSnd->Play();
   UpdateLifeUI();
 }
