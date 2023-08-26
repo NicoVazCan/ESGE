@@ -1,13 +1,18 @@
 #include "ESGE_scene.h"
 
+#include <SDL2/SDL.h>
 #include "ESGE_objEvent.h"
 
 #define SCENE_FILE_LEN 128
 
-class ObjSceneChanger: public ESGE_ObjScene, public ESGE_ObjKeyEvent
+class ObjSceneChanger:
+  public ESGE_ObjScene,
+  public ESGE_ObjKeyEvent,
+  public ESGE_ObjJoyEvent
 {
   char sceneFile[SCENE_FILE_LEN] = "scene.bin";
   SDL_Keycode key = 0;
+  Uint8 button = 0;
 
 public:
   static char* GetSceneFile(void *obj, char *str, size_t n)
@@ -33,15 +38,26 @@ public:
     ((ObjSceneChanger*)obj)->key = value;
   }
 
+  static char GetButton(void *obj)
+  {
+    return ((ObjSceneChanger*)obj)->button;
+  }
+  static void SetButton(void *obj, char value)
+  {
+    ((ObjSceneChanger*)obj)->button = value;
+  }
+
   virtual void OnEnable(void) override
   {
     ESGE_ObjScene::OnEnable();
     EnableKeyEvent();
+    EnableJoyEvent();
   }
   virtual void OnDisable(void) override
   {
     ESGE_ObjScene::OnDisable();
     DisableKeyEvent();
+    DisableJoyEvent();
   }
   
   virtual void OnKeyDown(
@@ -50,6 +66,12 @@ public:
   ) override
   {
     if (key == this->key)
+      ESGE_SceneMngr::ChangeScene(sceneFile);
+  }
+
+  virtual void OnJoyButtonDown(Uint8 button)
+  {
+    if (button == this->button)
       ESGE_SceneMngr::ChangeScene(sceneFile);
   }
 };
@@ -67,7 +89,13 @@ ESGE_TYPE_FIELDS(
       key,
       ObjSceneChanger::GetKey,
       ObjSceneChanger::SetKey,
-      ESGE_END_FIELD
+      ESGE_FIELD(
+        C,
+        button,
+        ObjSceneChanger::GetButton,
+        ObjSceneChanger::SetButton,
+        ESGE_END_FIELD
+      )
     )
   )
 )

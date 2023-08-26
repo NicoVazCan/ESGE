@@ -5,6 +5,7 @@
 #include "ESGE_audio.h"
 #include <stdio.h>
 #include "ESGE_objDraw.h"
+#include "ESGE_error.h"
 
 
 #define ESGE_CMD_LEN 128
@@ -380,7 +381,16 @@ main(int argc, char *argv[])
 	SDL_Thread *shell;
 	Uint32 ticks;
 
-	SDL_Init(SDL_INIT_EVENTS | SDL_INIT_VIDEO | SDL_INIT_AUDIO);
+	if (
+		SDL_Init(
+			SDL_INIT_EVENTS |
+			SDL_INIT_VIDEO |
+			SDL_INIT_AUDIO |
+			SDL_INIT_JOYSTICK
+		)
+	)
+		ESGE_Error("Failed to initializa SDL: %s", SDL_GetError());
+
 	ESGE_Display::Init(title, w, h);
 	ESGE_InitAudio(0, 0);
 	ESGE_SceneMngr::Init(0);

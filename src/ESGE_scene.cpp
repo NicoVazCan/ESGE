@@ -173,17 +173,21 @@ ESGE_Scene::~ESGE_Scene(void)
 void
 ESGE_Scene::Init(void)
 {
+#ifndef ESGE_EDITOR
   for (ESGE_ObjScene *obj = objList; obj != NULL; obj = obj->next)
   {
     if (obj->state == ESGE_ObjScene::OK)
       obj->OnInit();
   }
+#endif
 }
 void
 ESGE_Scene::Quit(void)
 {
+#ifndef ESGE_EDITOR
   for (ESGE_ObjScene *obj = objList; obj != NULL; obj = obj->next)
     obj->OnQuit();
+#endif
 }
 
 void

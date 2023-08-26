@@ -651,6 +651,82 @@ ObjPlayer::OnKeyUp(SDL_Keycode key, SDL_UNUSED SDL_Keymod mod)
   }
 }
 
+void
+ObjPlayer::OnJoyHat(SDL_UNUSED Uint8 hat, Uint8 value)
+{
+  switch (value)
+  {
+  case SDL_HAT_UP:
+    AimUp();
+    break;
+
+  case SDL_HAT_DOWN:
+    Ball();
+    break;
+
+  case SDL_HAT_LEFT:
+    GoLeft();
+    break;
+
+  case SDL_HAT_RIGHT:
+    GoRight();
+    break;
+
+  case SDL_HAT_CENTERED:
+    StopGoRight();
+    StopGoLeft();
+    StopAimUp();
+    break;
+
+  default:
+    break;
+  }
+}
+
+#define BUTTON_B 0
+#define BUTTON_A 1
+#define BUTTON_Y 2
+#define BUTTON_X 3
+
+void
+ObjPlayer::OnJoyButtonDown(Uint8 button)
+{
+  switch (button)
+  {
+  case BUTTON_B:
+    Jump();
+    break;
+
+  case BUTTON_A:
+    Save();
+    break;
+
+  case BUTTON_Y:
+    Shot();
+    break;
+
+  case BUTTON_X:
+    Load();
+    break;
+
+  default:
+    break;
+  }
+}
+void
+ObjPlayer::OnJoyButtonUp(Uint8 button)
+{
+  switch (button)
+  {
+  case BUTTON_B:
+    StopJump();
+    break;
+
+  default:
+    break;
+  }
+}
+
 #define ACC ( \
   ((int)(ESGE_deltaTm * ESGE_deltaTm)) * 0x0020 / 256 \
 )
@@ -991,6 +1067,7 @@ ObjPlayer::OnEnable(void)
 {
   ESGE_ObjScene::OnEnable();
   EnableKeyEvent();
+  EnableJoyEvent();
   EnableUpdate();
   EnablePhysic();
   EnableDraw();
@@ -1002,6 +1079,7 @@ ObjPlayer::OnDisable(void)
 {
   ESGE_ObjScene::OnDisable();
   DisableKeyEvent();
+  DisableJoyEvent();
   DisableUpdate();
   DisablePhysic();
   DisableDraw();

@@ -2,6 +2,7 @@
 
 #define SGLIB_ASSERT SDL_assert
 #include "sglib.h"
+#include "ESGE_error.h"
 
 
 ESGE_Event *ESGE_Event::list = NULL;
@@ -318,6 +319,14 @@ ESGE_ObjJoyEvent::JoyButtonUp(void)
 void
 ESGE_ObjJoyEvent::JoyDeviceAdd(void)
 {
+  if (!SDL_JoystickOpen(ESGE_event.jdevice.which))
+  {
+    ESGE_Error(
+      "Cannot open joystick with id %d",
+      ESGE_event.jdevice.which
+    );
+  }
+
   for (ESGE_ObjJoyEvent *obj = list; obj != NULL; obj = obj->next)
   {
     if (obj->joyID == -1 || obj->joyID == ESGE_event.jdevice.which)
@@ -327,11 +336,17 @@ ESGE_ObjJoyEvent::JoyDeviceAdd(void)
 void
 ESGE_ObjJoyEvent::JoyDeviceRem(void)
 {
+  SDL_Joystick *joy;
+
   for (ESGE_ObjJoyEvent *obj = list; obj != NULL; obj = obj->next)
   {
     if (obj->joyID == -1 || obj->joyID == ESGE_event.jdevice.which)
       obj->OnJoyDeviceRem(ESGE_event.jdevice.which);
   }
+
+  joy = SDL_JoystickFromInstanceID(ESGE_event.jdevice.which);
+  SDL_assert(joy);
+  SDL_JoystickClose(joy);
 }
 void
 ESGE_ObjJoyEvent::JoyBattery(void)

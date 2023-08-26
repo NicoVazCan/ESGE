@@ -22,6 +22,7 @@ class ObjText;
 class ObjPlayer:
   public ESGE_ObjScene,
   public ESGE_ObjKeyEvent,
+  public ESGE_ObjJoyEvent,
   public ESGE_ObjUpdate,
   public ESGE_ObjDynamic,
   public ESGE_ObjDrawSprite,
@@ -87,6 +88,10 @@ public:
 
   virtual void OnKeyDown(SDL_Keycode key, SDL_Keymod mod);
   virtual void OnKeyUp(SDL_Keycode key, SDL_Keymod mod);
+
+  virtual void OnJoyHat(Uint8 hat, Uint8 value);
+  virtual void OnJoyButtonDown(Uint8 button);
+  virtual void OnJoyButtonUp(Uint8 button);
 
   virtual void OnUpdate(void) override;
 

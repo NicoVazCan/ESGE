@@ -3,6 +3,7 @@
 #include "ESGE_scene.h"
 #include "ESGE_display.h"
 #include "ESGE_audio.h"
+#include "ESGE_error.h"
 
 #include "ESGE_objEvent.h"
 #include "ESGE_objUpdate.h"
@@ -64,7 +65,15 @@ main(int argc, const char *argv[])
 		else sceneFile = argv[i];
 	}
 
-	SDL_Init(SDL_INIT_EVENTS | SDL_INIT_VIDEO | SDL_INIT_AUDIO);
+	if (
+		SDL_Init(
+			SDL_INIT_EVENTS |
+			SDL_INIT_VIDEO |
+			SDL_INIT_AUDIO |
+			SDL_INIT_JOYSTICK
+		)
+	)
+		ESGE_Error("Failed to initializa SDL: %s", SDL_GetError());
 	ESGE_Display::Init(title, w, h);
 	ESGE_InitAudio(soundVolume, musicVolume);
 	ESGE_SceneMngr::Init(nDisabledScene);
