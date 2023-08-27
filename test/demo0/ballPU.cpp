@@ -82,7 +82,7 @@ public:
   {
     SDL_Rect playerHitBox, triggerBox;
 
-    playerHitBox = player->GetHitBox();
+    playerHitBox = player->ESGE_ObjDynamic::GetBox();
 
     triggerBox.x = pos.x;
     triggerBox.y = pos.y;

@@ -93,10 +93,10 @@ ObjSpawnerEnemy::ObjSpawnerEnemy(void)
 {
   layer = PLAYER_LAYER-2;
 
-  offsetSize.x = 0;
-  offsetSize.y = 0;
-  offsetSize.w = W;
-  offsetSize.h = H;
+  ObjAlive::offsetSize.x = 0;
+  ObjAlive::offsetSize.y = 0;
+  ObjAlive::offsetSize.w = W;
+  ObjAlive::offsetSize.h = H;
 
   spritesheet = ESGE_FileMngr<ESGE_Spritesheet>::Watch(SS);
 
@@ -171,8 +171,8 @@ ObjSpawnerEnemy::OnUpdate(void)
     {
       SDL_Rect playerHitBox, atkBox;
 
-      playerHitBox = player->GetHitBox();
-      atkBox = GetHitBox();
+      playerHitBox = player->ObjAlive::GetBox();
+      atkBox = ObjAlive::GetBox();
 
       if (SDL_HasIntersection(&playerHitBox, &atkBox))
       {

@@ -11,7 +11,7 @@ ObjEnemy::Attack(SDL_Rect atkBox, int dmg)
   {
     SDL_Rect hitBox;
 
-    hitBox = obj->GetHitBox();
+    hitBox = obj->ObjAlive::GetBox();
     if (SDL_HasIntersection(&atkBox, &hitBox))
     {
       obj->OnAttack(dmg);

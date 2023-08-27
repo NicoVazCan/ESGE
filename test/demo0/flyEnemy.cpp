@@ -159,8 +159,8 @@ ObjFlyEnemy::OnUpdate(void)
     {
       SDL_Rect playerHitBox, atkBox;
 
-      playerHitBox = player->GetHitBox();
-      atkBox = GetHitBox();
+      playerHitBox = player->ObjAlive::GetBox();
+      atkBox = ObjAlive::GetBox();
 
       if (SDL_HasIntersection(&playerHitBox, &atkBox))
       {
