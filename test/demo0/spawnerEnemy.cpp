@@ -129,8 +129,8 @@ ObjSpawnerEnemy::OnStart(void)
 
 #define SPAWN_OFFSET_H 16
 #define SPAWN_OFFSET_V 32
-#define FOCUS_RANGE 64
-#define DMG 10
+#define FOCUS_RANGE 80
+#define DMG 5
 #define HEAL_PROB 50
 
 void

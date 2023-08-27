@@ -25,7 +25,7 @@ class ObjSpawnerEnemy:
 
   Uint32 spawnDeltaTm;
   Uint32 maxSpawnDeltaTm;
-  int maxFlyEnemy = 8;
+  int maxFlyEnemy = 32;
 
   ESGE_Sound *dmgSnd, *deathSnd;
 

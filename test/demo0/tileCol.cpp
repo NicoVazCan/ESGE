@@ -89,14 +89,14 @@ public:
   virtual void OnEnable(void)
   {
     ESGE_ObjScene::OnEnable();
-    EnableDraw();
+    //EnableDraw();
     EnableStatic();
   }
 
   virtual void OnDisable(void)
   {
     ESGE_ObjScene::OnDisable();
-    DisableDraw();
+    //DisableDraw();
     DisableStatic();
   }
 };

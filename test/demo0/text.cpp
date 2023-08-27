@@ -66,6 +66,7 @@ ObjText::SetStr(void *obj, const char *str)
 
 ObjText::ObjText(void)
 {
+  str[0] = '\0';
   layer = PLAYER_LAYER+20;
   spritesheet = ESGE_FileMngr<ESGE_Spritesheet>::Watch(TEXT_SS);
 }

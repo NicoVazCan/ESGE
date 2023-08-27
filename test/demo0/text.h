@@ -14,7 +14,7 @@ class ObjText:
   public ESGE_ObjPoint,
   public ESGE_ObjDraw
 {
-  char str[TEXT_LEN] = "";
+  char str[TEXT_LEN];
   ESGE_Spritesheet *spritesheet;
 
 public:
