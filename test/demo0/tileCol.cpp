@@ -62,7 +62,13 @@ public:
 
   virtual void OnDraw(void)
   {
-    ESGE_Display::WorldDrawRect(GetColBox(), 255, 0, 0, 255);
+    ESGE_Display::WorldDrawRect(
+      ESGE_ObjCollider::GetBox(),
+      255,
+      0,
+      0,
+      255
+    );
   }
 
 

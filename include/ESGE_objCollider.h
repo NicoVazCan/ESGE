@@ -2,21 +2,19 @@
 # define ESGE_OBJ_COLLIDER_H_
 
 # include <SDL2/SDL.h>
-# include "ESGE_objPoint.h"
+# include "ESGE_objBox.h"
 
 
-class ESGE_ObjCollider: public virtual ESGE_ObjPoint
+class ESGE_ObjCollider: public ESGE_ObjBox
 {
 public:
-  SDL_Rect offsetSize = {0, 0, 0, 0};
-
   ESGE_ObjCollider(void);
   virtual ~ESGE_ObjCollider(void) = 0;
 
-  SDL_Rect GetColBox(void);
-  void SetColBox(SDL_Rect colBox);
-
-  virtual void OnCollide(ESGE_ObjCollider *other);
+  virtual void OnCollideUp(ESGE_ObjCollider *other);
+  virtual void OnCollideDown(ESGE_ObjCollider *other);
+  virtual void OnCollideLeft(ESGE_ObjCollider *other);
+  virtual void OnCollideRight(ESGE_ObjCollider *other);
 };
 
 #endif

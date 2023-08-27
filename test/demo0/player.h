@@ -97,7 +97,10 @@ public:
 
   virtual void OnPhysic(void) override;
 
-  virtual void OnCollide(ESGE_ObjCollider *other) override;
+  virtual void OnCollideUp(ESGE_ObjCollider *other) override;
+  virtual void OnCollideDown(ESGE_ObjCollider *other) override;
+  virtual void OnCollideLeft(ESGE_ObjCollider *other) override;
+  virtual void OnCollideRight(ESGE_ObjCollider *other) override;
 
   virtual void OnDraw(void) override;
 

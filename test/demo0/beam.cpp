@@ -202,7 +202,22 @@ ObjBeam::OnUpdate(void)
 }
 
 void
-ObjBeam::OnCollide(SDL_UNUSED ESGE_ObjCollider *other)
+ObjBeam::OnCollideUp(SDL_UNUSED ESGE_ObjCollider *other)
+{
+  Destroy();
+}
+void
+ObjBeam::OnCollideDown(SDL_UNUSED ESGE_ObjCollider *other)
+{
+  Destroy();
+}
+void
+ObjBeam::OnCollideLeft(SDL_UNUSED ESGE_ObjCollider *other)
+{
+  Destroy();
+}
+void
+ObjBeam::OnCollideRight(SDL_UNUSED ESGE_ObjCollider *other)
 {
   Destroy();
 }

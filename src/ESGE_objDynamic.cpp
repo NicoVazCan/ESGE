@@ -23,75 +23,52 @@ ESGE_ObjDynamic::OnPhysic(void)
   {
     SDL_Rect thisColBox;
 
-    thisColBox = GetColBox();
+    pos.y -= vel.y;
 
-    thisColBox.y -= vel.y;
+    thisColBox = ESGE_ObjCollider::GetBox();
 
     if (vel.x > 0)
     {
       if ((otherH = ESGE_ObjStatic::GetObjAtRight(thisColBox)))
       {
-        SDL_Rect otherColBox;
-
-        otherColBox = otherH->GetColBox();
-        thisColBox.x = otherColBox.x - thisColBox.w;
+        otherH->OnCollideLeft(this);
+        OnCollideRight(otherH);
       }
     }
     else if (vel.x < 0)
     {
       if ((otherH = ESGE_ObjStatic::GetObjAtLeft(thisColBox)))
       {
-        SDL_Rect otherColBox;
-
-        otherColBox = otherH->GetColBox();
-        thisColBox.x = otherColBox.x + otherColBox.w;
+        otherH->OnCollideRight(this);
+        OnCollideLeft(otherH);
       }
     }
 
-    thisColBox.y += vel.y;
-
-    SetColBox(thisColBox);
+    pos.y += vel.y;
   }
 
   if (vel.y != 0)
   {
     SDL_Rect thisColBox;
 
-    thisColBox = GetColBox();
+    thisColBox = ESGE_ObjCollider::GetBox();
 
     if (vel.y > 0)
     {
       if((otherV = ESGE_ObjStatic::GetObjAtDown(thisColBox)))
       {
-        SDL_Rect otherColBox;
-
-        otherColBox = otherV->GetColBox();
-        thisColBox.y = otherColBox.y - thisColBox.h;
+        otherV->OnCollideUp(this);
+        OnCollideDown(otherV);
       }
     }
     else if (vel.y < 0)
     {
       if((otherV = ESGE_ObjStatic::GetObjAtUp(thisColBox)))
       {
-        SDL_Rect otherColBox;
-
-        otherColBox = otherV->GetColBox();
-        thisColBox.y = otherColBox.y + otherColBox.h;
+        otherV->OnCollideDown(this);
+        OnCollideUp(otherV);
       }
     }
-
-    SetColBox(thisColBox);
-  }
-
-  if (otherH)
-  {
-    OnCollide(otherH);
-    otherH->OnCollide(this);
-  }
-  if (otherV)
-  {
-    OnCollide(otherV);
-    otherV->OnCollide(this);
   }
 
   prevPos = pos;

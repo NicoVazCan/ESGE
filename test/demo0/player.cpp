@@ -439,7 +439,7 @@ ObjPlayer::IsInGround(void)
 {
   SDL_Rect box;
 
-  box = GetColBox();
+  box = ESGE_ObjCollider::GetBox();
   box.y++;
   return ESGE_ObjStatic::GetObjAtDown(box) != NULL;
 }
@@ -449,7 +449,7 @@ ObjPlayer::IsCeilAbove(void)
 {
   SDL_Rect box;
 
-  box = GetColBox();
+  box = ESGE_ObjCollider::GetBox();
   box.y -= 16;
   return ESGE_ObjStatic::GetObjAtDown(box) != NULL;
 }
@@ -1050,7 +1050,7 @@ ObjPlayer::OnPhysic(void)
   roomMngr->SetFocusCenter(pos.x + 8, pos.y + 16);
   camMngr->SetCamCenter(pos.x + 8, pos.y + 16);
 }
-
+/*
 void
 ObjPlayer::OnCollide(ESGE_ObjCollider *other)
 {
@@ -1084,6 +1084,31 @@ ObjPlayer::OnCollide(ESGE_ObjCollider *other)
     fPos.y = pos.y << POS_SCALE;
     fVel.y = 0;
   }
+}
+*/
+void
+ObjPlayer::OnCollideUp(SDL_UNUSED ESGE_ObjCollider *other)
+{
+  fPos.y = pos.y << POS_SCALE;
+  fVel.y = 0;
+}
+void
+ObjPlayer::OnCollideDown(SDL_UNUSED ESGE_ObjCollider *other)
+{
+  fPos.y = pos.y << POS_SCALE;
+  fVel.y = 0;
+}
+void
+ObjPlayer::OnCollideLeft(SDL_UNUSED ESGE_ObjCollider *other)
+{
+  fPos.x = pos.x << POS_SCALE;
+  fVel.x = 0;
+}
+void
+ObjPlayer::OnCollideRight(SDL_UNUSED ESGE_ObjCollider *other)
+{
+  fPos.x = pos.x << POS_SCALE;
+  fVel.x = 0;
 }
 
 #define BLINK_T 16*2

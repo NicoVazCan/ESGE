@@ -45,6 +45,11 @@ public:
   void EnableStatic(void);
   void DisableStatic(void);
   bool IsEnabledStatic(void);
+
+  virtual void OnCollideUp(ESGE_ObjCollider *other) override;
+  virtual void OnCollideDown(ESGE_ObjCollider *other) override;
+  virtual void OnCollideLeft(ESGE_ObjCollider *other) override;
+  virtual void OnCollideRight(ESGE_ObjCollider *other) override;
 };
 
 #endif

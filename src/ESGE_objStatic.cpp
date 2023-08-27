@@ -145,10 +145,7 @@ ESGE_ObjStatic::GetObjAtRight(SDL_Rect box)
 
 
 ESGE_ObjStatic::ESGE_ObjStatic(void)
-{
-  offsetSize.x = 0;
-  offsetSize.y = 0;
-}
+{}
 
 ESGE_ObjStatic::~ESGE_ObjStatic(void)
 {}
@@ -339,4 +336,53 @@ bool
 ESGE_ObjStatic::IsEnabledStatic(void)
 {
   return enabledStatic;
+}
+
+void
+ESGE_ObjStatic::OnCollideUp(ESGE_ObjCollider *other)
+{
+  SDL_Rect thisColBox, otherColBox;
+
+  thisColBox = ESGE_ObjCollider::GetBox();
+  otherColBox = other->ESGE_ObjCollider::GetBox();
+
+  otherColBox.y = thisColBox.y - otherColBox.h;
+
+  other->ESGE_ObjCollider::SetBox(otherColBox);
+}
+void
+ESGE_ObjStatic::OnCollideDown(ESGE_ObjCollider *other)
+{
+  SDL_Rect thisColBox, otherColBox;
+
+  thisColBox = ESGE_ObjCollider::GetBox();
+  otherColBox = other->ESGE_ObjCollider::GetBox();
+
+  otherColBox.y = thisColBox.y + thisColBox.h;
+
+  other->ESGE_ObjCollider::SetBox(otherColBox);
+}
+void
+ESGE_ObjStatic::OnCollideLeft(ESGE_ObjCollider *other)
+{
+  SDL_Rect thisColBox, otherColBox;
+
+  thisColBox = ESGE_ObjCollider::GetBox();
+  otherColBox = other->ESGE_ObjCollider::GetBox();
+
+  otherColBox.x = thisColBox.x - otherColBox.w;
+
+  other->ESGE_ObjCollider::SetBox(otherColBox);
+}
+void
+ESGE_ObjStatic::OnCollideRight(ESGE_ObjCollider *other)
+{
+  SDL_Rect thisColBox, otherColBox;
+
+  thisColBox = ESGE_ObjCollider::GetBox();
+  otherColBox = other->ESGE_ObjCollider::GetBox();
+
+  otherColBox.x = thisColBox.x + thisColBox.w;
+
+  other->ESGE_ObjCollider::SetBox(otherColBox);
 }
