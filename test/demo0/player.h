@@ -85,8 +85,6 @@ public:
   virtual void OnInit(void) override;
   virtual void OnQuit(void) override;
 
-  virtual void OnStart(void) override;
-
   virtual void OnKeyDown(SDL_Keycode key, SDL_Keymod mod);
   virtual void OnKeyUp(SDL_Keycode key, SDL_Keymod mod);
 

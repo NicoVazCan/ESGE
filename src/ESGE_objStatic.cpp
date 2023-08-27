@@ -1,6 +1,7 @@
 #include "ESGE_objStatic.h"
 
 #include <SDL2/SDL.h>
+#include "ESGE_error.h"
 
 
 ESGE_ListH *ESGE_ObjStatic::listH = NULL;
@@ -35,6 +36,111 @@ ESGE_ObjStatic::GetObjAt(SDL_Point pos)
       return nodeV->obj;
   }
   return NULL;
+}
+
+ESGE_ObjStatic*
+ESGE_ObjStatic::GetObjAtUp(SDL_Rect box)
+{
+  SDL_Point test;
+  int right;
+  ESGE_ObjStatic *obj = NULL;
+
+  test.x = box.x;
+  test.y = box.y;
+  right = box.x + box.w;
+
+  while (
+    test.x < right &&
+    !(obj = ESGE_ObjStatic::GetObjAt(test))
+  )
+    test.x += ESGE_ObjStatic::cellW;
+
+  if (!obj)
+  {
+    test.x = right - 1;
+
+    obj = ESGE_ObjStatic::GetObjAt(test);
+  }
+
+  return obj;
+}
+ESGE_ObjStatic*
+ESGE_ObjStatic::GetObjAtDown(SDL_Rect box)
+{
+  SDL_Point test;
+  int right;
+  ESGE_ObjStatic *obj = NULL;
+
+  test.x = box.x;
+  test.y = box.y + box.h - 1;
+  right = box.x + box.w;
+
+  while (
+    test.x < right &&
+    !(obj = ESGE_ObjStatic::GetObjAt(test))
+  )
+    test.x += ESGE_ObjStatic::cellW;
+  
+  if (!obj)
+  {
+    test.x = right - 1;
+    
+    obj = ESGE_ObjStatic::GetObjAt(test);
+  }
+
+  return obj;
+}
+ESGE_ObjStatic*
+ESGE_ObjStatic::GetObjAtLeft(SDL_Rect box)
+{
+  SDL_Point test;
+  int botton;
+  ESGE_ObjStatic *obj = NULL;
+
+  test.x = box.x;
+  test.y = box.y;
+  botton = box.y + box.h;
+
+  while (
+    test.y < botton &&
+    !(obj = ESGE_ObjStatic::GetObjAt(test))
+  )
+    test.y += ESGE_ObjStatic::cellH;
+  
+  if (!obj)
+  {
+    test.y = botton - 1;
+
+    obj = ESGE_ObjStatic::GetObjAt(test);
+  }
+
+  return obj;
+}
+ESGE_ObjStatic*
+ESGE_ObjStatic::GetObjAtRight(SDL_Rect box)
+{
+  SDL_Point test;
+  int botton;
+  ESGE_ObjStatic *obj = NULL;
+
+  test.x = box.x + box.w - 1;
+  test.y = box.y;
+  botton = box.y + box.h;
+
+  while (
+    test.y < botton &&
+    !(obj = ESGE_ObjStatic::GetObjAt(test))
+  )
+    test.y += ESGE_ObjStatic::cellH;
+  
+  if (!obj)
+  {
+    test.y = botton - 1;
+
+    obj = ESGE_ObjStatic::GetObjAt(test);
+  }
+
+  return obj;
 }
 
 
@@ -74,6 +180,14 @@ ESGE_ObjStatic::SetRowH(int rowH)
 }
 
 
+#define ESGE_OBJ_STATIC_ERROR() \
+ESGE_Error( \
+  "Failed to enable static object: Two objects in %d column and %d " \
+  "row", \
+  col, \
+  row \
+)
+
 void
 ESGE_ObjStatic::EnableStatic(void)
 {
@@ -107,7 +221,8 @@ ESGE_ObjStatic::EnableStatic(void)
     nodeV = &(*nodeV)->next
   );
 
-  SDL_assert(!*nodeV || (*nodeV)->row != row);
+  if (*nodeV && (*nodeV)->row == row)
+    ESGE_OBJ_STATIC_ERROR();
 
   *nodeV = new ESGE_ListV{row, this, *nodeV};
 
@@ -116,7 +231,8 @@ ESGE_ObjStatic::EnableStatic(void)
     row++;
     nodeV = &(*nodeV)->next;
 
-    SDL_assert(!*nodeV || (*nodeV)->row != row);
+    if (*nodeV && (*nodeV)->row == row)
+      ESGE_OBJ_STATIC_ERROR();
 
     *nodeV = new ESGE_ListV{row, this, *nodeV};
   }
@@ -140,7 +256,8 @@ ESGE_ObjStatic::EnableStatic(void)
       nodeV = &(*nodeV)->next
     );
 
-    SDL_assert(!*nodeV || (*nodeV)->row != row);
+    if (*nodeV && (*nodeV)->row == row)
+      ESGE_OBJ_STATIC_ERROR();
 
     *nodeV = new ESGE_ListV{row, this, *nodeV};
 
@@ -149,7 +266,8 @@ ESGE_ObjStatic::EnableStatic(void)
       row++;
       nodeV = &(*nodeV)->next;
 
-      SDL_assert(!*nodeV || (*nodeV)->row != row);
+      if (*nodeV && (*nodeV)->row == row)
+        ESGE_OBJ_STATIC_ERROR();
 
       *nodeV = new ESGE_ListV{row, this, *nodeV};
     }

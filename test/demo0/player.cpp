@@ -437,51 +437,21 @@ ObjPlayer::Save(void)
 bool
 ObjPlayer::IsInGround(void)
 {
-  bool inGround = false;
-  SDL_Point test;
-  SDL_Rect thisColBox;
+  SDL_Rect box;
 
-  thisColBox = GetColBox();
-  test.x = thisColBox.x;
-  test.y = thisColBox.y + thisColBox.h;
-
-  while (test.x < thisColBox.x + thisColBox.w && !inGround)
-  {
-    inGround = ESGE_ObjStatic::GetObjAt(test) != NULL;
-    test.x += ESGE_ObjStatic::cellW;
-  }
-  if (!inGround)
-  {
-    test.x = thisColBox.x + thisColBox.w - 1;
-    inGround = ESGE_ObjStatic::GetObjAt(test) != NULL;
-  }
-
-  return inGround;
+  box = GetColBox();
+  box.y++;
+  return ESGE_ObjStatic::GetObjAtDown(box) != NULL;
 }
 
 bool 
 ObjPlayer::IsCeilAbove(void)
 {
-  bool ceilAbove = false;
-  SDL_Point test;
-  SDL_Rect thisColBox;
+  SDL_Rect box;
 
-  thisColBox = GetColBox();
-  test.x = thisColBox.x;
-  test.y = thisColBox.y - 16;
-
-  while (test.x < thisColBox.x + thisColBox.w && !ceilAbove)
-  {
-    ceilAbove = ESGE_ObjStatic::GetObjAt(test) != NULL;
-    test.x += ESGE_ObjStatic::cellW;
-  }
-  if (!ceilAbove)
-  {
-    test.x = thisColBox.x + thisColBox.w - 1;
-    ceilAbove = ESGE_ObjStatic::GetObjAt(test) != NULL;
-  }
-
-  return ceilAbove;
+  box = GetColBox();
+  box.y -= 16;
+  return ESGE_ObjStatic::GetObjAtDown(box) != NULL;
 }
 
 #define UI_STR_LEN 16
@@ -584,31 +554,17 @@ ObjPlayer::OnInit(void)
   ObjText::SetPosX(fpsText, FPS_POS_X);
   ObjText::SetPosY(fpsText, FPS_POS_Y);
   UpdateFPSUI();
+
+  roomMngr = (ObjRoomMngr*)Create("ObjRoomMngr");
+  camMngr = (ObjCamMngr*)Create("ObjCamMngr");
 }
 void
 ObjPlayer::OnQuit(void)
 {
   lifeText->Destroy();
   fpsText->Destroy();
-}
-
-void
-ObjPlayer::OnStart(void)
-{
-  if (!(roomMngr = ESGE_GetObj<ObjRoomMngr>(sceneID, "ObjRoomMngr")))
-  {
-    ESGE_Error(
-      "ObjRoomMngr not found in scene with id=%" SDL_PRIu64,
-      sceneID
-    );
-  }
-  if (!(camMngr = ESGE_GetObj<ObjCamMngr>(sceneID, "ObjCamMngr")))
-  {
-    ESGE_Error(
-      "ObjRoomMngr not found in scene with id=%" SDL_PRIu64,
-      sceneID
-    );
-  }
+  roomMngr->Destroy();
+  camMngr->Destroy();
 }
 
 void
