@@ -19,6 +19,10 @@ struct ESGE_ListH
   ESGE_ListH *next;
 };
 
+enum ESGE_CheckDir
+{
+  ESGE_CHECK_UP, ESGE_CHECK_DOWN, ESGE_CHECK_LEFT, ESGE_CHECK_RIGHT
+}
 
 class ESGE_ObjStatic: public ESGE_ObjCell, public ESGE_ObjCollider
 {
@@ -28,6 +32,7 @@ class ESGE_ObjStatic: public ESGE_ObjCell, public ESGE_ObjCollider
 
 public:
   static ESGE_ObjStatic *GetObjAt(SDL_Point pos);
+  static ESGE_ObjStatic *GetObjAt(SDL_Rect box, ESGE_CheckDir dir);
 
   ESGE_ObjStatic(void);
   virtual ~ESGE_ObjStatic(void) = 0;

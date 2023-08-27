@@ -12,11 +12,11 @@
 
 
 static const ESGE_Frm _frms[] = {
-  {0, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*20},
-  {1, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*20},
-  {2, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*20},
-  {3, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*20},
-  {4, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*20},
+  {0, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*16},
+  {1, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*12},
+  {2, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+  {3, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {4, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
 };
 
 static const ESGE_Anim _anim = {

@@ -35,12 +35,12 @@ ESGE_TYPE_FIELDS(
 )
 
 static const ESGE_Frm _frms[] = {
-  {0, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*20},
-  {1, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*20},
-  {2, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*20},
-  {3, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*20},
-  {2, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*20},
-  {1, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*20}
+  {0, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {1, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {2, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {3, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {2, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {1, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8}
 };
 
 static const ESGE_Anim _anim = {_frms, SDL_arraysize(_frms), -1};
@@ -86,6 +86,8 @@ ObjSpawnerEnemy::SetMaxFlyEnemy(void *obj, int value)
 #define DEATH_SND "sounds/enemy_death.wav"
 #define W 32
 #define H 64
+#define SPAWN_TM 1000
+#define DMG_TM 500
 
 ObjSpawnerEnemy::ObjSpawnerEnemy(void)
 {
@@ -107,6 +109,9 @@ ObjSpawnerEnemy::ObjSpawnerEnemy(void)
   animPlayer.GetSprite(&sprite);
 
   life = MAX_LIFE;
+
+  spawnDeltaTm = maxSpawnDeltaTm = SPAWN_TM;
+  dmgDeltaTm = maxDmgDeltaTm = DMG_TM;
 }
 ObjSpawnerEnemy::~ObjSpawnerEnemy(void)
 {
@@ -207,7 +212,7 @@ ObjSpawnerEnemy::OnUpdate(void)
   animPlayer.GetSprite(&sprite);
 }
 
-#define BLINK_T 16*4
+#define BLINK_T 16*2
 
 void
 ObjSpawnerEnemy::OnDraw(void)

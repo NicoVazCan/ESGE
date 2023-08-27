@@ -35,118 +35,118 @@ ESGE_TYPE_FIELDS(
 
 
 static const ESGE_Frm frmsStandR[] = {
-  {0, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*50},
-  {1, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*50},
-  {2, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*50},
-  {1, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*50}
+  {0, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*16},
+  {1, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*16},
+  {2, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*16},
+  {1, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*16}
 };
 
 static const ESGE_Frm frmsStandL[] = {
-  {0, 1, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*50},
-  {1, 1, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*50},
-  {2, 1, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*50},
-  {1, 1, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*50}
+  {0, 1, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*16},
+  {1, 1, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*16},
+  {2, 1, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*16},
+  {1, 1, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*16}
 };
 
 
 static const ESGE_Frm frmsStandUR[] = {
-  {0, 2, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*50},
-  {1, 2, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*50},
-  {2, 2, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*50},
-  {1, 2, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*50}
+  {0, 2, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*16},
+  {1, 2, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*16},
+  {2, 2, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*16},
+  {1, 2, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*16}
 };
 
 static const ESGE_Frm frmsStandUL[] = {
-  {0, 3, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*50},
-  {1, 3, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*50},
-  {2, 3, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*50},
-  {1, 3, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*50}
+  {0, 3, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*16},
+  {1, 3, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*16},
+  {2, 3, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*16},
+  {1, 3, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*16}
 };
 
 
 static const ESGE_Frm frmsRunR[] = {
-  {0, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
-  {1, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
-  {2, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
-  {3, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
-  {4, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
-  {5, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
-  {6, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
-  {7, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
-  {8, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
-  {9, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6}
+  {0, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*3},
+  {1, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*3},
+  {2, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*3},
+  {3, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*3},
+  {4, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*3},
+  {5, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*3},
+  {6, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*3},
+  {7, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*3},
+  {8, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*3},
+  {9, 4, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*3}
 };
 
 static const ESGE_Frm frmsRunL[] = {
-  {0, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
-  {1, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
-  {2, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
-  {3, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
-  {4, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
-  {5, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
-  {6, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
-  {7, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
-  {8, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6},
-  {9, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*6}
+  {0, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*3},
+  {1, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*3},
+  {2, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*3},
+  {3, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*3},
+  {4, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*3},
+  {5, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*3},
+  {6, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*3},
+  {7, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*3},
+  {8, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*3},
+  {9, 5, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*3}
 };
 
 
 static const ESGE_Frm frmsJmpR[] = {
-  {0, 6, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {1, 6, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {2, 6, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+  {0, 6, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {1, 6, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {2, 6, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
 };
 
 static const ESGE_Frm frmsJmpL[] = {
-  {0, 7, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {1, 7, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {2, 7, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+  {0, 7, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {1, 7, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {2, 7, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
 };
 
 
 static const ESGE_Frm frmsJmpUR[] = {
-  {0, 8, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {1, 8, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {2, 8, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+  {0, 8, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {1, 8, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {2, 8, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
 };
 
 static const ESGE_Frm frmsJmpUL[] = {
-  {0, 9, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {1, 9, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {2, 9, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+  {0, 9, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {1, 9, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {2, 9, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
 };
 
 
 static const ESGE_Frm frmsFallR[] = {
-  {0, 10, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {1, 10, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+  {0, 10, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {1, 10, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
 };
 
 static const ESGE_Frm frmsFallL[] = {
-  {0, 11, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {1, 11, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+  {0, 11, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {1, 11, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
 };
 
 
 static const ESGE_Frm frmsFallUR[] = {
-  {0, 12, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {1, 12, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+  {0, 12, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {1, 12, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
 };
 
 static const ESGE_Frm frmsFallUL[] = {
-  {0, 13, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
-  {1, 13, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*10},
+  {0, 13, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {1, 13, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
 };
 
 
 static const ESGE_Frm frmsDmgR[] = {
-  {0, 14, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*20},
-  {1, 14, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*40},
+  {0, 14, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {1, 14, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*16},
 };
 
 static const ESGE_Frm frmsDmgL[] = {
-  {0, 15, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*20},
-  {1, 15, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*40},
+  {0, 15, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {1, 15, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*16},
 };
 
 
@@ -156,25 +156,25 @@ static const ESGE_Frm frmsBall[] = {
 
 
 static const ESGE_Frm frmsBallR[] = {
-  {0, 16, 1., 45.,  {20, 36}, SDL_FLIP_NONE, 16*10},
-  {0, 16, 1., 90.,  {20, 36}, SDL_FLIP_NONE, 16*10},
-  {0, 16, 1., 135., {20, 36}, SDL_FLIP_NONE, 16*10},
-  {0, 16, 1., 180., {20, 36}, SDL_FLIP_NONE, 16*10},
-  {0, 16, 1., 225., {20, 36}, SDL_FLIP_NONE, 16*10},
-  {0, 16, 1., 270., {20, 36}, SDL_FLIP_NONE, 16*10},
-  {0, 16, 1., 315., {20, 36}, SDL_FLIP_NONE, 16*10},
-  {0, 16, 1., 360., {20, 36}, SDL_FLIP_NONE, 16*10},
+  {0, 16, 1., 45.,  {20, 36}, SDL_FLIP_NONE, 16*6},
+  {0, 16, 1., 90.,  {20, 36}, SDL_FLIP_NONE, 16*6},
+  {0, 16, 1., 135., {20, 36}, SDL_FLIP_NONE, 16*6},
+  {0, 16, 1., 180., {20, 36}, SDL_FLIP_NONE, 16*6},
+  {0, 16, 1., 225., {20, 36}, SDL_FLIP_NONE, 16*6},
+  {0, 16, 1., 270., {20, 36}, SDL_FLIP_NONE, 16*6},
+  {0, 16, 1., 315., {20, 36}, SDL_FLIP_NONE, 16*6},
+  {0, 16, 1., 360., {20, 36}, SDL_FLIP_NONE, 16*6},
 };
 
 static const ESGE_Frm frmsBallL[] = {
-  {0, 16, 1., -45.,  {20, 36}, SDL_FLIP_NONE, 16*10},
-  {0, 16, 1., -90.,  {20, 36}, SDL_FLIP_NONE, 16*10},
-  {0, 16, 1., -135., {20, 36}, SDL_FLIP_NONE, 16*10},
-  {0, 16, 1., -180., {20, 36}, SDL_FLIP_NONE, 16*10},
-  {0, 16, 1., -225., {20, 36}, SDL_FLIP_NONE, 16*10},
-  {0, 16, 1., -270., {20, 36}, SDL_FLIP_NONE, 16*10},
-  {0, 16, 1., -315., {20, 36}, SDL_FLIP_NONE, 16*10},
-  {0, 16, 1., -360., {20, 36}, SDL_FLIP_NONE, 16*10},
+  {0, 16, 1., -45.,  {20, 36}, SDL_FLIP_NONE, 16*6},
+  {0, 16, 1., -90.,  {20, 36}, SDL_FLIP_NONE, 16*6},
+  {0, 16, 1., -135., {20, 36}, SDL_FLIP_NONE, 16*6},
+  {0, 16, 1., -180., {20, 36}, SDL_FLIP_NONE, 16*6},
+  {0, 16, 1., -225., {20, 36}, SDL_FLIP_NONE, 16*6},
+  {0, 16, 1., -270., {20, 36}, SDL_FLIP_NONE, 16*6},
+  {0, 16, 1., -315., {20, 36}, SDL_FLIP_NONE, 16*6},
+  {0, 16, 1., -360., {20, 36}, SDL_FLIP_NONE, 16*6},
 };
 
 
@@ -258,7 +258,7 @@ ObjPlayer::SetPosY(void *obj, int value)
 }
 
 
-#define JMP (((int)ESGE_deltaTm) * 0x0280 / 16)
+#define JMP (((int)ESGE_deltaTm) * 0x03A0 / 16)
 
 void
 ObjPlayer::Jump(void)
@@ -493,7 +493,22 @@ ObjPlayer::UpdateLifeUI(void)
 
   SDL_snprintf(uiStr, UI_STR_LEN, "life: %d", life);
   
-  ObjText::SetStr(uiText, uiStr);
+  ObjText::SetStr(lifeText, uiStr);
+}
+
+void
+ObjPlayer::UpdateFPSUI(void)
+{
+  char uiStr[UI_STR_LEN];
+
+  SDL_snprintf(
+    uiStr,
+    UI_STR_LEN,
+    "fps: %d",
+    ESGE_realDeltaTm > 0 ? 1000/ESGE_realDeltaTm : -1
+  );
+  
+  ObjText::SetStr(fpsText, uiStr);
 }
 
 #define JMP_SND "sounds/jump.wav"
@@ -503,8 +518,7 @@ ObjPlayer::UpdateLifeUI(void)
 #define PU_SND "sounds/power_up.wav"
 #define SS "sprites/player.sprite.bin"
 #define MAX_LIFE 99
-#define UI_POS_X 4
-#define UI_POS_Y 4
+#define DMG_TM 1000
 
 
 ObjPlayer::ObjPlayer(void)
@@ -521,23 +535,24 @@ ObjPlayer::ObjPlayer(void)
 
   animPlayer.sprts = spritesheet;
   animPlayer.speed = 100;
-
-  facingR = true;
-  inGround = true;
-  aimingUp = false;
-  lockedBall = true;
-  ball = false;
-
   animPlayer.Start(anims + STAND_R);
   animPlayer.GetSprite(&sprite);
 
-  going = STAND;
 
   jmpSnd = ESGE_FileMngr<ESGE_Sound>::Watch(JMP_SND);
   shotSnd = ESGE_FileMngr<ESGE_Sound>::Watch(SHOT_SND);
   dmgSnd = ESGE_FileMngr<ESGE_Sound>::Watch(DMG_SND);
   healSnd = ESGE_FileMngr<ESGE_Sound>::Watch(HEAL_SND);
   puSnd = ESGE_FileMngr<ESGE_Sound>::Watch(PU_SND);
+
+  going = STAND;
+  facingR = true;
+  inGround = true;
+  aimingUp = false;
+  lockedBall = true;
+  ball = false;
+
+  dmgDeltaTm = maxDmgDeltaTm = DMG_TM;
 }
 
 ObjPlayer::~ObjPlayer(void)
@@ -550,19 +565,31 @@ ObjPlayer::~ObjPlayer(void)
   ESGE_FileMngr<ESGE_Sound>::Leave(puSnd);
 }
 
+#define LIFE_POS_X 4
+#define LIFE_POS_Y 4
+#define FPS_POS_X 4
+#define FPS_POS_Y 4+8
+
 void
 ObjPlayer::OnInit(void)
 {
-  uiText = Create("ObjText");
+  lifeText = Create("ObjText");
 
-  ObjText::SetPosX(uiText, UI_POS_X);
-  ObjText::SetPosY(uiText, UI_POS_Y);
+  ObjText::SetPosX(lifeText, LIFE_POS_X);
+  ObjText::SetPosY(lifeText, LIFE_POS_Y);
   UpdateLifeUI();
+
+  fpsText = Create("ObjText");
+
+  ObjText::SetPosX(fpsText, FPS_POS_X);
+  ObjText::SetPosY(fpsText, FPS_POS_Y);
+  UpdateFPSUI();
 }
 void
 ObjPlayer::OnQuit(void)
 {
-  uiText->Destroy();
+  lifeText->Destroy();
+  fpsText->Destroy();
 }
 
 void
@@ -651,6 +678,52 @@ ObjPlayer::OnKeyUp(SDL_Keycode key, SDL_UNUSED SDL_Keymod mod)
   }
 }
 
+#define X_AXIS 0
+#define Y_AXIS 1
+#define X_DEAD_ZONE (SDL_JOYSTICK_AXIS_MAX/2)
+#define Y_DEAD_ZONE (SDL_JOYSTICK_AXIS_MAX/2)
+
+void
+ObjPlayer::OnJoyAxis(Uint8 axis, Sint16 value)
+{
+  switch (axis)
+  {
+  case X_AXIS:
+    if (value > X_DEAD_ZONE)
+    {
+      GoRight();
+    }
+    else if (value < -X_DEAD_ZONE)
+    {
+      GoLeft();
+    }
+    else
+    {
+      StopGoRight();
+      StopGoLeft();
+    }
+    break;
+
+  case Y_AXIS:
+    if (value > Y_DEAD_ZONE)
+    {
+      Ball();
+    }
+    else if (value < -Y_DEAD_ZONE)
+    {
+      AimUp();
+    }
+    else
+    {
+      StopAimUp();
+    }
+    break;
+
+  default:
+    break;
+  }
+}
+
 void
 ObjPlayer::OnJoyHat(SDL_UNUSED Uint8 hat, Uint8 value)
 {
@@ -728,11 +801,11 @@ ObjPlayer::OnJoyButtonUp(Uint8 button)
 }
 
 #define ACC ( \
-  ((int)(ESGE_deltaTm * ESGE_deltaTm)) * 0x0020 / 256 \
+  ((int)(ESGE_deltaTm * ESGE_deltaTm)) * 0x0040 / 256 \
 )
-#define VEL (((int)ESGE_deltaTm) * 0x0140 / 16)
+#define VEL (((int)ESGE_deltaTm) * 0x0280 / 16)
 #define GRA ( \
-  ((int)(ESGE_deltaTm * ESGE_deltaTm)) * 0x0010 / 256 \
+  ((int)(ESGE_deltaTm * ESGE_deltaTm)) * 0x0020 / 256 \
 )
 #define ROUND(T, S, N) ( \
   ((N + (1<<(S-1)) + (N>>(sizeof(T)*8-1))) & (~((1<<S)-1))) >> S \
@@ -742,15 +815,28 @@ ObjPlayer::OnJoyButtonUp(Uint8 button)
 void
 ObjPlayer::OnUpdate(void)
 {
-  inGround = IsInGround();
+  UpdateFPSUI();
 
-  if (fVel.y + fAcc.y >= JMP)
+  if (fVel.y >= 0)
   {
-    fAcc.y = 0;
-    fVel.y = JMP;
+    if ((inGround = IsInGround()))
+    {
+      fAcc.y = 0;
+      fVel.y = 0;
+    }
+    else fAcc.y = GRA;
   }
-  else fAcc.y = GRA;
+  else
+  {
+    inGround = false;
 
+    if (fVel.y + GRA >= JMP)
+    {
+      fAcc.y = 0;
+      fVel.y = JMP;
+    }
+    else fAcc.y = GRA;
+  }
 
   if (dmgDeltaTm < maxDmgDeltaTm)
   {
@@ -1044,7 +1130,7 @@ ObjPlayer::OnCollide(ESGE_ObjCollider *other)
   }
 }
 
-#define BLINK_T 16*4
+#define BLINK_T 16*2
 
 void
 ObjPlayer::OnDraw(void)

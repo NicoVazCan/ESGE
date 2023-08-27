@@ -23,14 +23,14 @@ class ObjSpawnerEnemy:
   ESGE_Spritesheet *spritesheet;
   ESGE_AnimPlayer animPlayer;
 
-  Uint32 spawnDeltaTm = 2000;
-  Uint32 maxSpawnDeltaTm = 2000;
+  Uint32 spawnDeltaTm;
+  Uint32 maxSpawnDeltaTm;
   int maxFlyEnemy = 8;
 
   ESGE_Sound *dmgSnd, *deathSnd;
 
-  Uint32 dmgDeltaTm = 1000;
-  Uint32 maxDmgDeltaTm = 1000;
+  Uint32 dmgDeltaTm;
+  Uint32 maxDmgDeltaTm;
 
   ObjPlayer *player;
 

@@ -30,8 +30,8 @@ class ObjFlyEnemy:
 
   ESGE_Sound *dmgSnd, *deathSnd;
 
-  Uint32 dmgDeltaTm = 1000;
-  Uint32 maxDmgDeltaTm = 1000;
+  Uint32 dmgDeltaTm;
+  Uint32 maxDmgDeltaTm;
 
 public:
   static int GetPosX(void *obj);

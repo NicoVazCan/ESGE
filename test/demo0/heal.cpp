@@ -11,10 +11,10 @@
 
 
 static const ESGE_Frm _frms[] = {
-  {0, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*20},
-  {1, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*20},
-  {2, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*20},
-  {3, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*20}
+  {0, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {1, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {2, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8},
+  {3, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*8}
 };
 
 static const ESGE_Anim _anim = {
@@ -82,7 +82,7 @@ public:
 #define HEAL 5
 #define W 8
 #define H 8
-#define MAX_TM 10000
+#define MAX_TM 5000
 
   virtual void OnUpdate(void) override
   {

@@ -31,23 +31,23 @@ ESGE_TYPE_FIELDS(
 )
 
 static const ESGE_Frm _frmsR[] = {
-  {0, 0, 1., 0., {8, 4}, SDL_FLIP_NONE, 16*8},
-  {1, 0, 1., 0., {8, 4}, SDL_FLIP_NONE, 16*8}
+  {0, 0, 1., 0., {8, 4}, SDL_FLIP_NONE, 16*3},
+  {1, 0, 1., 0., {8, 4}, SDL_FLIP_NONE, 16*3}
 };
 
 static const ESGE_Frm _frmsL[] = {
-  {0, 0, 1., 180., {8, 4}, SDL_FLIP_NONE, 16*8},
-  {1, 0, 1., 180., {8, 4}, SDL_FLIP_NONE, 16*8}
+  {0, 0, 1., 180., {8, 4}, SDL_FLIP_NONE, 16*3},
+  {1, 0, 1., 180., {8, 4}, SDL_FLIP_NONE, 16*3}
 };
 
 static const ESGE_Frm _frmsD[] = {
-  {0, 0, 1., 90., {8, 4}, SDL_FLIP_NONE, 16*8},
-  {1, 0, 1., 90., {8, 4}, SDL_FLIP_NONE, 16*8}
+  {0, 0, 1., 90., {8, 4}, SDL_FLIP_NONE, 16*3},
+  {1, 0, 1., 90., {8, 4}, SDL_FLIP_NONE, 16*3}
 };
 
 static const ESGE_Frm _frmsU[] = {
-  {0, 0, 1., 270., {8, 4}, SDL_FLIP_NONE, 16*8},
-  {1, 0, 1., 270., {8, 4}, SDL_FLIP_NONE, 16*8}
+  {0, 0, 1., 270., {8, 4}, SDL_FLIP_NONE, 16*3},
+  {1, 0, 1., 270., {8, 4}, SDL_FLIP_NONE, 16*3}
 };
 
 static const ESGE_Anim _anims[] = {
@@ -88,7 +88,7 @@ ObjBeam::SetPosY(void *obj, int value)
   ((ObjBeam*)obj)->iPos.y = value;
 }
 
-#define VEL (((int)ESGE_deltaTm) * 0x0200 / 16)
+#define VEL (((int)ESGE_deltaTm) * 0x0400 / 16)
 
 int
 ObjBeam::GetDir(void *obj)

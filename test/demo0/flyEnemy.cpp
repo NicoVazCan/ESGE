@@ -27,12 +27,12 @@ ESGE_TYPE_FIELDS(
 )
 
 static const ESGE_Frm _frms[] = {
-  {0, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*4},
-  {1, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*4},
-  {2, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*4},
-  {3, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*4},
-  {2, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*4},
-  {1, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*4}
+  {0, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*3},
+  {1, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*3},
+  {2, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*3},
+  {3, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*3},
+  {2, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*3},
+  {1, 0, 1., 0., {0, 0}, SDL_FLIP_NONE, 16*3}
 };
 
 static const ESGE_Anim _anim = {
@@ -74,6 +74,7 @@ ObjFlyEnemy::SetPosY(void *obj, int value)
 #define DEATH_SND "sounds/enemy_death.wav"
 #define W 16
 #define H 8
+#define DMG_TM 500
 
 ObjFlyEnemy::ObjFlyEnemy(void)
 {
@@ -95,6 +96,8 @@ ObjFlyEnemy::ObjFlyEnemy(void)
   animPlayer.speed = 100;
   animPlayer.Start(&_anim);
   animPlayer.GetSprite(&sprite);
+
+  dmgDeltaTm = maxDmgDeltaTm = DMG_TM;
 }
 ObjFlyEnemy::~ObjFlyEnemy(void)
 {
@@ -112,14 +115,14 @@ ObjFlyEnemy::OnStart(void)
 
 #define FOCUS_RANGE 128
 #define ACC ( \
-  ((int)(ESGE_deltaTm * ESGE_deltaTm)) * 0x0004 / 256 \
+  ((int)(ESGE_deltaTm * ESGE_deltaTm)) * 0x0008 / 256 \
 )
-#define VEL (((int)ESGE_deltaTm) * 0x0080 / 16)
+#define VEL (((int)ESGE_deltaTm) * 0x0100 / 16)
 #define ROUND(T, S, N) ( \
   ((N + (1<<(S-1)) + (N>>(sizeof(T)*8-1))) & (~((1<<S)-1))) >> S \
 )
 #define DMG 10
-#define HEAL_PROB 50
+#define HEAL_PROB 25
 
 void
 ObjFlyEnemy::OnUpdate(void)
@@ -270,7 +273,7 @@ ObjFlyEnemy::OnUpdate(void)
   animPlayer.GetSprite(&sprite);
 }
 
-#define BLINK_T 16*4
+#define BLINK_T 16*2
 
 void
 ObjFlyEnemy::OnDraw(void)

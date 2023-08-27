@@ -35,14 +35,14 @@ class ObjPlayer:
   ObjRoomMngr *roomMngr;
   ObjCamMngr *camMngr;
 
-  ESGE_ObjScene *uiText;
+  ESGE_ObjScene *lifeText, *fpsText;
 
   ESGE_Spritesheet *spritesheet;
   ESGE_AnimPlayer animPlayer;
   ESGE_Sound *jmpSnd, *shotSnd, *dmgSnd, *healSnd, *puSnd;
 
-  Uint32 dmgDeltaTm = 4000;
-  Uint32 maxDmgDeltaTm = 4000;
+  Uint32 dmgDeltaTm;
+  Uint32 maxDmgDeltaTm;
 
   bool facingR, inGround, aimingUp, lockedBall, ball;
   enum {STAND, RIGHT, LEFT} going;
@@ -70,6 +70,7 @@ class ObjPlayer:
   bool IsCeilAbove(void);
 
   void UpdateLifeUI(void);
+  void UpdateFPSUI(void);
 
 public:
   static int GetPosX(void *obj);
@@ -89,6 +90,7 @@ public:
   virtual void OnKeyDown(SDL_Keycode key, SDL_Keymod mod);
   virtual void OnKeyUp(SDL_Keycode key, SDL_Keymod mod);
 
+  virtual void OnJoyAxis(Uint8 axis, Sint16 value);
   virtual void OnJoyHat(Uint8 hat, Uint8 value);
   virtual void OnJoyButtonDown(Uint8 button);
   virtual void OnJoyButtonUp(Uint8 button);

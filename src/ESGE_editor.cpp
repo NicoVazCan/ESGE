@@ -432,17 +432,19 @@ main(int argc, char *argv[])
 
 	ESGE_SceneMngr::Update();
 	shell = SDL_CreateThread(RunShell, "shell", NULL);
-	ticks = SDL_GetTicks();
 
 	while (run)
 	{
+		ticks = SDL_GetTicks();
+
 		SDL_PumpEvents();
 		UpdateEditor();
 		ESGE_SceneMngr::Update();
 		ESGE_ObjDraw::Draw();
 		ESGE_Display::Update();
 
-		ticks += ESGE_realDeltaTm = SDL_GetTicks() - ticks;
+		ESGE_realDeltaTm = SDL_GetTicks() - ticks;
+		
   	if (ESGE_realDeltaTm < ESGE_deltaTm)
   		SDL_Delay(ESGE_deltaTm - ESGE_realDeltaTm);
 	}

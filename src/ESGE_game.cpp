@@ -79,10 +79,10 @@ main(int argc, const char *argv[])
 	ESGE_SceneMngr::Init(nDisabledScene);
 	ESGE_SceneMngr::AddScene(sceneFile);
 
-	ticks = SDL_GetTicks();
-
 	for (;;)
 	{
+		ticks = SDL_GetTicks();
+
 		ESGE_EventLoop();
 		if (ESGE_quit) break;
 
@@ -93,7 +93,8 @@ main(int argc, const char *argv[])
 
 		ESGE_Display::Update();
 
-		ticks += ESGE_realDeltaTm = SDL_GetTicks() - ticks;
+		ESGE_realDeltaTm = SDL_GetTicks() - ticks;
+
   	if (ESGE_realDeltaTm < ESGE_deltaTm)
   		SDL_Delay(ESGE_deltaTm - ESGE_realDeltaTm);
 	}
