@@ -26,8 +26,6 @@ class ObjFlyEnemy:
   ESGE_Spritesheet *spritesheet;
   ESGE_AnimPlayer animPlayer;
 
-  ObjPlayer *player;
-
   ESGE_Sound *dmgSnd, *deathSnd;
 
   Uint32 dmgDeltaTm;
@@ -42,8 +40,6 @@ public:
 
   ObjFlyEnemy(void);
   virtual ~ObjFlyEnemy(void) override;
-
-  virtual void OnStart(void) override;
 
   virtual void OnUpdate(void) override;
 

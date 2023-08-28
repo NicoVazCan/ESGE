@@ -31,7 +31,6 @@ class ObjHeal:
 {
   ESGE_Spritesheet *spritesheet;
   ESGE_AnimPlayer animPlayer;
-  ObjPlayer *player;
 
   Uint32 existingTm;
 
@@ -74,11 +73,6 @@ public:
     ESGE_FileMngr<ESGE_Spritesheet>::Leave(spritesheet);
   }
 
-  virtual void OnStart(void) override
-  {
-    SDL_assert((player = ESGE_GetObj<ObjPlayer>("ObjPlayer")));
-  }
-
 #define HEAL 5
 #define W 8
 #define H 8
@@ -92,22 +86,27 @@ public:
     }
     else
     {
-      SDL_Rect playerHitBox, triggerBox;
+      ObjPlayer *player;
 
-      playerHitBox = player->ESGE_ObjDynamic::GetBox();
-
-      triggerBox.x = pos.x;
-      triggerBox.y = pos.y;
-      triggerBox.w = W;
-      triggerBox.h = H;
-
-      if (SDL_HasIntersection(&playerHitBox, &triggerBox))
-      {
-        player->Heal(HEAL);
-        Destroy();
-      }
-      
       existingTm += ESGE_deltaTm;
+
+      if ((player = ESGE_GetObj<ObjPlayer>("ObjPlayer")))
+      {
+        SDL_Rect playerHitBox, triggerBox;
+
+        playerHitBox = player->ESGE_ObjDynamic::GetBox();
+
+        triggerBox.x = pos.x;
+        triggerBox.y = pos.y;
+        triggerBox.w = W;
+        triggerBox.h = H;
+
+        if (SDL_HasIntersection(&playerHitBox, &triggerBox))
+        {
+          player->Heal(HEAL);
+          Destroy();
+        }
+      }
     }
 
     animPlayer.Update(ESGE_deltaTm);

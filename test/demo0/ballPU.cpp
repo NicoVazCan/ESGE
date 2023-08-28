@@ -34,7 +34,6 @@ class ObjBallPU:
 {
   ESGE_Spritesheet *spritesheet;
   ESGE_AnimPlayer animPlayer;
-  ObjPlayer *player;
 
 public:
   static int GetCol(void *obj)
@@ -73,26 +72,26 @@ public:
     ESGE_FileMngr<ESGE_Spritesheet>::Leave(spritesheet);
   }
 
-  virtual void OnStart(void) override
-  {
-    SDL_assert((player = ESGE_GetObj<ObjPlayer>("ObjPlayer")));
-  }
-
   virtual void OnUpdate(void) override
   {
-    SDL_Rect playerHitBox, triggerBox;
+    ObjPlayer *player;
 
-    playerHitBox = player->ESGE_ObjDynamic::GetBox();
-
-    triggerBox.x = pos.x;
-    triggerBox.y = pos.y;
-    triggerBox.w = cellW;
-    triggerBox.h = cellH;
-
-    if (SDL_HasIntersection(&playerHitBox, &triggerBox))
+    if ((player = ESGE_GetObj<ObjPlayer>("ObjPlayer")))
     {
-      player->UnlockBall();
-      Destroy();
+      SDL_Rect playerHitBox, triggerBox;
+
+      playerHitBox = player->ESGE_ObjDynamic::GetBox();
+
+      triggerBox.x = pos.x;
+      triggerBox.y = pos.y;
+      triggerBox.w = cellW;
+      triggerBox.h = cellH;
+
+      if (SDL_HasIntersection(&playerHitBox, &triggerBox))
+      {
+        player->UnlockBall();
+        Destroy();
+      }
     }
 
     animPlayer.Update(ESGE_deltaTm);

@@ -2,8 +2,8 @@
 
 #include "ESGE_display.h"
 
-#define FOCUS_W (256+16*2)
-#define FOCUS_H (144+16*2)
+#define FOCUS_W (16*3)
+#define FOCUS_H (16*4)
 
 
 static Room _rooms[] = {
@@ -20,10 +20,20 @@ ObjRoomMngr::LoadRooms(void)
   {
     if (SDL_HasIntersection(&rooms[i].area, &focus))
     {
+      SDL_Point center;
+
       if (!rooms[i].loaded)
       {
         ESGE_SceneMngr::AddScene(rooms[i].sceneFile);
         rooms[i].loaded = true;
+      }
+
+      center.x = focus.x + focus.w / 2;
+      center.y = focus.y + focus.h / 2;
+
+      if (SDL_PointInRect(&center, &rooms[i].area))
+      {
+        ESGE_SceneMngr::SetActiveScene(rooms[i].sceneFile);
       }
     }
     else

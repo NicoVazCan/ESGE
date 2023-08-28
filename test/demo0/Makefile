@@ -1,7 +1,7 @@
 PLATFORM_NAME = rpi
 PLATFORM_VER  = 1
 #rpi
-BUILD    			= release
+BUILD    			= debug
 #debug
 #release
 

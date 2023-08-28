@@ -32,8 +32,6 @@ class ObjSpawnerEnemy:
   Uint32 dmgDeltaTm;
   Uint32 maxDmgDeltaTm;
 
-  ObjPlayer *player;
-
 public:
   static int GetCol(void *obj);
   static void SetCol(void *obj, int value);
@@ -46,8 +44,6 @@ public:
 
   ObjSpawnerEnemy(void);
   virtual ~ObjSpawnerEnemy(void);
-
-  virtual void OnStart(void) override;
 
   virtual void OnUpdate(void) override;
 

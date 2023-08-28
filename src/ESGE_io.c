@@ -109,8 +109,17 @@ ESGE_ReadStr(SDL_RWops *io, char *str, size_t n)
 
   SDL_assert(str);
   c = str;
-  for (; n > 0 && (*c++ = ESGE_ReadU8(io)) != '\0'; --n);
-  for (; n > 0; --n) *c++ = '\0';
+  
+  while (n > 0)
+  {
+    n--;
+    if ((*c++ = ESGE_ReadU8(io)) == '\0') break;
+  }
+  while (n > 0)
+  {
+    n--;
+    *c++ = '\0';
+  }
 
   return str;
 }

@@ -32,12 +32,11 @@ CmdAdd(ESGE_Scene *scene, const char *delim, char **saveptr)
 	else
 	{
 		char *fieldName, *fieldValue;
-		
+
 		while ((fieldName = SDL_strtokr(NULL, delim, saveptr)))
 		{
 			const ESGE_Type *type;
-			const ESGE_Field *field = NULL;
-			Uint64 fieldID;
+			const ESGE_Field *field;
 
 			if (!(fieldValue = SDL_strtokr(NULL, delim, saveptr)))
 			{
@@ -45,20 +44,16 @@ CmdAdd(ESGE_Scene *scene, const char *delim, char **saveptr)
 				break;
 			}
 
-			type 		= ESGE_Type::Get(obj->typeID);
-			fieldID = ESGE_Hash(fieldName);
+			SDL_assert(type = ESGE_Type::Get(obj->typeID));
 
-			for (size_t i = 0; i < type->nFields; ++i)
+			if (!(field = type->GetField(fieldName)))
 			{
-				if (type->fields[i].id == fieldID)
-				{
-					field = type->fields + i;
-					break;
-				}
+				printf("Field \"%s\" not found\n", fieldName);
 			}
-
-			if (field) field->SetValue(obj, fieldValue);
-			else 			 printf("Field \"%s\" not found\n", fieldName);
+			else
+			{
+				field->SetValue(obj, fieldValue);
+			}
 		}
 	}
 }

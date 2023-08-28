@@ -107,12 +107,6 @@ ObjFlyEnemy::~ObjFlyEnemy(void)
   ESGE_FileMngr<ESGE_Sound>::Leave(deathSnd);
 }
 
-void
-ObjFlyEnemy::OnStart(void)
-{
-  SDL_assert((player = ESGE_GetObj<ObjPlayer>("ObjPlayer")));
-}
-
 #define FOCUS_RANGE 128
 #define ACC ( \
   ((int)(ESGE_deltaTm * ESGE_deltaTm)) * 0x0008 / 256 \
@@ -157,107 +151,112 @@ ObjFlyEnemy::OnUpdate(void)
     }
     else
     {
-      SDL_Rect playerHitBox, atkBox;
+      ObjPlayer *player;
 
-      playerHitBox = player->ObjAlive::GetBox();
-      atkBox = ObjAlive::GetBox();
-
-      if (SDL_HasIntersection(&playerHitBox, &atkBox))
+      if ((player = ESGE_GetObj<ObjPlayer>("ObjPlayer")))
       {
-        player->OnAttack(DMG);
-      }
+        SDL_Rect playerHitBox, atkBox;
 
-      if (
-        SDL_abs(player->pos.x - pos.x) <= FOCUS_RANGE &&
-        SDL_abs(player->pos.y - pos.y) <= FOCUS_RANGE
-      )
-      {
-        if (player->pos.x > pos.x)
+        playerHitBox = player->ObjAlive::GetBox();
+        atkBox = ObjAlive::GetBox();
+
+        if (SDL_HasIntersection(&playerHitBox, &atkBox))
         {
-          if (fVel.x + ACC >= VEL)
-          {
-            fAcc.x = 0;
-            fVel.x = VEL;
-          }
-          else fAcc.x = ACC;
-        }
-        else if (player->pos.x < pos.x)
-        {
-          if (fVel.x - ACC <= -VEL)
-          {
-            fAcc.x = 0;
-            fVel.x = -VEL;
-          }
-          else fAcc.x = -ACC;
+          player->OnAttack(DMG);
         }
 
-        if (player->pos.y > pos.y)
+        if (
+          SDL_abs(player->pos.x - pos.x) <= FOCUS_RANGE &&
+          SDL_abs(player->pos.y - pos.y) <= FOCUS_RANGE
+        )
         {
-          if (fVel.y + ACC >= VEL)
+          if (player->pos.x > pos.x)
           {
-            fAcc.y = 0;
-            fVel.y = VEL;
+            if (fVel.x + ACC >= VEL)
+            {
+              fAcc.x = 0;
+              fVel.x = VEL;
+            }
+            else fAcc.x = ACC;
           }
-          else fAcc.y = ACC;
-        }
-        else if (player->pos.y < pos.y)
-        {
-          if (fVel.y - ACC <= -VEL)
+          else if (player->pos.x < pos.x)
           {
-            fAcc.y = 0;
-            fVel.y = -VEL;
+            if (fVel.x - ACC <= -VEL)
+            {
+              fAcc.x = 0;
+              fVel.x = -VEL;
+            }
+            else fAcc.x = -ACC;
           }
-          else fAcc.y = -ACC;
+
+          if (player->pos.y > pos.y)
+          {
+            if (fVel.y + ACC >= VEL)
+            {
+              fAcc.y = 0;
+              fVel.y = VEL;
+            }
+            else fAcc.y = ACC;
+          }
+          else if (player->pos.y < pos.y)
+          {
+            if (fVel.y - ACC <= -VEL)
+            {
+              fAcc.y = 0;
+              fVel.y = -VEL;
+            }
+            else fAcc.y = -ACC;
+          }
         }
-      }
-      else
-      {
-        if (fVel.x > 0)
+        else
         {
-          if (fVel.x - ACC <= 0)
+          if (fVel.x > 0)
+          {
+            if (fVel.x - ACC <= 0)
+            {
+              fAcc.x = 0;
+              fVel.x = 0;
+            }
+            else fAcc.x = -ACC;
+          }
+          else if (fVel.x < 0)
+          {
+            if (fVel.x + ACC >= 0)
+            {
+              fAcc.x = 0;
+              fVel.x = 0;
+            }
+            else fAcc.x = ACC;
+          }
+          else
           {
             fAcc.x = 0;
             fVel.x = 0;
           }
-          else fAcc.x = -ACC;
-        }
-        else if (fVel.x < 0)
-        {
-          if (fVel.x + ACC >= 0)
-          {
-            fAcc.x = 0;
-            fVel.x = 0;
-          }
-          else fAcc.x = ACC;
-        }
-        else
-        {
-          fAcc.x = 0;
-          fVel.x = 0;
-        }
 
-        if (fVel.y > 0)
-        {
-          if (fVel.y - ACC <= 0)
+          if (fVel.y > 0)
+          {
+            if (fVel.y - ACC <= 0)
+            {
+              fAcc.y = 0;
+              fVel.y = 0;
+            }
+            else fAcc.y = -ACC;
+          }
+          else if (fVel.y < 0)
+          {
+            if (fVel.y + ACC >= 0)
+            {
+              fAcc.y = 0;
+              fVel.y = 0;
+            }
+            else fAcc.y = ACC;
+          }
+          else
           {
             fAcc.y = 0;
             fVel.y = 0;
           }
-          else fAcc.y = -ACC;
-        }
-        else if (fVel.y < 0)
-        {
-          if (fVel.y + ACC >= 0)
-          {
-            fAcc.y = 0;
-            fVel.y = 0;
-          }
-          else fAcc.y = ACC;
-        }
-        else
-        {
-          fAcc.y = 0;
-          fVel.y = 0;
         }
       }
       

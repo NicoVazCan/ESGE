@@ -12,12 +12,12 @@ class ObjBgnd: public ESGE_ObjScene, public ESGE_ObjDrawSprite
   ESGE_Spritesheet *spritesheet;
 
 public:
-  virtual void OnInit(void) override
+  ObjBgnd(void)
   {
     spritesheet = ESGE_FileMngr<ESGE_Spritesheet>::Watch(BGRND_SS);
     spritesheet->GetSprite(&sprite, 0, 0);
   }
-  virtual void OnQuit(void) override
+  ~ObjBgnd(void)
   {
     ESGE_FileMngr<ESGE_Spritesheet>::Leave(spritesheet);
   }

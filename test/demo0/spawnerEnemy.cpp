@@ -121,12 +121,6 @@ ObjSpawnerEnemy::~ObjSpawnerEnemy(void)
   ESGE_FileMngr<ESGE_Sound>::Leave(deathSnd);
 }
 
-void
-ObjSpawnerEnemy::OnStart(void)
-{
-  SDL_assert((player = ESGE_GetObj<ObjPlayer>("ObjPlayer")));
-}
-
 #define SPAWN_OFFSET_H 16
 #define SPAWN_OFFSET_V 32
 #define FOCUS_RANGE 80
@@ -169,39 +163,44 @@ ObjSpawnerEnemy::OnUpdate(void)
     }
     else
     {
-      SDL_Rect playerHitBox, atkBox;
+      ObjPlayer *player;
 
-      playerHitBox = player->ObjAlive::GetBox();
-      atkBox = ObjAlive::GetBox();
-
-      if (SDL_HasIntersection(&playerHitBox, &atkBox))
+      if ((player = ESGE_GetObj<ObjPlayer>("ObjPlayer")))
       {
-        player->OnAttack(DMG);
-      }
+        SDL_Rect playerHitBox, atkBox;
 
-      if (
-        SDL_abs(player->pos.x - pos.x) <= FOCUS_RANGE &&
-        SDL_abs(player->pos.y - pos.y) <= FOCUS_RANGE
-      )
-      {
-        if (spawnDeltaTm >= maxSpawnDeltaTm)
+        playerHitBox = player->ObjAlive::GetBox();
+        atkBox = ObjAlive::GetBox();
+
+        if (SDL_HasIntersection(&playerHitBox, &atkBox))
         {
-          ESGE_ObjScene *fly;
-          int nFly = 0;
+          player->OnAttack(DMG);
+        }
 
-          for (
-            ESGE_ObjScene *obj = ESGE_GetSharedList<ObjFlyEnemy>();
-            obj;
-            obj = obj->nextShared
-          )
-            nFly++;
-
-          if (nFly < maxFlyEnemy)
+        if (
+          SDL_abs(player->pos.x - pos.x) <= FOCUS_RANGE &&
+          SDL_abs(player->pos.y - pos.y) <= FOCUS_RANGE
+        )
+        {
+          if (spawnDeltaTm >= maxSpawnDeltaTm)
           {
-            spawnDeltaTm = 0;
-            fly = Create("ObjFlyEnemy");
-            ObjFlyEnemy::SetPosX(fly, pos.x + SPAWN_OFFSET_H);
-            ObjFlyEnemy::SetPosY(fly, pos.y + SPAWN_OFFSET_V);
+            ESGE_ObjScene *fly;
+            int nFly = 0;
+
+            for (
+              ESGE_ObjScene *obj = ESGE_GetSharedList<ObjFlyEnemy>();
+              obj;
+              obj = obj->nextShared
+            )
+              nFly++;
+
+            if (nFly < maxFlyEnemy)
+            {
+              spawnDeltaTm = 0;
+              fly = Create("ObjFlyEnemy");
+              ObjFlyEnemy::SetPosX(fly, pos.x + SPAWN_OFFSET_H);
+              ObjFlyEnemy::SetPosY(fly, pos.y + SPAWN_OFFSET_V);
+            }
           }
         }
       }

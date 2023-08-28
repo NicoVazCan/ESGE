@@ -285,6 +285,9 @@ ObjPlayer::StopJump(void)
 void
 ObjPlayer::GoRight(void)
 {
+  if (inGround)
+    aimingUp = false;
+
   going = RIGHT;
 }
 void
@@ -296,6 +299,9 @@ ObjPlayer::StopGoRight(void)
 void
 ObjPlayer::GoLeft(void)
 {
+  if (inGround)
+    aimingUp = false;
+  
   going = LEFT;
 }
 void
@@ -307,7 +313,8 @@ ObjPlayer::StopGoLeft(void)
 void
 ObjPlayer::AimUp(void)
 {
-  aimingUp = true;
+  if (going == STAND || !inGround)
+    aimingUp = true;
 
   if (!lockedBall && !IsCeilAbove())
   {
