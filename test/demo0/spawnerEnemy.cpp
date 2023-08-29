@@ -14,17 +14,14 @@
 ESGE_TYPE_FIELDS(
   ObjSpawnerEnemy,
   ESGE_FIELD(
-    I,
     col,
     ObjSpawnerEnemy::GetCol,
     ObjSpawnerEnemy::SetCol,
     ESGE_FIELD(
-      I,
       row,
       ObjSpawnerEnemy::GetRow,
       ObjSpawnerEnemy::SetRow,
       ESGE_FIELD(
-        I,
         maxFlyEnemy,
         ObjSpawnerEnemy::GetMaxFlyEnemy,
         ObjSpawnerEnemy::SetMaxFlyEnemy,

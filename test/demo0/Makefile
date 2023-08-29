@@ -1,5 +1,5 @@
-PLATFORM_NAME = rpi
-PLATFORM_VER  = 1
+PLATFORM_NAME =
+PLATFORM_VER  =
 #rpi
 BUILD    			= debug
 #debug
@@ -7,15 +7,15 @@ BUILD    			= debug
 
 ifeq ($(PLATFORM_NAME), rpi)
 	ifeq (		 $(PLATFORM_VER), 1)
-		CFLAGS += -mcpu=arm1176jzf-s \
+		RPI_FLAGS = -mcpu=arm1176jzf-s \
 			-mfloat-abi=hard \
 			-mfpu=vfp 
 	else ifeq ($(PLATFORM_VER), 2)
-		CFLAGS += -mcpu=cortex-a7 \
+		RPI_FLAGS = -mcpu=cortex-a7 \
 			-mfloat-abi=hard \
 			-mfpu=neon-vfpv4
 	else ifeq ($(PLATFORM_VER), 3)
-		CFLAGS += -mcpu=cortex-a53 \
+		RPI_FLAGS = -mcpu=cortex-a53 \
 			-mfloat-abi=hard \
 			-mfpu=neon-fp-armv8 \
 			-mneon-for-64bits
@@ -23,11 +23,14 @@ ifeq ($(PLATFORM_NAME), rpi)
 
 	SYSROOT = /media/nico/rootfs
 
-	CFLAGS += \
+	RPI_FLAGS += \
 		-I$(SYSROOT)/opt/vc/include \
 		-I$(SYSROOT)/usr/include \
 		-I$(SYSROOT)/opt/vc/include/interface/vcos/pthreads \
 		-I$(SYSROOT)/opt/vc/include/interface/vmcs_host/linux
+
+	CFLAGS   += $(RPI_FLAGS)
+	CXXFLAGS += $(RPI_FLAGS)
 
 	LDLIBS  += -L$(SYSROOT)/opt/vc/lib
 
@@ -40,23 +43,31 @@ ifeq ($(PLATFORM_NAME), rpi)
 endif
 
 ifeq ($(BUILD), release)
-	CFLAGS += -O3
+	BUILD_FLAGS += -O3
 else ifeq ($(BUILD), debug)
-	CFLAGS += -Wall -Wextra -pedantic -ggdb3
+	BUILD_FLAGS += -Wall -Wextra -pedantic -Og -ggdb3
 endif
 
-CFLAGS 	+= -I../../include
+CFLAGS   += $(BUILD_FLAGS)
+CXXFLAGS += $(BUILD_FLAGS)
 
-CFLAGS  += $(shell PKG_CONFIG_SYSROOT_DIR=$(SYSROOT) \
+CFLAGS 	 += -I../../include
+CXXFLAGS += -I../../include
+
+SDL_FLAGS += $(shell PKG_CONFIG_SYSROOT_DIR=$(SYSROOT) \
 	pkg-config --cflags          sdl2)
-LDFLAGS += $(shell PKG_CONFIG_SYSROOT_DIR=$(SYSROOT) \
+LDFLAGS 	+= $(shell PKG_CONFIG_SYSROOT_DIR=$(SYSROOT) \
 	pkg-config --libs-only-L     sdl2)
-LDFLAGS += $(shell PKG_CONFIG_SYSROOT_DIR=$(SYSROOT) \
+LDFLAGS 	+= $(shell PKG_CONFIG_SYSROOT_DIR=$(SYSROOT) \
 	pkg-config --libs-only-other sdl2)
-LDLIBS  += $(shell PKG_CONFIG_SYSROOT_DIR=$(SYSROOT) \
+LDLIBS  	+= $(shell PKG_CONFIG_SYSROOT_DIR=$(SYSROOT) \
 	pkg-config --libs-only-l     sdl2)
 
-CXXFLAGS += -std=c++11 -nostdinc++ -fno-exceptions -fno-rtti $(CFLAGS)
+CFLAGS 	 += $(SDL_FLAGS)
+CXXFLAGS += $(SDL_FLAGS)
+
+CFLAGS 	 += -std=c11
+CXXFLAGS += -std=c++11 -nostdinc++ -fno-exceptions -fno-rtti
 
 
 vpath %.h ../../include
@@ -76,27 +87,10 @@ game: $(OBJS_GAME) -lESGE_GAME
 editor: $(OBJS_EDIT) -lESGE_EDIT
 	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
-player.o: ESGE_scene.h ESGE_spritesheet.h ESGE_anim.h ESGE_time.h \
-	ESGE_audio.h ESGE_file.h ESGE_objStatic.h ESGE_objDynamic.h \
-	ESGE_objUpdate.h ESGE_objDrawSprite.h
-
-tileCol.o: ESGE_scene.h ESGE_display.h ESGE_objStatic.h ESGE_objDraw.h
-
-tileSet.o: ESGE_scene.h
-
 %_edit.o : %.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) -DESGE_EDITOR $< -o $@
 %_edit.o : %.cpp
 	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) -DESGE_EDITOR $< -o $@
-
-player_edit.o: ESGE_scene.h ESGE_spritesheet.h ESGE_anim.h \
-	ESGE_time.h ESGE_audio.h ESGE_file.h ESGE_objStatic.h \
-	ESGE_objDynamic.h ESGE_objUpdate.h ESGE_objDrawSprite.h
-
-tileCol_edit.o: ESGE_scene.h ESGE_display.h ESGE_objStatic.h \
-	ESGE_objDraw.h
-
-tileSet_edit.o: ESGE_scene.h
 
 clean:
 	$(RM) *.o

@@ -19,12 +19,10 @@
 ESGE_TYPE_FIELDS(
   ObjPlayer,
   ESGE_FIELD(
-    I,
     pos.x,
     ObjPlayer::GetPosX,
     ObjPlayer::SetPosX,
     ESGE_FIELD(
-      I,
       pos.y,
       ObjPlayer::GetPosY,
       ObjPlayer::SetPosY,

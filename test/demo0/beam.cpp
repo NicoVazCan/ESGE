@@ -10,17 +10,14 @@
 ESGE_TYPE_FIELDS(
   ObjBeam,
   ESGE_FIELD(
-    I,
     pos.x,
     ObjBeam::GetPosX,
     ObjBeam::SetPosX,
     ESGE_FIELD(
-      I,
       pos.y,
       ObjBeam::GetPosY,
       ObjBeam::SetPosY,
       ESGE_FIELD(
-        I,
         dir,
         ObjBeam::GetDir,
         ObjBeam::SetDir,

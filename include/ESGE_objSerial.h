@@ -14,13 +14,8 @@ static const ESGE_TypeImpl<CLASS> ESGE__type##CLASS( \
 
 # define ESGE_END_FIELD
 
-# define ESGE_FIELD(TYPE_ID, NAME, GET, SET, NEXT) \
-{ \
-  ESGE_Field::TYPE_ID, \
-  ESGE_Hash(#NAME), \
-  #NAME, \
-  { (void*)GET, (void*)SET } \
-}, NEXT
+# define ESGE_FIELD(NAME, GET, SET, NEXT) \
+ESGE_Field(#NAME, GET, SET), NEXT
 
 # define ESGE_TYPE_FIELDS(CLASS, FIELDS) \
 static const ESGE_Field ESGE__fields##CLASS[] = \
@@ -57,7 +52,6 @@ struct ESGE_Field
   const char *name;
   union
   {
-    struct { void *const get, *const set; } value;
     ESGE_FieldValue<char>                   valueC;
     ESGE_FieldValue<int>                    valueI;
     ESGE_FieldValue<long>                   valueL;
@@ -65,6 +59,37 @@ struct ESGE_Field
     ESGE_FieldValue<float>                  valueF;
     ESGE_FieldValue<char*>                  valueS;
   };
+
+  ESGE_Field(
+    const char* name,
+    char (*get)(void *obj),
+    void (*set)(void *obj, char value)
+  );
+  ESGE_Field(
+    const char* name,
+    int (*get)(void *obj),
+    void (*set)(void *obj, int value)
+  );
+  ESGE_Field(
+    const char *name,
+    long (*get)(void *obj),
+    void (*set)(void *obj, long value)
+  );
+  ESGE_Field(
+    const char *name,
+    long long (*get)(void *obj),
+    void (*set)(void *obj, long long value)
+  );
+  ESGE_Field(
+    const char *name,
+    float (*get)(void *obj),
+    void (*set)(void *obj, float value)
+  );
+  ESGE_Field(
+    const char *name,
+    char* (*get)(void *obj, char *str, size_t n),
+    void (*set)(void *obj, const char *str)
+  );
 
   void GetValue(void *obj, char *value, size_t len) const;
   void GetValue(void *obj, void *value, size_t len) const;

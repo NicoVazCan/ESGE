@@ -104,22 +104,18 @@ public:
 ESGE_TYPE_FIELDS(
   ObjTileCol,
   ESGE_FIELD(
-    I,
     col,
     ObjTileCol::GetCol,
     ObjTileCol::SetCol,
     ESGE_FIELD(
-      I,
       row,
       ObjTileCol::GetRow,
       ObjTileCol::SetRow,
       ESGE_FIELD(
-        I,
         colW,
         ObjTileCol::GetColW,
         ObjTileCol::SetColW,
         ESGE_FIELD(
-          I,
           rowH,
           ObjTileCol::GetRowH,
           ObjTileCol::SetRowH,

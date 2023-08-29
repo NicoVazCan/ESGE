@@ -8,17 +8,14 @@
 ESGE_TYPE_FIELDS(
   ObjText,
   ESGE_FIELD(
-    I,
     pos.x,
     ObjText::GetPosX,
     ObjText::SetPosX,
     ESGE_FIELD(
-      I,
       pos.y,
       ObjText::GetPosY,
       ObjText::SetPosY,
       ESGE_FIELD(
-        S,
         str,
         ObjText::GetStr,
         ObjText::SetStr,

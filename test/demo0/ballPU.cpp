@@ -125,12 +125,10 @@ public:
 ESGE_TYPE_FIELDS(
   ObjBallPU,
   ESGE_FIELD(
-    I,
     col,
     ObjBallPU::GetCol,
     ObjBallPU::SetCol,
     ESGE_FIELD(
-      I,
       row,
       ObjBallPU::GetRow,
       ObjBallPU::SetRow,

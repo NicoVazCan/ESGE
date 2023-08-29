@@ -80,17 +80,14 @@ public:
 ESGE_TYPE_FIELDS(
   ObjSceneChanger,
   ESGE_FIELD(
-    S,
     sceneFile,
     ObjSceneChanger::GetSceneFile,
     ObjSceneChanger::SetSceneFile,
     ESGE_FIELD(
-      I,
       key,
       ObjSceneChanger::GetKey,
       ObjSceneChanger::SetKey,
       ESGE_FIELD(
-        C,
         button,
         ObjSceneChanger::GetButton,
         ObjSceneChanger::SetButton,

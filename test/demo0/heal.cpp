@@ -140,12 +140,10 @@ public:
 ESGE_TYPE_FIELDS(
   ObjHeal,
   ESGE_FIELD(
-    I,
     pos.x,
     ObjHeal::GetPosX,
     ObjHeal::SetPosX,
     ESGE_FIELD(
-      I,
       pos.y,
       ObjHeal::GetPosY,
       ObjHeal::SetPosY,

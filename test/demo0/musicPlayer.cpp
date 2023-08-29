@@ -42,7 +42,6 @@ public:
 ESGE_TYPE_FIELDS(
   ObjMusicPlayer,
   ESGE_FIELD(
-    S,
     wavFile,
     ObjMusicPlayer::GetWavFile,
     ObjMusicPlayer::SetWavFile,

@@ -44,11 +44,13 @@ CmdAdd(ESGE_Scene *scene, const char *delim, char **saveptr)
 				break;
 			}
 
-			SDL_assert(type = ESGE_Type::Get(obj->typeID));
+			if (!(type = ESGE_Type::Get(obj->typeID)))
+				ESGE_Error("Type \"%s\" not found?", typeName);
 
 			if (!(field = type->GetField(fieldName)))
 			{
 				printf("Field \"%s\" not found\n", fieldName);
+				break;
 			}
 			else
 			{
@@ -109,7 +111,8 @@ CmdPrint(ESGE_Scene *scene, const char *delim, char **saveptr)
 	{
 		const ESGE_Type *type;
 
-		type = ESGE_Type::Get(obj->typeID);
+		if (!(type = ESGE_Type::Get(obj->typeID)))
+			ESGE_Error("Object \"%s\" without type?", instName);
 
 		for (size_t i = 0; i < type->nFields; ++i)
 		{
@@ -151,11 +154,13 @@ CmdEdit(ESGE_Scene *scene, const char *delim, char **saveptr)
 				break;
 			}
 
-			SDL_assert(type = ESGE_Type::Get(obj->typeID));
+		if (!(type = ESGE_Type::Get(obj->typeID)))
+			ESGE_Error("Object \"%s\" without type?", instName);
 
 			if (!(field = type->GetField(fieldName)))
 			{
 				printf("Field \"%s\" not found\n", fieldName);
+				break;
 			}
 			else
 			{
@@ -226,7 +231,9 @@ RunShell(SDL_UNUSED void *userdata)
   	char line[ESGE_CMD_LEN], *cmd, *saveptr;
 
     fputs("> ", stdout);
-    fgets(line, ESGE_CMD_LEN, stdin);
+    if (!fgets(line, ESGE_CMD_LEN, stdin))
+    	ESGE_Error("Cannot read from %s", "stdin");
+
     if (!(cmd = SDL_strtokr(line, delim, &saveptr))) continue;
 
     if (cmd[1])

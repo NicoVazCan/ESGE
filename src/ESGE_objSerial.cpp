@@ -6,6 +6,67 @@
 #include "ESGE_io.h"
 
 
+ESGE_Field::ESGE_Field(
+  const char* name,
+  char (*get)(void *obj),
+  void (*set)(void *obj, char value)
+):
+  type(C),
+  id(ESGE_Hash(name)),
+  name(name),
+  valueC{get, set}
+{}
+ESGE_Field::ESGE_Field(
+  const char* name,
+  int (*get)(void *obj),
+  void (*set)(void *obj, int value)
+):
+  type(I),
+  id(ESGE_Hash(name)),
+  name(name),
+  valueI{get, set}
+{}
+ESGE_Field::ESGE_Field(
+  const char *name,
+  long (*get)(void *obj),
+  void (*set)(void *obj, long value)
+):
+  type(L),
+  id(ESGE_Hash(name)),
+  name(name),
+  valueL{get, set}
+{}
+ESGE_Field::ESGE_Field(
+  const char *name,
+  long long (*get)(void *obj),
+  void (*set)(void *obj, long long value)
+):
+  type(L),
+  id(ESGE_Hash(name)),
+  name(name),
+  valueLL{get, set}
+{}
+ESGE_Field::ESGE_Field(
+  const char *name,
+  float (*get)(void *obj),
+  void (*set)(void *obj, float value)
+):
+  type(F),
+  id(ESGE_Hash(name)),
+  name(name),
+  valueF{get, set}
+{}
+ESGE_Field::ESGE_Field(
+  const char *name,
+  char* (*get)(void *obj, char *str, size_t n),
+  void (*set)(void *obj, const char *str)
+):
+  type(S),
+  id(ESGE_Hash(name)),
+  name(name),
+  valueS{get, set}
+{}
+
 void
 ESGE_Field::GetValue(void *obj, char *value, size_t len) const
 {
@@ -234,7 +295,7 @@ ESGE_ObjSerial::Load(SDL_RWops *io)
   {
     bool fMatch = false;
     Uint8 tEnum;
-    const ESGE_Field *f;
+    const ESGE_Field *f = NULL;
 
     tEnum = ESGE_ReadU8(io);
 
@@ -247,31 +308,65 @@ ESGE_ObjSerial::Load(SDL_RWops *io)
     switch (tEnum)
     {
     case ESGE_Field::C:
-      if (fMatch) f->valueC.set(this, ESGE_ReadS8(io));
-      else        ESGE_ReadS8(io);
+      if (fMatch && f)
+      {
+        f->valueC.set(this, ESGE_ReadS8(io));
+      }
+      else
+      {
+        ESGE_ReadS8(io);
+      }
       break;
     case ESGE_Field::I:
-      if (fMatch) f->valueI.set(this, ESGE_ReadS16(io));
-      else        ESGE_ReadS16(io);
+      if (fMatch && f)
+      {
+        f->valueI.set(this, ESGE_ReadS16(io));
+      }
+      else
+      {
+        ESGE_ReadS16(io);
+      }
       break;
     case ESGE_Field::L:
-      if (fMatch) f->valueL.set(this, ESGE_ReadS32(io));
-      else        ESGE_ReadS32(io);
+      if (fMatch && f)
+      {
+        f->valueL.set(this, ESGE_ReadS32(io));
+      }
+      else
+      {
+        ESGE_ReadS32(io);
+      }
       break;
     case ESGE_Field::LL:
-      if (fMatch) f->valueLL.set(this, ESGE_ReadS64(io));
-      else        ESGE_ReadS64(io);
+      if (fMatch && f)
+      {
+        f->valueLL.set(this, ESGE_ReadS64(io));
+      }
+      else
+      {
+        ESGE_ReadS64(io);
+      }
       break;
     case ESGE_Field::F:
-      if (fMatch) f->valueF.set(this, ESGE_ReadFloat(io));
-      else        ESGE_ReadFloat(io);
+      if (fMatch && f)
+      {
+        f->valueF.set(this, ESGE_ReadFloat(io));
+      }
+      else
+      {
+        ESGE_ReadFloat(io);
+      }
       break;
     case ESGE_Field::S:
-      char str[ESGE_MAX_STR];
+      {
+        char str[ESGE_MAX_STR];
 
-      ESGE_ReadStr(io, str, ESGE_MAX_STR);
-      if (fMatch)
-        f->valueS.set(this, str);
+        ESGE_ReadStr(io, str, ESGE_MAX_STR);
+        if (fMatch && f)
+        {
+          f->valueS.set(this, str);
+        }
+      }
       break;
     default:
       SDL_assert(!"unrecognised type");

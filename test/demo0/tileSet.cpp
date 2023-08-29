@@ -122,27 +122,22 @@ public:
 ESGE_TYPE_FIELDS(
   ObjTileSet,
   ESGE_FIELD(
-    I,
     col,
     ObjTileSet::GetCol,
     ObjTileSet::SetCol,
     ESGE_FIELD(
-      I,
       row,
       ObjTileSet::GetRow,
       ObjTileSet::SetRow,
       ESGE_FIELD(
-        I,
         spriteCol,
         ObjTileSet::GetSpriteCol,
         ObjTileSet::SetSpriteCol,
         ESGE_FIELD(
-          I,
           spriteRow,
           ObjTileSet::GetSpriteRow,
           ObjTileSet::SetSpriteRow,
           ESGE_FIELD(
-            I,
             spriteFlip,
             ObjTileSet::GetSpriteFlip,
             ObjTileSet::SetSpriteFlip,

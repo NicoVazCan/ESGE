@@ -1,3 +1,4 @@
+#include <SDL2/SDL.h>
 #include "ESGE_error.h"
 
 void* operator new(size_t sz)
@@ -6,7 +7,12 @@ void* operator new(size_t sz)
 
   if (sz == 0) ++sz;
   if (!(ptr = SDL_malloc(sz)))
-    ESGE_Error("Cannot allocate %" SDL_PRIu64 " bytes in heap", sz);
+  {
+    ESGE_Error(
+      "Cannot allocate %" SDL_PRIu64 " bytes in heap",
+      (Uint64)sz
+    );
+  }
 
   return ptr;
 }
@@ -17,7 +23,14 @@ void* operator new[](size_t sz)
 
   if (sz == 0) ++sz;
   if (!(ptr = SDL_malloc(sz)))
-    ESGE_Error("Cannot allocate %" SDL_PRIu64 " bytes in heap", sz);
+  {
+  {
+    ESGE_Error(
+      "Cannot allocate %" SDL_PRIu64 " bytes in heap",
+      (Uint64)sz
+    );
+  }
+  }
 
   return ptr;
 }

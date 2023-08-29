@@ -12,12 +12,10 @@
 ESGE_TYPE_FIELDS(
   ObjFlyEnemy,
   ESGE_FIELD(
-    I,
     pos.x,
     ObjFlyEnemy::GetPosX,
     ObjFlyEnemy::SetPosX,
     ESGE_FIELD(
-      I,
       pos.y,
       ObjFlyEnemy::GetPosY,
       ObjFlyEnemy::SetPosY,
