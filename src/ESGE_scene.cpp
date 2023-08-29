@@ -439,31 +439,35 @@ ESGE_Scene::RenameObj(const char *instName, const char *newInstName)
 
   if (*node != NULL && (*node)->instID == instID)
   {
-    ESGE_ObjScene *obj = *node;
+    ESGE_ObjScene **newNode;
+    Uint64 newInstID;
 
-    *node = obj->next;
-    instID = ESGE_Hash(newInstName);
+    newInstID = ESGE_Hash(newInstName);
 
     for (
-      node = &objList;
-      *node != NULL && (*node)->instID < instID;
-      node = &(*node)->next
+      newNode = &objList;
+      *newNode != NULL && (*newNode)->instID < newInstID;
+      newNode = &(*newNode)->next
     );
 
-    if (*node != NULL && (*node)->instID == instID)
+    if (*newNode != NULL && (*newNode)->instID == newInstID)
     {
       return SDL_SetError(
         "Object \"%s\" already exist in \"%s\" scene",
-        instName,
+        newInstName,
         sceneFile
       );
     }
     else
     {
+      ESGE_ObjScene *obj = *node;
+
+      *node = obj->next;
+
       SDL_strlcpy(obj->instName, newInstName, ESGE_INST_NAME_LEN);
-      obj->instID = instID;
-      obj->next = *node;
-      *node = obj;
+      obj->instID = newInstID;
+      obj->next = *newNode;
+      *newNode = obj;
 
       return 0;
     }

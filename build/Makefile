@@ -42,10 +42,11 @@ ifeq ($(PLATFORM_NAME), rpi)
 		/bin/arm-linux-gnueabihf-g++ --sysroot=$(SYSROOT)
 endif
 
-ifeq ($(BUILD), release)
+ifneq (, $(findstring release, $(BUILD)))
 	BUILD_FLAGS += -O3
-else ifeq ($(BUILD), debug)
-	BUILD_FLAGS += -Wall -Wextra -pedantic -Og -ggdb3
+endif
+ifneq (, $(findstring debug, $(BUILD)))
+	BUILD_FLAGS += -Wall -Wextra -pedantic -ggdb3
 endif
 
 CFLAGS   += $(BUILD_FLAGS)
