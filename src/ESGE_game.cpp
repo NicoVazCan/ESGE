@@ -12,6 +12,22 @@
 
 Uint32 ESGE_deltaTm = 16, ESGE_realDeltaTm;
 
+#define GAME_HELP \
+"USAGE: game [OPTION]... [FILE]\n" \
+"Opens a window with the scene from FILE to start the game.\n" \
+"If no FILE specified, the scene is opened from the file named\n" \
+"\"scene.bin\" in the current directory, if it does not exist an\n" \
+"empty one is created.\n" \
+"\n" \
+"  -t Set window title, \"game\" by default\n" \
+"  -W Set window width in pixels, 256 by default\n" \
+"  -H Set window width in pixels, 144 by default\n" \
+"  -f Set game loop frame per secound, 60 by default\n" \
+"  -d Set maximum disabled scenes, 4 by default\n" \
+"  -s Set sound volume, range 0 to 256, 15 by default\n" \
+"  -m Set music volume, range 0 to 256, 15 by default\n" \
+"  -h Print this mensage\n"
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -19,6 +35,7 @@ int
 main(int argc, const char *argv[])
 {
 	const char *title = "game", *sceneFile = "scene.bin";
+	static const char *const help = GAME_HELP;
 	int w = 256, h = 144, nDisabledScene = 4;
 	Uint8 soundVolume = 0x0F, musicVolume = 0x0F;
 	Uint32 ticks;
@@ -29,7 +46,7 @@ main(int argc, const char *argv[])
 		{
 			if (i == argc-1)
 			{
-				puts("help");
+				puts(help);
 				return 0;
 			}
 			switch (argv[i][1])
@@ -37,10 +54,10 @@ main(int argc, const char *argv[])
 			case 't':
 				title = argv[++i];
 				break;
-			case 'w':
+			case 'W':
 				SDL_sscanf(argv[++i], "%d", &w);
 				break;
-			case 'h':
+			case 'H':
 				SDL_sscanf(argv[++i], "%d", &h);
 				break;
 			case 'f':
@@ -56,8 +73,9 @@ main(int argc, const char *argv[])
 			case 'm':
 				SDL_sscanf(argv[++i], "%hhu", &musicVolume);
 				break;
+			case 'h':
 			default:
-				puts("help");
+				puts(help);
 				return 0;
 			}
 		}
