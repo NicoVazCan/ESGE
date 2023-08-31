@@ -30,6 +30,10 @@ public:
    * \brief Constructor for ESGE_Spritesheet.
    * This constructor should not be called directly to ensure just a
    * instance for file. Use ESGE_FileMngr<ESGE_Spritesheet>::Watch(\a fileName).
+   * The file is in binary an consists in a null ended char string being the
+   * sprite sheet bmp image file path from the executable, and four signed
+   * integers of 16 bits being the width, height, horizontal offset, and
+   * vertical offset of the sprite in that order.
    * 
    * \param file The file name of the sprite sheet.
    */

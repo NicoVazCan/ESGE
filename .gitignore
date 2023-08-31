@@ -2,4 +2,5 @@ game
 editor
 *.a
 *.o
-docs/ouput/*
+docs/ouput/html
+docs/ouput/latex
