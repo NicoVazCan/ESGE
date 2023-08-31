@@ -2,3 +2,4 @@ game
 editor
 *.a
 *.o
+docs/ouput/*

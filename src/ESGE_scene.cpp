@@ -520,6 +520,7 @@ ESGE_SceneMngr::Quit(void)
   while (s)
   {
     n = s->next;
+    s->Quit();
     delete s;
     s = n;
   }
@@ -527,6 +528,7 @@ ESGE_SceneMngr::Quit(void)
   while (s)
   {
     n = s->next;
+    s->Quit();
     delete s;
     s = n;
   }
