@@ -5,47 +5,47 @@
 #include "ESGE_error.h"
 
 
-ESGE_Event *ESGE_Event::list = NULL;
+ESGE_ObjEvent *ESGE_ObjEvent::list = NULL;
 
 
 void
-ESGE_Event::Event(void)
+ESGE_ObjEvent::Event(void)
 {
-  for (ESGE_Event *obj = list; obj != NULL; obj = obj->next)
+  for (ESGE_ObjEvent *obj = list; obj != NULL; obj = obj->next)
     obj->OnEvent();
 }
 
 
-ESGE_Event::ESGE_Event(void)
+ESGE_ObjEvent::ESGE_ObjEvent(void)
 {}
 
-ESGE_Event::~ESGE_Event(void)
+ESGE_ObjEvent::~ESGE_ObjEvent(void)
 {}
 
 
 void
-ESGE_Event::EnableEvent(void)
+ESGE_ObjEvent::EnableEvent(void)
 {
   enabledEvent = true;
-  SGLIB_LIST_ADD(ESGE_Event, list, this, next);
+  SGLIB_LIST_ADD(ESGE_ObjEvent, list, this, next);
 }
 
 void
-ESGE_Event::DisableEvent(void)
+ESGE_ObjEvent::DisableEvent(void)
 {
   enabledEvent = false;
-  SGLIB_LIST_DELETE(ESGE_Event, list, this, next);
+  SGLIB_LIST_DELETE(ESGE_ObjEvent, list, this, next);
 }
 
 bool
-ESGE_Event::IsEnabledEvent(void)
+ESGE_ObjEvent::IsEnabledEvent(void)
 {
   return enabledEvent;
 }
 
 
 void
-ESGE_Event::OnEvent(void)
+ESGE_ObjEvent::OnEvent(void)
 {}
 
 
@@ -407,7 +407,7 @@ ESGE_EventLoop(void)
 {
   while (SDL_PollEvent(&ESGE_event))
   {
-    ESGE_Event::Event();
+    ESGE_ObjEvent::Event();
 
     switch (ESGE_event.type)
     {

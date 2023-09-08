@@ -9,14 +9,14 @@
 
 
 /**
- * \class ESGE_Event
+ * \class ESGE_ObjEvent
  * \brief Represents objects with event handling behavior.
  */
-class ESGE_Event
+class ESGE_ObjEvent
 {
-  static ESGE_Event *list; /**< Pointer to the first game object with event handling behavior in the list. */
+  static ESGE_ObjEvent *list; /**< Pointer to the first game object with event handling behavior in the list. */
 
-  ESGE_Event *next = NULL; /**< Pointer to the next game object with event handling behavior in the list. */
+  ESGE_ObjEvent *next = NULL; /**< Pointer to the next game object with event handling behavior in the list. */
   bool enabledEvent = false; /**< Flag indicating if event handling is enabled for this game object. */
 
 public:
@@ -28,14 +28,14 @@ public:
   static void Event(void);
 
   /**
-   * \brief Default constructor for ESGE_Event.
+   * \brief Default constructor for ESGE_ObjEvent.
    */
-  ESGE_Event(void);
+  ESGE_ObjEvent(void);
   /**
-   * \brief Virtual destructor for ESGE_Event.
+   * \brief Virtual destructor for ESGE_ObjEvent.
    * This class is meant to be used as a base class, so the destructor is declared as virtual.
    */
-  virtual ~ESGE_Event(void) = 0;
+  virtual ~ESGE_ObjEvent(void) = 0;
 
   /**
    * \brief Enable event handling for the game object.
