@@ -1,4 +1,4 @@
-ESGE, a crossplatform 2D game engine for embedded systems.
+ESGE, A CROSSPLATFORM 2D GAME ENGINE FOR EMBEDDED SYSTEMS
 
 This game engine consists of abstract classes following a
 template pattern. These classes need to be implemented to
@@ -9,3 +9,35 @@ scene editor to allow the creation and modification of scenes,
 along with their respective objects. Ultimately, the engine
 culminates in generating the game's executable, which implements
 its main loop.
+
+
+BUILDING SCENE EDITOR AND GAME EXECUTABLES FROM THE TECH DEMO:
+
+First of all, it is necessary to install the SDL library. To do this,
+if you are on a Linux system with apt, just run the following
+command:
+
+sudo apt-get install libsdl2-dev
+
+If not, you can compile by yourself SDL by following the the guide
+found in its repository (https://github.com/libsdl-org/SDL).
+
+After that, the next step is to compile the two static libraries of
+the game engine using the "Make" tool in the "build" folder of the
+project.
+
+Finally, being in the "test/demo0" directory, "Make" must be used
+again to obtain the "editor" and "game" executables.
+
+TEST SCENE EDITOR AND GAME EXECUTABLES FROM THE TECH DEMO:
+
+To test the tech demo game, just run "game" in the "test/demo0"
+directory. in the "test/demo0" directory.
+
+To test the scene editor of the technical demo, you will need to
+run "editor" in the directory "test/demo0" as follows way:
+
+./editor room0.bin room1.bin room2.bin
+
+In this way, the three scenes delivered to you will be opened in the
+editor.
