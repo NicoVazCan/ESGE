@@ -1,0 +1,11 @@
+ESGE, a crossplatform 2D game engine for embedded systems.
+
+This game engine consists of abstract classes following a
+template pattern. These classes need to be implemented to
+represent game objects, giving to them diverse functionalities.
+Furthermore, an API is included for resource management, like
+files, scenes, sprite sheets, animations, sounds, and music. Has a
+scene editor to allow the creation and modification of scenes,
+along with their respective objects. Ultimately, the engine
+culminates in generating the game's executable, which implements
+its main loop.
