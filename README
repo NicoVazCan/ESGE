@@ -34,10 +34,42 @@ TEST SCENE EDITOR AND GAME EXECUTABLES FROM THE TECH DEMO:
 To test the tech demo game, just run "game" in the "test/demo0"
 directory. in the "test/demo0" directory.
 
+In the game you can perform the following actions by pressing the
+corresponding key:
+-To start the game, "enter".
+-To exit, "esc".
+-To move, aim and morph into a ball, the directional keys.
+-To jump, "space".
+-To shoot, "ctrl".
+-To save, "S".
+-To load, "L".
+
 To test the scene editor of the technical demo, you will need to
-run "editor" in the directory "test/demo0" as follows way:
+run "editor" in the directory "test/demo0" as follows:
 
 ./editor room0.bin room1.bin room2.bin
 
-In this way, the three scenes delivered to you will be opened in the
-editor.
+After that, the three given scenes will be opened in the editor.
+
+In the editor window, you can move through the scenes by using the the
+directional keys or by holding down the "space" key and dragging
+dragging with the mouse. You can also zoom in and out with the "+"
+and "-" keys.
+
+In the terminal, put the folowing command to add an object enemy to
+the last activated escene:
+
+add ObjSpawnerEnemy col 70 row 1
+
+Save it in the scene file with the command:
+
+save
+
+Close the editor with the comman:
+
+quit
+
+For more information about the possible commands, put the next
+comand:
+
+help
