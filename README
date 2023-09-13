@@ -29,6 +29,14 @@ project.
 Finally, being in the "test/demo0" directory, "Make" must be used
 again to obtain the "editor" and "game" executables.
 
+
+OR USE STATIC LINKED EXECUTABLES
+
+In the "test/demo0" directory, to skip the previous step, you will
+already find the two executables "game" and "editor" statically
+linked for 64-bit Linux and Raspberry Pi 1 model B platforms.
+
+
 TEST SCENE EDITOR AND GAME EXECUTABLES FROM THE TECH DEMO:
 
 To test the tech demo game, just run "game" in the "test/demo0"

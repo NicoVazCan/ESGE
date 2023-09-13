@@ -32,7 +32,7 @@ Uint32 ESGE_deltaTm = 16, ESGE_realDeltaTm;
 extern "C"
 #endif
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
 	const char *title = "game", *sceneFile = "scene.bin";
 	static const char *const help = GAME_HELP;

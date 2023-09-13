@@ -18,6 +18,7 @@ ESGE_ObjScene::Create(const char *typeName)
       "Failed to create an object of type \"%s\": No scene loaded",
       typeName
     );
+    return NULL;
   }
   else if ((newObj = active->AddObj(typeName)))
   {
@@ -30,6 +31,7 @@ ESGE_ObjScene::Create(const char *typeName)
       typeName,
       SDL_GetError()
     );
+    return NULL;
   }
 }
 
