@@ -355,7 +355,8 @@ RunShell(SDL_UNUSED void *userdata)
 	return 0;
 }
 
-Uint32 ESGE_deltaTm = 16, ESGE_realDeltaTm;
+Uint32 ESGE_deltaTm = 16;
+Uint64 ESGE_deltaCnt = 0;
 
 #define ESGE_EDITOR_CAM_VEL ((float) ESGE_deltaTm * 4 / 16)
 #define ESGE_EDITOR_ZOOM 1.f + 0.01f * ((float)ESGE_deltaTm) / 16.f
@@ -447,7 +448,6 @@ main(int argc, char *argv[])
 	static const char *const help = EDIT_HELP;
 	int w = 256, h = 144;
 	SDL_Thread *shell;
-	Uint32 ticks;
 
 	if (
 		SDL_Init(
@@ -507,7 +507,9 @@ main(int argc, char *argv[])
 
 	while (run)
 	{
-		ticks = SDL_GetTicks();
+		Uint32 initMS, elapseMS;
+		
+		initMS = SDL_GetTicks();
 
 		SDL_PumpEvents();
 		UpdateEditor();
@@ -515,10 +517,10 @@ main(int argc, char *argv[])
 		ESGE_ObjDraw::Draw();
 		ESGE_Display::Update();
 
-		ESGE_realDeltaTm = SDL_GetTicks() - ticks;
+		elapseMS = SDL_GetTicks() - initMS;
 		
-  	if (ESGE_realDeltaTm < ESGE_deltaTm)
-  		SDL_Delay(ESGE_deltaTm - ESGE_realDeltaTm);
+  	if (elapseMS < ESGE_deltaTm)
+  		SDL_Delay(ESGE_deltaTm - elapseMS);
 	}
 
 	SDL_WaitThread(shell, NULL);

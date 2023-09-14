@@ -1,15 +1,12 @@
-PLATFORM 	=
 #PLATFORM 	= linux
 #PLATFORM 	= windows # not suported
 #PLATFORM 	= rpi 1
 #PLATFORM 	= rpi 2
 #PLATFORM 	= rpi 3
 
-#BUILD  	  = 
 BUILD  	  = release
 #BUILD 			= debug
 
-LINKING  	=
 #LINKING  	= dynamic
 #LINKING  	= static
 

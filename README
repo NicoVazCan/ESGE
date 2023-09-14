@@ -81,3 +81,12 @@ For more information about the possible commands, put the next
 comand:
 
 help
+
+
+USING EDITOR EXECUTABLE IN HEADLESS RASPBERRY PI
+
+Connect the Raspberry Pi with Ethernet to the PC.
+Configure the IPv4 with the sharing method.
+Execute the following command to connect via SSH:
+
+ssh "your_PC_name"@raspberrypi.local

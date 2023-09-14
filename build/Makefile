@@ -1,11 +1,9 @@
-PLATFORM 	=
 #PLATFORM 	= linux
 #PLATFORM 	= windows
-PLATFORM 	= rpi 1
+#PLATFORM 	= rpi 1
 #PLATFORM 	= rpi 2
 #PLATFORM 	= rpi 3
 
-#BUILD  	  = 
 BUILD  	  = release
 #BUILD 			= debug
 

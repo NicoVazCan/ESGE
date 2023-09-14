@@ -479,8 +479,13 @@ ObjPlayer::UpdateFPSUI(void)
   SDL_snprintf(
     uiStr,
     UI_STR_LEN,
-    "fps: %d",
-    ESGE_realDeltaTm > 0 ? 1000/ESGE_realDeltaTm : -1
+    "fps: %.2f",
+    ESGE_deltaCnt > 0 ?
+      1.f / (
+        ((float)ESGE_deltaCnt) /
+        ((float)SDL_GetPerformanceFrequency())
+      ) :
+      -1.f
   );
   
   ObjText::SetStr(fpsText, uiStr);

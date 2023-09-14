@@ -10,7 +10,8 @@
 #include "ESGE_objDraw.h"
 
 
-Uint32 ESGE_deltaTm = 16, ESGE_realDeltaTm;
+Uint32 ESGE_deltaTm = 16;
+Uint64 ESGE_deltaCnt = 0;
 
 #define GAME_HELP \
 "USAGE: game [OPTION]... [FILE]\n" \
@@ -38,7 +39,6 @@ main(int argc, char *argv[])
 	static const char *const help = GAME_HELP;
 	int w = 256, h = 144, nDisabledScene = 4;
 	Uint8 soundVolume = 0x0F, musicVolume = 0x0F;
-	Uint32 ticks;
 
 	for (int i = 1; i < argc; ++i)
 	{
@@ -98,7 +98,11 @@ main(int argc, char *argv[])
 
 	for (;;)
 	{
-		ticks = SDL_GetTicks();
+		Uint32 initMS, elapseMS;
+		Uint64 initCnt;
+
+		initMS = SDL_GetTicks();
+		initCnt = SDL_GetPerformanceCounter();
 
 		ESGE_EventLoop();
 		if (ESGE_quit) break;
@@ -110,10 +114,11 @@ main(int argc, char *argv[])
 
 		ESGE_Display::Update();
 
-		ESGE_realDeltaTm = SDL_GetTicks() - ticks;
+		ESGE_deltaCnt = SDL_GetPerformanceCounter() - initCnt;
+		elapseMS = SDL_GetTicks() - initMS;
 
-  	if (ESGE_realDeltaTm < ESGE_deltaTm)
-  		SDL_Delay(ESGE_deltaTm - ESGE_realDeltaTm);
+  	if (elapseMS < ESGE_deltaTm)
+  		SDL_Delay(ESGE_deltaTm - elapseMS);
 	}
 
 	ESGE_SceneMngr::Quit();
